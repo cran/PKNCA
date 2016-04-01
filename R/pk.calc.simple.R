@@ -242,30 +242,31 @@ PKNCA.set.summary("kel", business.geomean, business.geocv)
 #' Calculate the (observed oral) clearance
 #'
 #' @param dose the dose administered
-#' @param auc the area under the curve from 0 to infinity or 0 to tau
-#' (the next dose on a regular schedule at steady-state)
+#' @param aucinf the area under the curve from 0 to infinity or 0 to
+#'   tau (the next dose on a regular schedule at steady-state)
 #' @param unitconv the multiplied factor to use for unit conversion
-#' (e.g. 1000 for mg \code{dose}, time*ng/mL for \code{auc}, and
-#' output in L/time)
+#'   (e.g. 1000 for mg \code{dose}, time*ng/mL for \code{auc}, and
+#'   output in L/time)
 #' @return the numeric value of the total (CL) or observed oral
-#' clearance (CL/F)
-#' @references Gabrielsson J, Weiner D.  "Section 2.5.1 Derivation of
-#' clearance."  Pharmacokinetic & Pharmacodynamic Data Analysis:
-#' Concepts and Applications, 4th Edition.  Stockholm, Sweden: Swedish
-#' Pharmaceutical Press, 2000.  86-7.
+#'   clearance (CL/F)
+#' @references Gabrielsson J, Weiner D.
+#'   "Section 2.5.1 Derivation of clearance."  Pharmacokinetic &
+#'   Pharmacodynamic Data Analysis: Concepts and Applications, 4th
+#'   Edition.  Stockholm, Sweden: Swedish Pharmaceutical Press, 2000.
+#'   86-7.
 #' @export
-pk.calc.cl <- function(dose, auc, unitconv)
-  if (missing(unitconv)) {
-    dose/auc
+pk.calc.cl <- function(dose, aucinf, unitconv=NA)
+  if (is.na(unitconv)) {
+    dose/aucinf
   } else {
-    unitconv*dose/auc
+    unitconv*dose/aucinf
   }
 ## Add the column to the interval specification
 add.interval.col("cl",
                  FUN="pk.calc.cl",
                  values=c(FALSE, TRUE),
                  desc="Clearance or observed oral clearance",
-                 depends=list("auclast", "aucinf"))
+                 depends=list("aucinf", "auclast"))
 PKNCA.set.summary("cl", business.geomean, business.geocv)
 
 #' Calculate the absolute (or relative) bioavailability
@@ -353,6 +354,24 @@ add.interval.col("vss",
                  desc="The steady-state volume of distribution",
                  depends=c("cl", "mrt"))
 PKNCA.set.summary("vss", business.geomean, business.geocv)
+
+#' Calculate the volume of distribution (Vd) or observed volume of
+#' distribution (Vd/F)
+#'
+#' @param dose Dose given
+#' @param aucinf Area under the curve to infinity (either predicted or
+#' observed).
+#' @param lambda.z Elimination rate constant
+#' @return The observed volume of distribution
+#' @export
+pk.calc.vd <- function(dose, aucinf, lambda.z)
+  dose/(aucinf * lambda.z)
+add.interval.col("vd",
+                 FUN="pk.calc.vd",
+                 values=c(FALSE, TRUE),
+                 desc="Apparent observed volume of distribution",
+                 depends=c("aucinf", "lambda.z"))
+PKNCA.set.summary("vd", business.geomean, business.geocv)
 
 #' Calculate the average concentration during an interval.
 #'

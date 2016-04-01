@@ -33,6 +33,14 @@ PKNCAconc <- function(data, formula, subject, labels, units) {
     stop("The left hand side of the formula must have exactly one variable")
   if (length(all.vars(parsedForm$rhs)) != 1)
     stop("The right hand side of the formula (excluding groups) must have exactly one variable")
+  ## Values must be unique (one value per measurement)
+  key.cols <- c(all.vars(parsedForm$rhs),
+                all.vars(parsedForm$groupFormula))
+  if (any(mask.dup <- duplicated(data[,key.cols])))
+    stop("Rows that are not unique per group and time (column names: ",
+         paste(key.cols, collapse=", "),
+         ") found within concentration data.  Row numbers: ",
+         paste(seq_along(mask.dup)[mask.dup], collapse=", "))
   ## Assign the subject
   if (missing(subject)) {
     tmp.groups <- all.vars(parsedForm$groupFormula)
@@ -87,16 +95,19 @@ set.name.matching <- function(ret, name, value, data) {
 
 #' Create a PKNCAdose object
 #'
-#' @param data A data frame with time and the groups
-#' defined in \code{formula}.
-#' @param formula The formula defining the \code{~time|groups} where
-#' \code{time} is the time of the dosing.
+#' @param data A data frame with time and the groups defined in
+#'   \code{formula}.
+#' @param formula The formula defining the
+#'   \code{dose.amount~time|groups} where \code{time} is the time of
+#'   the dosing and \code{dose.amount} is the amount administered at
+#'   that time.
 #' @param labels (optional) Labels for use when plotting.  They are a
-#' named list where the names correspond to the names in the data
-#' frame and the values are used for xlab and/or ylab as appropriate.
+#'   named list where the names correspond to the names in the data
+#'   frame and the values are used for xlab and/or ylab as
+#'   appropriate.
 #' @param units (optional) Units for use when plotting and calculating
-#' parameters.  Note that unit conversions and simplifications are not
-#' done; the text is used as-is.
+#'   parameters.  Note that unit conversions and simplifications are
+#'   not done; the text is used as-is.
 #' @return A PKNCAconc object that can be used for automated NCA.
 #' @export
 PKNCAdose <- function(data, formula, labels, units) {
@@ -106,10 +117,18 @@ PKNCAdose <- function(data, formula, labels, units) {
     stop("All of the variables in the formula must be in the data")
   }
   parsedForm <- parseFormula(formula, require.two.sided=FALSE)
-  if (length(all.vars(parsedForm$lhs)) != 0)
-    stop("The formula must be one-sided")
+  if (!(length(all.vars(parsedForm$lhs)) %in% c(0, 1)))
+    stop("The left hand side of the formula must have zero or one variable")
   if (length(all.vars(parsedForm$rhs)) != 1)
     stop("The right hand side of the formula (excluding groups) must have exactly one variable")
+  ## Values must be unique (one value per measurement)
+  key.cols <- c(all.vars(parsedForm$rhs),
+                all.vars(parsedForm$groupFormula))
+  if (any(mask.dup <- duplicated(data[,key.cols])))
+    stop("Rows that are not unique per group and time (column names: ",
+         paste(key.cols, collapse=", "),
+         ") found within dosing data.  Row numbers: ",
+         paste(seq_along(mask.dup)[mask.dup], collapse=", "))
   ret <- list(data=data,
               formula=formula)
   ## check and add labels and units
@@ -358,31 +377,49 @@ model.frame.PKNCAdose <- model.frame.PKNCAconc
 #' adds in the intervals for PK calculations.
 #' 
 #' @param data.conc Concentration data as a \code{PKNCAconc} object or
-#' a data frame
-#' @param formula.conc Formula for making a \code{PKNCAconc} object
-#' with \code{data.conc}.  This must be given if \code{data.conc} is a
-#' data.frame, and it must not be given if \code{data.conc} is a
-#' \code{PKNCAconc} object.
+#'   a data frame
 #' @param data.dose Dosing data as a \code{PKNCAdose} object
+#' @param formula.conc Formula for making a \code{PKNCAconc} object
+#'   with \code{data.conc}.  This must be given if \code{data.conc} is
+#'   a data.frame, and it must not be given if \code{data.conc} is a
+#'   \code{PKNCAconc} object.
 #' @param formula.dose Formula for making a \code{PKNCAdose} object
-#' with \code{data.dose}.  This must be given if \code{data.dose} is a
-#' data.frame, and it must not be given if \code{data.dose} is a
-#' \code{PKNCAdose} object.
+#'   with \code{data.dose}.  This must be given if \code{data.dose} is
+#'   a data.frame, and it must not be given if \code{data.dose} is a
+#'   \code{PKNCAdose} object.
 #' @param intervals A data frame with the AUC interval specifications
-#' as defined in \code{\link{check.interval.specification}}.  If
-#' missing, this will be automatically chosen by
-#' \code{\link{choose.auc.intervals}}.
+#'   as defined in \code{\link{check.interval.specification}}.  If
+#'   missing, this will be automatically chosen by
+#'   \code{\link{choose.auc.intervals}}.
 #' @param options List of changes to the default
-#' \code{\link{PKNCA.options}} for calculations.
+#'   \code{\link{PKNCA.options}} for calculations.
+#' @param ... arguments passed to \code{PKNCAdata.default}
 #' @return A PKNCAdata object with concentration, dose, interval, and
-#' calculation options stored (note that PKNCAdata objects can also
-#' have results after a NCA calculations are done to the data).
+#'   calculation options stored (note that PKNCAdata objects can also
+#'   have results after a NCA calculations are done to the data).
 #' @seealso \code{\link{PKNCAconc}}, \code{\link{PKNCAdose}},
-#' \code{\link{choose.auc.intervals}}
+#'   \code{\link{choose.auc.intervals}}
 #' @export
-PKNCAdata <- function(data.conc, formula.conc,
-                      data.dose, formula.dose,
-                      intervals, options=list()) {
+PKNCAdata <- function(data.conc, data.dose, ...)
+  UseMethod("PKNCAdata", data.conc)
+
+## Ensure that arguments are reversible
+#' @rdname PKNCAdata
+#' @export
+PKNCAdata.PKNCAconc <- function(data.conc, data.dose, ...)
+  PKNCAdata.default(data.conc=data.conc, data.dose=data.dose, ...)
+
+#' @rdname PKNCAdata
+#' @export
+PKNCAdata.PKNCAdose <- function(data.conc, data.dose, ...)
+  ## Swap the arguments
+  PKNCAdata.default(data.dose=data.conc, data.conc=data.dose, ...)
+
+#' @rdname PKNCAdata
+#' @export
+PKNCAdata.default <- function(data.conc, data.dose, ...,
+                              formula.conc, formula.dose,
+                              intervals, options=list()) {
   ret <- list()
   ## Generate the conc element
   if (inherits(data.conc, "PKNCAconc")) {
@@ -427,18 +464,25 @@ PKNCAdata <- function(data.conc, formula.conc,
     intervals <- data.frame()
     indep.var.conc <- all.vars(parseFormula(ret$conc)$rhs)
     indep.var.dose <- all.vars(parseFormula(ret$dose)$rhs)
-    for (i in 1:nrow(groupid)) {
+    for (i in seq_len(nrow(groupid))) {
       tmp.group <- groupid[i,,drop=FALSE]
-      rownames(tmp.group) <- NULL
-      new.intervals <-
-        cbind(
-          tmp.group,
-          choose.auc.intervals(tmp.conc.dose[[i]]$conc[,indep.var.conc],
-                               tmp.conc.dose[[i]]$dose[,indep.var.dose],
-                               single.dose.aucs=PKNCA.choose.option("single.dose.aucs",
-                                 options)))
-      intervals <-
-        rbind(intervals, new.intervals)
+      if (!is.null(tmp.conc.dose[[i]]$conc)) {
+        rownames(tmp.group) <- NULL
+        new.intervals <-
+          cbind(
+            tmp.group,
+            choose.auc.intervals(tmp.conc.dose[[i]]$conc[,indep.var.conc],
+                                 tmp.conc.dose[[i]]$dose[,indep.var.dose],
+                                 single.dose.aucs=PKNCA.choose.option("single.dose.aucs",
+                                   options)))
+        intervals <-
+          rbind(intervals, new.intervals)
+      } else {
+        warning("No intervals generated due to no concentration data for ",
+                paste(names(tmp.group),
+                      unlist(lapply(tmp.group, as.character)),
+                      sep="=", collapse=", "))
+      }
     }
   }
   ret$intervals <- check.interval.specification(intervals)
@@ -548,31 +592,26 @@ roundingSummarize <- function(x, name) {
 #' Summarize PKNCA results
 #'
 #' @param object The results to summarize
-#' @param simplify.start Should all results with the same starting
-#' time for the interval be summarized together?  (I.e. If TRUE,
-#' AUC[0-24] and AUC[0-Inf] are both summarized in the same row.)
 #' @param drop.group Which group(s) should be dropped from the
-#' formula?
+#'   formula?
 #' @param not.requested.string A character string to use when a
-#' parameter summary was not requested for a parameter within an
-#' interval.
+#'   parameter summary was not requested for a parameter within an
+#'   interval.
 #' @param not.calculated.string A character string to use when a
-#' parameter summary was requested, but the point estimate AND spread
-#' calculations (if applicable) returned \code{NA}.
+#'   parameter summary was requested, but the point estimate AND
+#'   spread calculations (if applicable) returned \code{NA}.
+#' @param ... Ignored.
 #' @return A data frame of NCA parameter results summarized according
-#' to the summarization settings.
+#'   to the summarization settings.
 #' @seealso \code{\link{PKNCA.set.summary}}
-summary.PKNCAresults <- function(object, simplify.start=TRUE,
-                                 drop.group="Subject",
+#' @export
+summary.PKNCAresults <- function(object, ...,
+                                 drop.group=object$data$conc$subject,
                                  not.requested.string=".",
                                  not.calculated.string="NC") {
   allGroups <- getGroups(object)
   groups <- unique(c("start", "end",
                      setdiff(names(allGroups), drop.group)))
-  if (simplify.start) {
-    groups <- setdiff(groups, "end")
-    drop.group <- c(drop.group, "end")
-  }
   summaryFormula <- stats::as.formula(paste0("~", paste(groups, collapse="+")))
   summaryInstructions <- PKNCA.set.summary()
   ## Find any parameters that request any summaries
@@ -583,7 +622,7 @@ summary.PKNCAresults <- function(object, simplify.start=TRUE,
              drop=FALSE],
            FUN=any)
   resultDataCols <- as.data.frame(resultDataCols[unlist(resultDataCols)])
-  ret <- cbind(unique(object$data$intervals[, groups, drop=FALSE]),
+  ret <- cbind(unique(object$result[, groups, drop=FALSE]),
                resultDataCols)
   ret[,setdiff(names(ret), groups)] <- not.requested.string
   ## Loop over every group that needs summarization
@@ -592,8 +631,10 @@ summary.PKNCAresults <- function(object, simplify.start=TRUE,
     for (n in setdiff(names(ret), groups)) {
       ## Select the rows of the intervals that match the current row
       ## from the return value.
-      current.interval <- merge(ret[i, groups, drop=FALSE],
-                                object$data$intervals[,c(groups, n)])
+      current.interval <-
+        merge(ret[i, groups, drop=FALSE],
+              object$data$intervals[,intersect(names(object$data$intervals),
+                                               c(groups, n))])
       if (any(current.interval[,n])) {
         currentData <- merge(
           ret[i, groups, drop=FALSE],
@@ -604,17 +645,22 @@ summary.PKNCAresults <- function(object, simplify.start=TRUE,
           ## Calculation is required
           point <- summaryInstructions[[n]]$point(
             currentData$PPORRES)
+          na.point <- is.na(point)
+          na.spread <- NA
           ## Round the point estimate
           point <- roundingSummarize(point, n)
           current <- point
-          na.point <- is.na(point)
-          na.spread <- NA
           if ("spread" %in% names(summaryInstructions[[n]])) {
             spread <- summaryInstructions[[n]]$spread(
               currentData$PPORRES)
             na.spread <- all(is.na(spread))
-            ## Round the spread
-            spread <- roundingSummarize(spread, n)
+            if (na.spread) {
+              ## The spread couldn't be calculated, so show that
+              spread <- not.calculated.string
+            } else {
+              ## Round the spread
+              spread <- roundingSummarize(spread, n)
+            }
             ## Collapse the spread into a usable form if it is
             ## longer than one (e.g. a range or a confidence
             ## interval) and put brackets around it.
