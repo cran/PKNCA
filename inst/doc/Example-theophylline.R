@@ -1,9 +1,10 @@
 ## ----setup, echo=FALSE, include=FALSE------------------------------------
 library(PKNCA)
+library(knitr)
 
 ## ----showtheoph----------------------------------------------------------
 ## It is always a good idea to look at the data
-head(datasets::Theoph)
+knitr::kable(head(datasets::Theoph))
 
 ## ----setupconcdose-------------------------------------------------------
 ## By default it is groupedData; convert it to a data frame for use
@@ -13,13 +14,14 @@ my.conc <- PKNCAconc(as.data.frame(datasets::Theoph), conc~Time|Subject)
 ## that first.
 d.dose <- unique(datasets::Theoph[datasets::Theoph$Time == 0,
                                   c("Dose", "Time", "Subject")])
-d.dose
+knitr::kable(d.dose,
+             caption="Example dosing data extracted from theophylline data set")
 my.dose <- PKNCAdose(d.dose, Dose~Time|Subject)
 
 ## ----autointervals-------------------------------------------------------
 my.data.automatic <- PKNCAdata(my.conc, my.dose)
-PKNCA.options("single.dose.aucs")
-my.data.automatic$intervals
+knitr::kable(PKNCA.options("single.dose.aucs"))
+knitr::kable(my.data.automatic$intervals)
 
 ## ----manualintervals-----------------------------------------------------
 my.intervals <- data.frame(start=0,
@@ -30,11 +32,11 @@ my.intervals <- data.frame(start=0,
                            auclast=TRUE)
 my.data.manual <- PKNCAdata(my.conc, my.dose,
                             intervals=my.intervals)
-my.data.manual$intervals
+knitr::kable(my.data.manual$intervals)
 
 ## ----calculationauto-----------------------------------------------------
 my.results.automatic <- pk.nca(my.data.automatic)
-head(my.results.automatic$result)
+knitr::kable(head(my.results.automatic$result))
 
 ## ----calculationautoshow, eval=FALSE-------------------------------------
 #  summary(my.results.automatic)
@@ -45,7 +47,7 @@ knitr::kable(summary(my.results.automatic))
 
 ## ----calculationmanual---------------------------------------------------
 my.results.manual <- pk.nca(my.data.manual)
-head(my.results.manual$result)
+knitr::kable(head(my.results.manual$result))
 
 ## ----calculationmanualshow, eval=FALSE-----------------------------------
 #  summary(my.results.manual)
