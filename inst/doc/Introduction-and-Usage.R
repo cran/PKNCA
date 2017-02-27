@@ -68,7 +68,7 @@ intervals <-
              cmax=c(FALSE, TRUE),
              tmax=c(FALSE, TRUE),
              auclast=TRUE,
-             aucinf=c(FALSE, TRUE))
+             aucinf.obs=c(FALSE, TRUE))
 
 ## ----asis=TRUE, echo=FALSE-----------------------------------------------
 knitr::kable(PKNCA.options()$single.dose.aucs)
@@ -91,13 +91,13 @@ PKNCA::find.tau(dose.times)
 #               cmax=c(FALSE, TRUE),
 #               tmax=c(FALSE, TRUE),
 #               auclast=TRUE,
-#               aucinf=c(FALSE, TRUE))
+#               aucinf.obs=c(FALSE, TRUE))
 #  my.data <- PKNCAdata(my.conc, my.dose,
 #                       intervals=my.intervals)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  my.data <- PKNCAdata(my.conc, my.dose)
 #  my.intervals <- my.data$intervals
-#  my.intervals$aucinf[1] <- TRUE
+#  my.intervals$aucinf.obs[1] <- TRUE
 #  mydata$intervals <- my.intervals
 

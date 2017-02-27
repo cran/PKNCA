@@ -275,31 +275,60 @@ test_that("interpolate.conc", {
                                 interp.method="lin up/log down"),
                regexp="interpolate.conc can only works through Tlast, please use interp.extrap.conc to combine both interpolation and extrapolation.")
 
+  ## Confirm that extrapolating before the first time uses conc.origin
+  expect_equal(interpolate.conc(conc=0:1,
+                                time=0:1,
+                                time.out=-1),
+               0,
+               info="conc.origin defaults to zero")
+  expect_equal(interpolate.conc(conc=0:1,
+                                time=0:1,
+                                time.out=-1,
+                                conc.origin=NA),
+               NA,
+               info="conc.origin is honored as NA")
+  expect_equal(interpolate.conc(conc=0:1,
+                                time=0:1,
+                                time.out=-1,
+                                conc.origin=5),
+               5,
+               info="conc.origin is honored as a number")
+  
   ## ##############################
   ## Confirm errors that should happen
 
-  ## Confirm that extrapolating before the first time is an error
-  expect_error(interpolate.conc(conc=0:1,
-                                time=0:1,
-                                time.out=-1),
-               regexp="Cannot interpolate backward in time")
-
-  ## Confirm that more than one time.out requested is an error (change
-  ## documentation when this is not true)
+  ## Change documentation when this is not true
   expect_error(interpolate.conc(conc=0:1,
                                 time=0:1,
                                 time.out=0:1),
-               regexp="Can only interpolate for one time point per function call")
+               regexp="Can only interpolate for one time point per function call",
+               info="Confirm that more than one time.out requested is an error")
 
-  ## Confirm that invalid interpolation methods are an error.
   expect_error(interpolate.conc(conc=0:1,
                                 time=0:1,
                                 time.out=0.5,
                                 interp.method="this doesn't work"),
-               regexp="interp.method must be one of 'linear' or 'lin up/log down'")
+               regexp="interp.method must be one of 'linear' or 'lin up/log down'",
+               info="Confirm that invalid interpolation methods are an error.")
 
-  ## FIXME: Future feature: Interpolation backward in time from a 0
-  ## starting value can be 0.
+  expect_error(interpolate.conc(conc=0:1,
+                                time=0:1,
+                                time.out=0.5,
+                                conc.origin=1:2),
+               regexp="conc.origin must be a scalar",
+               info="conc.origin must be a scalar")
+  expect_error(interpolate.conc(conc=0:1,
+                                time=0:1,
+                                time.out=0.5,
+                                conc.origin="A"),
+               regexp="conc.origin must be NA or a number \\(and not a factor\\)",
+               info="conc.origin must be a number and not a factor (character)")
+  expect_error(interpolate.conc(conc=0:1,
+                                time=0:1,
+                                time.out=0.5,
+                                conc.origin=factor("A")),
+               regexp="conc.origin must be NA or a number \\(and not a factor\\)",
+               info="conc.origin must be a number and not a factor (factor)")
 })
 
 test_that("interp.extrap.conc", {
@@ -327,4 +356,94 @@ test_that("interp.extrap.conc", {
                        interp.method="lin up/log down"),
     regexp="An interpolation/extrapolation time is NA")
 
+})
+
+test_that("interp.extrap.conc.dose", {
+  # Check inputs
+  expect_error(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0, route="foo", duration.dose=NA,
+                                       time.out=c(-1, -0.1, 0, 0.1, 7), out.after=FALSE),
+               regexp="route.dose must be either 'extravascular' or 'intravascular'",
+               info="Route must be valid")
+  expect_error(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0, route=c("extravascular", "extravascular"), duration.dose=NA,
+                                       time.out=c(-1, -0.1, 0, 0.1, 7), out.after=FALSE),
+               regexp="route.dose must either be a scalar or the same length as time.dose",
+               info="Route must have the correct length")
+  expect_error(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0, route="extravascular", duration.dose="A",
+                                       time.out=c(-1, -0.1, 0, 0.1, 7), out.after=FALSE),
+               regexp="duration.dose must be NA or a number.",
+               info="duration.dose must be NA or a number (character).")
+  expect_error(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0, route="extravascular", duration.dose=factor("A"),
+                                       time.out=c(-1, -0.1, 0, 0.1, 7), out.after=FALSE),
+               regexp="duration.dose must be NA or a number.",
+               info="duration.dose must be NA or a number (factor).")
+  expect_error(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0, route="extravascular", duration.dose=c(1, NA),
+                                       time.out=c(-1, -0.1, 0, 0.1, 7), out.after=FALSE),
+               regexp="duration.dose must either be a scalar or the same length as time.dose",
+               info="duration.dose must match the length of time.dose or be a scalar.")
+
+  expect_equal(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0,
+                                       time.out=-2),
+               structure(0, Method="Before all events"),
+               info="Interpolation before all events yields conc.origin which defaults to zero.")
+
+  expect_equal(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0,
+                                       conc.origin=NA,
+                                       time.out=-2),
+               structure(NA, Method="Before all events"),
+               info="Interpolation before all events yields conc.origin respecting its input.")
+
+  expect_equal(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0,
+                                       time.out=-1),
+               structure(0, Method="Copy"),
+               info="When there is a concentration measurement at a time point, it is returned.")
+  
+  expect_equal(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0,
+                                       time.out=-0.1),
+               structure(0, Method="Concentration, nothing or dose but not(dose, IV bolus, After), nothing or dose"),
+               info="When the previous measurement is zero and there is no dose between, it is returned.")
+
+  expect_equal(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0,
+                                       time.out=0),
+               structure(0, Method="Concentration, nothing or dose but not(dose, IV bolus, After), nothing or dose"),
+               info="When the previous measurement is zero it is at the time of the dose, zero is returned.")
+
+  expect_equal(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0,
+                                       time.out=0.1),
+               structure(0.1, Method="After a dose with no event and a concentration after"),
+               info="Extrapolation to a dose then interpolation between the dose and the next time works.")
+
+  expect_equal(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0,
+                                       time.out=5),
+               structure(0.25, Method="Copy"),
+               info="Copy from after the dose.")
+
+  expect_equal(interp.extrap.conc.dose(conc=c(0, 1, 2, 1, 0.5, 0.25),
+                                       time=c(-1, 1:5),
+                                       time.dose=0,
+                                       time.out=7),
+               structure(0.0625, Method="Concentration, nothing or dose but not(dose, IV bolus, After), nothing or dose"))
 })

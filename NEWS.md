@@ -4,6 +4,26 @@ will be especially noticable around the inclusion of IV NCA parameters
 and additional specifications of the dosing including dose amount and
 route.
 
+# PKNCA 0.8.1
+
+* A PKNCAdose is no longer required for calculations.
+* Data may now be excluded from calculations.
+
+# PKNCA 0.8
+
+This release is not backward compatible.  The switch to observed and
+predicted-related NCA parameters (like aucinf.obs and aucinf.pred)
+changed the format of the intervals specification.
+
+* Remove dependency on doBy library
+* Dose-aware interpolation and extrapolation was added with the interp.extrap.conc.dose function.
+* Added Clast.pred related NCA calculations
+* Added N to summary of PKNCAresults
+* Added parameter selection between Clast,observed and Clast,predicted across all parameters
+* Enabled PKNCAdose to be specified with one-sided formula
+* Improved error reporting so that the group and time (interval specification) is reported in addition to the error.
+* PKNCAdose now allows route of administration and IV infusion parameters of rate/duration to be specified
+
 # PKNCA 0.7.1
 
 * Updated vignettes

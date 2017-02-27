@@ -70,7 +70,7 @@ test_that("PKNCA.options", {
                         start=0,
                         end=c(24, Inf),
                         auclast=c(TRUE, FALSE),
-                        aucinf=c(FALSE, TRUE),
+                        aucinf.obs=c(FALSE, TRUE),
                         half.life=c(FALSE, TRUE),
                         tmax=c(FALSE, TRUE),
                         cmax=c(FALSE, TRUE)))))
@@ -294,49 +294,53 @@ test_that("PKNCA.choose.option", {
 
 context("PKNCA summary setting")
 
-test_that(
-  "PKNCA.set.summary input checking",
-  {
-    ## Get the current state to reset it at the end
-    initial.summary.set <- PKNCA.set.summary()
-    PKNCA.set.summary(reset=TRUE)
-    ## Confirm that reset actually resets the summary settings
-    expect_equal(PKNCA.set.summary(), list())
+test_that("PKNCA.set.summary input checking", {
+  ## Get the current state to reset it at the end
+  initial.summary.set <- PKNCA.set.summary()
+  PKNCA.set.summary(reset=TRUE)
+  ## Confirm that reset actually resets the summary settings
+  expect_equal(PKNCA.set.summary(), list())
     
-    ## name must already be defined
-    expect_error(PKNCA.set.summary("blah"),
-                 regexp="You must first define the parameter name with add.interval.col")
-    ## point must be a function
-    expect_error(PKNCA.set.summary("auclast", point="a"),
-                 regexp="point must be a function")
-    ## spread must be a function
-    expect_error(PKNCA.set.summary("auclast", point=mean, spread="a"),
-                 regexp="spread must be a function")
-    ## Rounding must either be a function or a list
-    expect_error(PKNCA.set.summary("auclast", point=mean, spread=sd,
-                                   rounding="a"),
-                 regexp="rounding must be either a list or a function")
-    expect_error(PKNCA.set.summary("auclast", point=mean, spread=sd,
-                                   rounding=list(foo=3, bar=4)),
-                 regexp="rounding must have a single value in the list")
-    expect_error(PKNCA.set.summary("auclast", point=mean, spread=sd,
-                                   rounding=list(foo=3)),
-                 regexp="When a list, rounding must have a name of either 'signif' or 'round'")
-    ## An initial setting works
-    expect_equal(PKNCA.set.summary("auclast", point=mean, spread=sd,
-                                   rounding=round),
-                 list(auclast=list(point=mean, spread=sd, rounding=round)))
-    ## Changing a setting works
-    expect_equal(PKNCA.set.summary("auclast", point=mean, spread=sd,
-                                   rounding=list(round=2)),
-                 list(auclast=list(point=mean, spread=sd,
-                        rounding=list(round=2))))
+  ## name must already be defined
+  expect_error(PKNCA.set.summary("blah"),
+               regexp="You must first define the parameter name with add.interval.col")
+  ## point must be a function
+  expect_error(PKNCA.set.summary("auclast", point="a"),
+               regexp="point must be a function")
+  ## spread must be a function
+  expect_error(PKNCA.set.summary("auclast", point=mean, spread="a"),
+               regexp="spread must be a function")
+  ## Rounding must either be a function or a list
+  expect_error(PKNCA.set.summary("auclast", point=mean, spread=sd,
+                                 rounding="a"),
+               regexp="rounding must be either a list or a function")
+  expect_error(PKNCA.set.summary("auclast", point=mean, spread=sd,
+                                 rounding=list(foo=3, bar=4)),
+               regexp="rounding must have a single value in the list")
+  expect_error(PKNCA.set.summary("auclast", point=mean, spread=sd,
+                                 rounding=list(foo=3)),
+               regexp="When a list, rounding must have a name of either 'signif' or 'round'")
+  ## An initial setting works
+  expect_equal(PKNCA.set.summary("auclast", point=mean, spread=sd,
+                                 rounding=round),
+               list(auclast=list(point=mean, spread=sd, rounding=round)))
+  ## Changing a setting works
+  expect_equal(PKNCA.set.summary("auclast", point=mean, spread=sd,
+                                 rounding=list(round=2)),
+               list(auclast=list(point=mean, spread=sd,
+                                 rounding=list(round=2))))
 
-    ## Reset all the values to the defaults
-    PKNCA.set.summary(reset=TRUE)
-    for (n in names(initial.summary.set)) {
-      tmp <- initial.summary.set[[n]]
-      tmp$name <- n
-      do.call(PKNCA.set.summary, tmp)
-    }
-  })
+  ## Reset all the values to the defaults
+  PKNCA.set.summary(reset=TRUE)
+  for (n in names(initial.summary.set)) {
+    tmp <- initial.summary.set[[n]]
+    tmp$name <- n
+    do.call(PKNCA.set.summary, tmp)
+  }
+})
+
+test_that("PKNCA.options.describe", {
+  expect_equal(PKNCA:::PKNCA.options.describe("adj.r.squared.factor"),
+               PKNCA:::.PKNCA.option.check[["adj.r.squared.factor"]](description=TRUE),
+               info="Option descriptions are provided accurately.")
+})

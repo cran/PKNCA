@@ -1,3 +1,7 @@
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/PKNCA)](https://cran.r-project.org/package=PKNCA)
+[![Travis-CI Build Status](https://travis-ci.org/billdenney/pknca.svg?branch=master)](https://travis-ci.org/billdenney/pknca)
+[![Code_Coverage_Badge](http://codecov.io/github/billdenney/pknca/coverage.svg?branch=master)](http://codecov.io/github/billdenney/pknca?branch=master)
+
 The PKNCA R Package
 =====
 
@@ -19,11 +23,34 @@ will be especially noticable around the inclusion of IV NCA parameters
 and additional specifications of the dosing including dose amount and
 route.
 
+# Citation
+
+As of version 0.8.0.9002, you can find citation information for the
+PKNCA package with a call to `citation(package="PKNCA")`.  The
+preferred citation until publication of version 1.0 is below:
+
+Denney W, Duvvuri S and Buckeridge C (2015). “Simple, Automatic
+Noncompartmental Analysis: The PKNCA R Package.” _Journal of
+Pharmacokinetics and Pharmacodynamics_, *42*(1), pp. 11-107,S65. ISSN
+1573-8744, doi: 10.1007/s10928-015-9432-2, <URL:
+https://github.com/billdenney/pknca>.
+
 # Installation
 
-To install the development version from github, install the devtools
+## From CRAN
+
+The current stable version of PKNCA is available on CRAN.  You can
+install it and its dependencies using the following command:
+
+    install.packages("PKNCA")
+
+## From GitHub
+
+To install the development version from GitHub, install the devtools
 package and then type the following commands:
 
+    install.packages("devtools")
+    install.packages("Rcpp")
     library(devtools)
     install_github("billdenney/pknca")
 
