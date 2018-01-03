@@ -1,35 +1,37 @@
 ## ----setup, echo=FALSE, include=FALSE------------------------------------
 library(PKNCA)
 
-## ----eval=FALSE----------------------------------------------------------
-#  library(PKNCA)
-#  
-#  ## Load the PK concentration data
-#  d.conc <- read.csv("concentration.csv", stringsAsFactors=FALSE)
-#  ## Load the dosing data
-#  d.dose <- read.csv("dose.csv", stringsAsFactors=FALSE)
-#  
-#  ## Create a concentration object specifying the concentration, time,
-#  ## study, and subject columns.  (Note that any number of grouping
-#  ## levels is supporting; you are not restricted to this list.)
-#  my.conc <- PKNCAconc(d.conc,
-#                       concentration~time|study+subject)
-#  ## Create a dosing object specifying the dose, time, study, and
-#  ## subject columns.  (Note that the grouping factors should be a
-#  ## subset of the grouping factors for concentration, and the columns
-#  ## must have the same names between concentration and dose objects.)
-#  my.dose <- PKNCAdose(d.dose,
-#                       dose~time|study+subject)
-#  ## Combine the concentration and dosing information both to
-#  ## automatically define the intervals for NCA calculation and provide
-#  ## doses for calculations requiring dose.
-#  my.data <- PKNCAdata(my.conc, my.dose)
-#  
-#  ## Calculate the NCA parameters
-#  my.results <- pk.nca(my.data)
-#  
-#  ## Summarize the results
-#  summary(my.results)
+## ----setup_data----------------------------------------------------------
+library(PKNCA)
+
+## Load the PK concentration data
+d.conc <- datasets::Theoph
+## Generate the dosing data
+d.dose <- d.conc[d.conc$Time == 0,]
+d.dose$Time <- 0
+
+## Create a concentration object specifying the concentration, time, and
+## subject columns.  (Note that any number of grouping levels is
+## supported; you are not restricted to just grouping by subject.)
+my.conc <- PKNCAconc(d.conc,
+                     conc~Time|Subject)
+## Create a dosing object specifying the dose, time, and subject
+## columns.  (Note that the grouping factors should be the same as or a
+## subset of the grouping factors for concentration, and the grouping
+## columns must have the same names between concentration and dose
+## objects.)
+my.dose <- PKNCAdose(d.dose,
+                     Dose~Time|Subject)
+## Combine the concentration and dosing information both to
+## automatically define the intervals for NCA calculation and provide
+## doses for calculations requiring dose.
+my.data <- PKNCAdata(my.conc, my.dose)
+
+## Calculate the NCA parameters
+my.results <- pk.nca(my.data)
+
+## Summarize the results
+summary(my.results)
 
 ## ------------------------------------------------------------------------
 PKNCA.options()
@@ -49,18 +51,60 @@ PKNCA.options()
 #                    spread=business.range,
 #                    rounding=list(round=2))
 
-## ----eval=FALSE----------------------------------------------------------
+## ----custom_summary_fun, eval=FALSE--------------------------------------
+#  median_na <- function(x) {
+#    median(x, na.rm=TRUE)
+#  }
+#  quantprob_na <- function(x) {
+#    quantile(x, probs=c(0.05, 0.95), na.rm=TRUE)
+#  }
+#  PKNCA.set.summary(name="auclast",
+#                    point=median_na,
+#                    spread=quantprob_na,
+#                    rounding=list(signif=3))
+
+## ----multi_summary_settings, eval=FALSE----------------------------------
+#  median_na <- function(x) {
+#    median(x, na.rm=TRUE)
+#  }
+#  quantprob_na <- function(x) {
+#    quantile(x, probs=c(0.05, 0.95), na.rm=TRUE)
+#  }
+#  PKNCA.set.summary(name=c("auclast", "cmax", "tmax", "half.life", "aucinf.pred"),
+#                    point=median_na,
+#                    spread=quantprob_na,
+#                    rounding=list(signif=3))
+
+## ----grouping, eval=FALSE------------------------------------------------
+#  ## Generate a faux multi-study, multi-analyte dataset.
+#  d.conc.parent <- d.conc
+#  d.conc.parent$Subject <- as.numeric(as.character(d.conc.parent$Subject))
+#  d.conc.parent$Study <- d.conc.parent$Subject <= 6
+#  d.conc.parent$Analyte <- "Parent"
+#  d.conc.metabolite <- d.conc.parent
+#  d.conc.metabolite$conc <- d.conc.metabolite$conc/2
+#  d.conc.metabolite$Analyte <- "Metabolite"
+#  d.conc.both <- rbind(d.conc.parent, d.conc.metabolite)
+#  d.conc.both <- d.conc.both[with(d.conc.both, order(Study, Subject, Time, Analyte)),]
+#  d.dose.both <- d.conc.both[d.conc.both$Time == 0 & d.conc.both$Analyte %in% "Parent",
+#                             c("Study", "Subject", "Dose", "Time")]
+#  
 #  ## Create a concentration object specifying the concentration, time,
 #  ## study, and subject columns.  (Note that any number of grouping
 #  ## levels is supporting; you are not restricted to this list.)
-#  my.conc <- PKNCAconc(d.conc,
-#                       concentration~time|study+subject/analyte)
+#  my.conc <- PKNCAconc(d.conc.both,
+#                       conc~Time|Study+Subject/Analyte)
 #  ## Create a dosing object specifying the dose, time, study, and
 #  ## subject columns.  (Note that the grouping factors should be a
 #  ## subset of the grouping factors for concentration, and the columns
 #  ## must have the same names between concentration and dose objects.)
-#  my.dose <- PKNCAdose(d.dose,
-#                       dose~time|study+subject)
+#  my.dose <- PKNCAdose(d.dose.both,
+#                       Dose~Time|Study+Subject)
+#  
+#  # Perform and summarize the PK data as previously described
+#  my.data <- PKNCAdata(my.conc, my.dose)
+#  my.results <- pk.nca(my.data)
+#  summary(my.results)
 
 ## ------------------------------------------------------------------------
 intervals <-
@@ -99,5 +143,5 @@ PKNCA::find.tau(dose.times)
 #  my.data <- PKNCAdata(my.conc, my.dose)
 #  my.intervals <- my.data$intervals
 #  my.intervals$aucinf.obs[1] <- TRUE
-#  mydata$intervals <- my.intervals
+#  my.data$intervals <- my.intervals
 

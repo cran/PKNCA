@@ -1,8 +1,51 @@
-Note that backward compatibility will not be guaranteed until version
-1.0.  Argument and function changes will continue until then.  These
-will be especially noticable around the inclusion of IV NCA parameters
-and additional specifications of the dosing including dose amount and
-route.
+Note that backward compatibility of function arguments will not be
+(near-)guaranteed until version 1.0.  Argument and function changes
+will continue until then.  These will be especially noticable around
+the inclusion of IV NCA parameters and additional specifications of
+the dosing including dose amount and route.
+
+# PKNCA 0.8.4
+
+* Added AUCint flavors
+* Parameter names for NCA parameters will likely be changing in the
+  next version; code will still work, but some calculation methods and
+  therefore results may be subtly different.  These changes will be
+  fully documented.)
+
+# PKNCA 0.8.2
+
+* BACKWARD INCOMPATIBILITY: The function supplied to the exclude
+  argument 'FUN' now requires two arguments and operates on the level
+  of a single group rather than the full object.  The function can
+  also return the reason as a character string instead of a logical
+  mask of when to exclude data.
+* BACKWARD INCOMPATIBILITY: Added back-end functionality to only
+  require one function to handle many NCA parameters that are related
+  (e.g. combine pk.calc.aucpext, pk.calc.aucpext.obs,
+  pk.calc.aucpext.pred, etc.).  If your current code calls a specific
+  function (like pk.calc.aucpext.pred), you must change to using the
+  generic function (like pk.calc.aucpext)
+* BACKWARD INCOMPATIBILITY: Functions that previously may have
+  returned Infinity due to dividing by zero (e.g. when AUC=0
+  calculating clearance) now return NA.
+
+* Added Validation vignette.
+
+* Corrected issue where time to steady-state with a single estimate
+  may have given more than one estimated time to steady-state.
+* Corrected issue with exclude handling where now a blank string is
+  also accepted as included (not excluded).
+* PKNCAconc now accepts a "volume" argument and pk.nca can now
+  calculate urine/feces-related parameters (fe, ae, clr)
+* exclude_nca* functions added (Fixes issue #20)
+* Add manual half-life point selection (Fixes issue #18)
+* Improved summary settings (Fixes issue #54)
+* Add parameters for Ceoi and intravenous MRT
+* Updated vignettes to improve clarity
+* Added dose-normalized PK parameters (Fixes issue #41)
+* Added checks to confirm that concentration and time are numeric
+  (Fixes feature request #40)
+* Improved test coverage
 
 # PKNCA 0.8.1
 

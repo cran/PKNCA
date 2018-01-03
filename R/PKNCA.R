@@ -28,8 +28,7 @@
 #' @importFrom digest digest
 #' @importFrom graphics plot
 #' @importFrom lattice xyplot
-#' @importFrom nlme fixef getData getGroups gnls intervals lme nlme 
-#'   ranef
+#' @importFrom nlme fixef getData gnls intervals lme nlme ranef
 #' @importFrom parallel mclapply
 #' @importFrom plyr rbind.fill
 #' @importFrom stats AIC as.formula coef confint formula glm logLik lm 
@@ -37,3 +36,6 @@
 #'   update.formula
 #' @importFrom utils head sessionInfo
 NULL
+
+# To work with the use of dplyr's pipe within the exclude function
+utils::globalVariables(".")

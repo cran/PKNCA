@@ -43,6 +43,16 @@ knitr::kable(head(complex.interval.steady.state, n=10),
 xyplot(conc~time, groups=Subject, type="l",
        data=complex.interval.steady.state)
 
+## ----to_steady_state-----------------------------------------------------
+up.to.steady.state <- superposition(my.conc.corrected,
+                                    tau=4*24,
+                                    n.tau=1,
+                                    dose.times=seq(0, 3*24, by=12))
+xyplot(conc~time,
+       groups=Subject,
+       data=up.to.steady.state,
+       type="l")
+
 ## ------------------------------------------------------------------------
 steady.state$time[steady.state$Subject == 1]
 sum(steady.state$Subject == 1)

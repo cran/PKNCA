@@ -233,3 +233,114 @@ test_that("pk.nca with exclusions", {
                max(tmpconc.excl$conc[tmpconc.excl$ID %in% 1 & is.na(tmpconc.excl$excl)]),
                info="Cmax is affected by the exclusion")
 })
+
+test_that("pk.calc.all with duration.dose required", {
+  tmpconc <- generate.conc(2, 1, 0:24)
+  tmpdose <- generate.dose(tmpconc)
+  tmpdose$duration_dose <- 0.1
+  myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
+  mydose <- PKNCAdose(tmpdose, formula=dose~time|treatment+ID, duration="duration_dose", route="intravascular")
+  mydata <- PKNCAdata(myconc, mydose,
+                      intervals=data.frame(start=0, end=24,
+                                           mrt.iv.last=TRUE))
+  myresult <- pk.nca(mydata)
+  expect_equal(myresult$result$PPORRES[myresult$result$PPTESTCD %in% "mrt.iv.last"],
+               c(10.36263, 10.12515),
+               tol=1e-5,
+               info="duration.dose is used when requested")
+})
+
+test_that("half life inclusion and exclusion", {
+  tmpconc <- generate.conc(2, 1, 0:24)
+  tmpdose <- generate.dose(tmpconc)
+  tmpconc$include_hl <- tmpconc$time <= 22
+  tmpconc$exclude_hl <- tmpconc$time == 22
+  myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
+  myconc_incl <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID,
+                           include_half.life="include_hl")
+  myconc_excl <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID,
+                           exclude_half.life="exclude_hl")
+  mydose <- PKNCAdose(tmpdose, formula=dose~time|treatment+ID)
+  mydata <-  PKNCAdata(myconc, mydose,
+                       intervals=data.frame(start=0, end=24, half.life=TRUE))
+  mydata_incl <- PKNCAdata(myconc_incl, mydose,
+                           intervals=data.frame(start=0, end=24, half.life=TRUE))
+  mydata_excl <- PKNCAdata(myconc_excl, mydose,
+                           intervals=data.frame(start=0, end=24, half.life=TRUE))
+  myresult <- pk.nca(mydata)
+  myresult_incl <- pk.nca(mydata_incl)
+  myresult_excl <- pk.nca(mydata_excl)
+  expect_false(identical(myresult$result, myresult_excl$result))
+  expect_false(identical(myresult$result, myresult_incl$result))
+})
+
+test_that("No interval requested (e.g. for placebo)", {
+  tmpconc <- generate.conc(2, 1, 0:24)
+  tmpdose <- generate.dose(tmpconc)
+  myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
+  mydose <- PKNCAdose(tmpdose, formula=dose~time|treatment+ID)
+  mydata <-  PKNCAdata(myconc, mydose,
+                       intervals=data.frame(treatment="Trt 3", start=0, end=24, cmax=TRUE,
+                                            stringsAsFactors=FALSE))
+  expect_message(myresult <- pk.nca(mydata),
+                 regexp="2 groups have no interval calculations requested.",
+                 info="No intervals apply to a group provides a message.")
+  expect_equal(nrow(as.data.frame(myresult)), 0,
+               info="No rows were generated when no intervals applied")
+})
+
+test_that("Volume-related calculations", {
+  tmpconc <- generate.conc(2, 1, c(4, 12, 24))
+  tmpconc$conc <- 1:nrow(tmpconc)
+  tmpconc$vol <- 2
+  tmpdose <- generate.dose(tmpconc)
+  myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID, volume="vol")
+  mydose <- PKNCAdose(tmpdose, formula=dose~time|treatment+ID)
+  mydata <-  PKNCAdata(myconc, mydose,
+                       intervals=data.frame(treatment="Trt 1", start=0, end=24,
+                                            ae=TRUE, fe=TRUE,
+                                            stringsAsFactors=FALSE))
+  myresult <- pk.nca(mydata)
+  expect_equal(as.data.frame(myresult)[["PPORRES"]], c(12, 12, 30, 30),
+              info="ae and fe are correctly calculated")
+  tmpdose2 <- tmpdose
+  tmpdose2$dose <- 2
+  mydose2 <- PKNCAdose(tmpdose2, formula=dose~time|treatment+ID)
+  mydata2 <-  PKNCAdata(myconc, mydose2,
+                       intervals=data.frame(treatment="Trt 1", start=0, end=24,
+                                            ae=TRUE, fe=TRUE,
+                                            stringsAsFactors=FALSE))
+  myresult2 <- pk.nca(mydata2)
+  expect_equal(as.data.frame(myresult2)[["PPORRES"]], c(12, 6, 30, 15),
+               info="fe respects dose")
+})
+
+test_that("pk.nca can calculate values with group-level data", {
+  tmpconc_impute <- generate.conc(2, 1, 0:24)
+  # This is what will happen in the imputation
+  tmpconc_observe_05 <- tmpconc_impute[tmpconc_impute$time %in% 0,]
+  tmpconc_observe_05$time <- 0.5
+  tmpconc_observe <- rbind(tmpconc_impute, tmpconc_observe_05)
+  tmpconc_observe <- tmpconc_observe[order(tmpconc_observe$treatment, tmpconc_observe$ID, tmpconc_observe$time),]
+  tmpdose <- generate.dose(tmpconc_impute)
+  tmpdose$time <- 0.5
+  
+  myconc_impute <- PKNCAconc(tmpconc_impute, formula=conc~time|treatment+ID)
+  myconc_observe <- PKNCAconc(tmpconc_observe, formula=conc~time|treatment+ID)
+  mydose <- PKNCAdose(tmpdose, formula=dose~time|treatment+ID)
+  mydata_impute <-
+    PKNCAdata(myconc_impute, mydose,
+              intervals=data.frame(treatment="Trt 1", start=0, end=24,
+                                   aucint.last=TRUE,
+                                   stringsAsFactors=FALSE))
+  mydata_observe <-
+    PKNCAdata(myconc_observe, mydose,
+              intervals=data.frame(treatment="Trt 1", start=0, end=24,
+                                   auclast=TRUE,
+                                   stringsAsFactors=FALSE))
+  myres_impute <- pk.nca(mydata_impute)
+  myres_observe <- pk.nca(mydata_observe)
+  expect_equal(as.data.frame(myres_impute)$PPORRES,
+               as.data.frame(myres_observe)$PPORRES,
+               info="Manually imputing values gives the same result as aucint")
+})

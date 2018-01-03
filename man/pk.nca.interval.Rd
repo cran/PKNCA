@@ -4,17 +4,50 @@
 \alias{pk.nca.interval}
 \title{Compute all PK parameters for a single concentration-time data set}
 \usage{
-pk.nca.interval(conc, time, dose, time.dose, interval, options = list())
+pk.nca.interval(conc, time, volume, duration.conc, dose, time.dose,
+  duration.dose, route, conc.group = NULL, time.group = NULL,
+  volume.group = NULL, duration.conc.group = NULL, dose.group = NULL,
+  time.dose.group = NULL, duration.dose.group = NULL, route.group = NULL,
+  include_half.life = NULL, exclude_half.life = NULL, interval,
+  options = list())
 }
 \arguments{
-\item{conc}{Concentration measured}
+\item{conc, conc.group}{Concentration measured for the current
+interval or all data for the group}
 
-\item{time}{Time of concentration measurement}
+\item{time, time.group}{Time of concentration measurement for the
+current interval or all data for the group}
 
-\item{dose}{Dose amount (may be a scalar or vector)}
+\item{volume, volume.group}{The volume (or mass) of the concentration
+measurement for the current interval or all data for the group
+(typically for urine and fecal measurements)}
 
-\item{time.dose}{Time of the dose (must be the same length as
-\code{dose})}
+\item{duration.conc, duration.conc.group}{The duration of the
+concentration measurement for the current interval or all data for
+the group (typically for urine and fecal measurements)}
+
+\item{dose, dose.group}{Dose amount (may be a scalar or vector) for
+the current interval or all data for the group}
+
+\item{time.dose, time.dose.group}{Time of the dose for the current
+interval or all data for the group (must be the same length as
+\code{dose} or \code{dose.group})}
+
+\item{duration.dose, duration.dose.group}{The duration of the dose
+administration for the current interval or all data for the group
+(typically zero for extravascular and intravascular bolus and
+nonzero for intravascular infusion)}
+
+\item{route, route.group}{The route of dosing for the current interval
+or all data for the group}
+
+\item{include_half.life}{An optional boolean vector of the
+concentration measurements to include in the half-life calculation.
+If given, no half-life point selection will occur.}
+
+\item{exclude_half.life}{An optional boolean vector of the
+concentration measurements to exclude from the half-life
+calculation.}
 
 \item{interval}{One row of an interval definition (see
 \code{\link{check.interval.specification}} for how to define the
@@ -28,13 +61,11 @@ A data frame with the start and end time along with all PK
   parameters for the \code{interval}
 }
 \description{
-For one subject/time range, compute all available PK parameters.
-All the internal options should be set by
-\code{\link{PKNCA.options}} prior to running.  The only part that
-changes with a call to this function is the \code{conc}entration
-and \code{time}.
+For one subject/time range, compute all available PK parameters. All
+the internal options should be set by \code{\link{PKNCA.options}}
+prior to running.  The only part that changes with a call to this
+function is the \code{conc}entration and \code{time}.
 }
 \seealso{
 \code{\link{check.interval.specification}}
 }
-

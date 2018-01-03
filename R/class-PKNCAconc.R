@@ -1,33 +1,37 @@
 #' Create a PKNCAconc object
-#' 
-#' @param data A data frame with concentration, time, and the groups 
-#'   defined in \code{formula}.
-#' @param formula The formula defining the 
-#'   \code{concentration~time|groups}
-#' @param subject The column indicating the subject number (used for 
-#'   plotting).  If not provided, this defaults to the beginning of the 
-#'   inner groups: For example with 
-#'   \code{concentration~time|Study+Subject/Analyte}, the inner groups 
-#'   start with the first grouping variable before a \code{/}, 
-#'   \code{Subject}.  If there is only one grouping variable, it is 
+#'
+#' @param data A data frame with concentration (or amount for
+#'   urine/feces), time, and the groups defined in \code{formula}.
+#' @param formula The formula defining the
+#'   \code{concentration~time|groups} or \code{amount~time|groups} for
+#'   urine/feces (In the remainder of the documentation, "concentration"
+#'   will be used to describe concentration or amount.)
+#' @param subject The column indicating the subject number (used for
+#'   plotting).  If not provided, this defaults to the beginning of the
+#'   inner groups: For example with
+#'   \code{concentration~time|Study+Subject/Analyte}, the inner groups
+#'   start with the first grouping variable before a \code{/},
+#'   \code{Subject}.  If there is only one grouping variable, it is
 #'   assumed to be the subject (e.g. \code{concentration~time|Subject}),
-#'   and if there are multiple grouping variables without a \code{/}, 
+#'   and if there are multiple grouping variables without a \code{/},
 #'   subject is assumed to be the last one.  For single-subject data, it
 #'   is assigned as \code{NULL}.
-#' @param labels (optional) Labels for use when plotting.  They are a 
-#'   named list where the names correspond to the names in the data 
-#'   frame and the values are used for xlab and/or ylab as appropriate.
-#' @param units (optional) Units for use when plotting and calculating 
-#'   parameters.  Note that unit conversions and simplifications are not
-#'   done; the text is used as-is.
-#' @param time.nominal (optional) The name of the nominal time column 
+#' @param time.nominal (optional) The name of the nominal time column
 #'   (if the main time variable is actual time.  The \code{time.nominal}
-#'   is not used during calculations; it is available to assist with 
+#'   is not used during calculations; it is available to assist with
 #'   data summary and checking.
 #' @param exclude (optional) The name of a column with concentrations to
-#'   exclude from calculations and summarization.  If given, the column 
+#'   exclude from calculations and summarization.  If given, the column
 #'   should have values of \code{NA} or \code{""} for concentrations to
 #'   include and non-empty text for concentrations to exclude.
+#' @param volume (optional) The volume (or mass) of collection as is
+#'   typically used for urine or feces measurements.
+#' @param duration (optional) The duration of collection as is typically
+#'   used for concentration measurements in urine or feces.
+#' @param exclude_half.life,include_half.life Points to exclude from the
+#'   half-life calculation (still using normal selection rules for the
+#'   other points) or to include for the half-life (using specifically
+#'   those points and bypassing automatic point selection).
 #' @param ... Ignored.
 #' @return A PKNCAconc object that can be used for automated NCA.
 #' @seealso \code{\link{PKNCAdata}}, \code{\link{PKNCAdose}}
@@ -46,13 +50,12 @@ PKNCAconc.tbl_df <- function(data, ...)
 
 #' @rdname PKNCAconc
 #' @export
-PKNCAconc.data.frame <- function(data, formula, subject, labels, units,
-                                 time.nominal, exclude, ...) {
-  ## Check inputs
-  if (!missing(time.nominal)) {
-    if (!(time.nominal %in% names(data))) {
-      stop("time.nominal, if given, must be a column name in the input data.")
-    }
+PKNCAconc.data.frame <- function(data, formula, subject,
+                                 time.nominal, exclude, duration, volume,
+                                 exclude_half.life, include_half.life, ...) {
+  ## The data must have... data
+  if (nrow(data) == 0) {
+    stop("data must have at least one row.")
   }
   ## Verify that all the variables in the formula are columns in the
   ## data.
@@ -103,20 +106,43 @@ PKNCAconc.data.frame <- function(data, formula, subject, labels, units,
   ret <- list(data=data,
               formula=formula,
               subject=subject)
+  class(ret) <- c("PKNCAconc", class(ret))
   if (missing(exclude)) {
     ret <- setExcludeColumn(ret)
   } else {
     ret <- setExcludeColumn(ret, exclude=exclude)
   }
-  ## check and add labels and units
-  if (!missing(labels))
-    ret <- set.name.matching(ret, "labels", labels, data)
-  if (!missing(units))
-    ret <- set.name.matching(ret, "units", units, data)
-  if (!missing(time.nominal)) {
-    ret$time.nominal <- time.nominal
+  if (missing(volume)) {
+    ret <- setAttributeColumn(ret, attr_name="volume", default_value=NA_real_)
+  } else {
+    ret <- setAttributeColumn(ret, attr_name="volume", col_or_value=volume)
+    if (!is.numeric(getAttributeColumn(ret, attr_name="volume")[[1]])) {
+      stop("Volume must be numeric")
+    }
   }
-  class(ret) <- c("PKNCAconc", class(ret))
+  if (missing(duration)) {
+    ret <- setDuration.PKNCAconc(ret)
+  } else {
+    ret <- setDuration.PKNCAconc(ret, duration=duration)
+  }
+  if (!missing(time.nominal)) {
+    ret <-
+      setAttributeColumn(object=ret,
+                         attr_name="time.nominal",
+                         col_name=time.nominal)
+  }
+  if (!missing(exclude_half.life)) {
+    ret <-
+      setAttributeColumn(object=ret,
+                         attr_name="exclude_half.life",
+                         col_name=exclude_half.life)
+  }
+  if (!missing(include_half.life)) {
+    ret <-
+      setAttributeColumn(object=ret,
+                         attr_name="include_half.life",
+                         col_name=include_half.life)
+  }
   ret
 }
 
@@ -151,19 +177,19 @@ getIndepVar.PKNCAconc <- function(x, ...) {
   x$data[, all.vars(parseFormula(x)$rhs)]
 }
 
-#' Get the groups (right hand side after the \code{|} from a PKNCA
-#' object.
-#'
+#' Get the groups (right hand side after the \code{|} from a PKNCA 
+#' object).
+#' 
 #' @param object The object to extract the data from
-#' @param form The formula to extract the data from (defaults to the
-#' formula from \code{object})
-#' @param level optional.  If included, this specifies the level(s) of
-#' the groups to include.  If a numeric scalar, include the first
-#' \code{level} number of groups.  If a numeric vector, include each
-#' of the groups specified by the number.  If a character vector,
-#' include the named group levels.
-#' @param data The data to extract the groups from (defaults to the
-#' data from \code{object})
+#' @param form The formula to extract the data from (defaults to the 
+#'   formula from \code{object})
+#' @param level optional.  If included, this specifies the level(s) of 
+#'   the groups to include.  If a numeric scalar, include the first 
+#'   \code{level} number of groups.  If a numeric vector, include each 
+#'   of the groups specified by the number.  If a character vector, 
+#'   include the named group levels.
+#' @param data The data to extract the groups from (defaults to the data
+#'   from \code{object})
 #' @param sep Unused (kept for compatibility with the nlme package)
 #' @param ... Arguments passed to other getGroups functions
 #' @return A data frame with the (selected) group columns.
@@ -194,6 +220,31 @@ getGroups.PKNCAconc <- function(object, form=formula(object), level,
 #' @export
 getData.PKNCAconc <- function(object)
   object$data
+
+#' @rdname getDataName
+getDataName.PKNCAconc <- function(object)
+  "data"
+
+setDuration.PKNCAconc <- function(object, duration, ...) {
+  if (missing(duration)) {
+    object <-
+      setAttributeColumn(object=object, attr_name="duration", default_value=0,
+                         message_if_default="Assuming point rather than interval concentration measurement")
+  } else {
+    object <-
+      setAttributeColumn(object=object, attr_name="duration", col_or_value=duration)
+  }
+  duration.val <- getAttributeColumn(object=object, attr_name="duration")[[1]]
+  if (is.numeric(duration.val) &&
+      !any(is.na(duration.val)) &&
+      !any(is.infinite(duration.val)) &&
+      all(duration.val >= 0)) {
+    # It passes the test
+  } else {
+    stop("duration must be numeric without missing (NA) or infinite values, and all values must be >= 0")
+  }
+  object
+}
 
 #' Print and/or summarize a PKNCAconc or PKNCAdose object.
 #'
@@ -291,14 +342,6 @@ plot.PKNCAconc <- function(x, ...,
   }
   call.args[["x"]] <- stats::formula(conc.formula)
   call.args[["data"]] <- x$data
-  ## If labels and/or units are given for the x and y variables, use
-  ## them.
-  xlab <- make.label("rhs", x$data, conc.formula, x$labels, x$units)
-  ylab <- make.label("lhs", x$data, conc.formula, x$labels, x$units)
-  if (!("xlab" %in% names(call.args)))
-    call.args[["xlab"]] <- xlab
-  if (!("ylab" %in% names(call.args)))
-    call.args[["ylab"]] <- ylab
   do.call(lattice::xyplot, call.args)
 }
 
@@ -326,7 +369,12 @@ split.PKNCAconc <- function(x, f=getGroups(x), drop=TRUE, ...) {
     groupid <- data.frame(NA)[,c()]
   } else {
     ## Do the initial separation and extract the groupid information
-    ret <- split(x=x$data, f=f, drop=drop, sep="\n")
+    f_new <-
+      as.factor(
+        do.call(
+          paste,
+          append(as.list(f), list(sep="\n"))))
+    ret <- split(x=x$data, f=f_new, drop=drop, sep="\n")
     groupid <- unique(f)
     ## reorder the output to align with the input grouping order
     ret.idx <-

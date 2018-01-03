@@ -264,6 +264,7 @@ pk.calc.auc.all <- function(conc, time, ..., options=list()) {
               lambda.z=NA)
 }
 
+
 #' @describeIn pk.calc.auxc Compute the area under the moment curve
 #' @export
 pk.calc.aumc <- function(conc, time, ..., options=list())
@@ -331,14 +332,14 @@ add.interval.col("aucinf.obs",
                  FUN="pk.calc.auc.inf.obs",
                  values=c(FALSE, TRUE),
                  desc="The area under the concentration time curve from the beginning of the interval to infinity with extrapolation to infinity from the observed Clast",
-                 depends=c("half.life", "clast.obs"))
+                 depends=c("lambda.z", "clast.obs"))
 PKNCA.set.summary("aucinf.obs", business.geomean, business.geocv)
 
 add.interval.col("aucinf.pred",
                  FUN="pk.calc.auc.inf.pred",
                  values=c(FALSE, TRUE),
                  desc="The area under the concentration time curve from the beginning of the interval to infinity with extrapolation to infinity from the predicted Clast",
-                 depends=c("half.life", "clast.pred"))
+                 depends=c("lambda.z", "clast.pred"))
 PKNCA.set.summary("aucinf.pred", business.geomean, business.geocv)
 
 add.interval.col("auclast",
@@ -359,14 +360,14 @@ add.interval.col("aumcinf.obs",
                  FUN="pk.calc.aumc.inf.obs",
                  values=c(FALSE, TRUE),
                  desc="The area under the concentration time moment curve from the beginning of the interval to infinity with extrapolation to infinity from the observed Clast",
-                 depends=c("half.life", "clast.obs"))
+                 depends=c("lambda.z", "clast.obs"))
 PKNCA.set.summary("aumcinf.obs", business.geomean, business.geocv)
 
 add.interval.col("aumcinf.pred",
                  FUN="pk.calc.aumc.inf.pred",
                  values=c(FALSE, TRUE),
                  desc="The area under the concentration time moment curve from the beginning of the interval to infinity with extrapolation to infinity from the predicted Clast",
-                 depends=c("half.life", "clast.pred"))
+                 depends=c("lambda.z", "clast.pred"))
 PKNCA.set.summary("aumcinf.pred", business.geomean, business.geocv)
 
 add.interval.col("aumclast",

@@ -2,9 +2,9 @@
 % Please edit documentation in R/class-PKNCAconc.R
 \name{PKNCAconc}
 \alias{PKNCAconc}
-\alias{PKNCAconc.data.frame}
 \alias{PKNCAconc.default}
 \alias{PKNCAconc.tbl_df}
+\alias{PKNCAconc.data.frame}
 \title{Create a PKNCAconc object}
 \usage{
 PKNCAconc(data, ...)
@@ -13,46 +13,51 @@ PKNCAconc(data, ...)
 
 \method{PKNCAconc}{tbl_df}(data, ...)
 
-\method{PKNCAconc}{data.frame}(data, formula, subject, labels, units,
-  time.nominal, exclude, ...)
+\method{PKNCAconc}{data.frame}(data, formula, subject, time.nominal, exclude,
+  duration, volume, exclude_half.life, include_half.life, ...)
 }
 \arguments{
-\item{data}{A data frame with concentration, time, and the groups 
-defined in \code{formula}.}
+\item{data}{A data frame with concentration (or amount for
+urine/feces), time, and the groups defined in \code{formula}.}
 
 \item{...}{Ignored.}
 
-\item{formula}{The formula defining the 
-\code{concentration~time|groups}}
+\item{formula}{The formula defining the
+\code{concentration~time|groups} or \code{amount~time|groups} for
+urine/feces (In the remainder of the documentation, "concentration"
+will be used to describe concentration or amount.)}
 
-\item{subject}{The column indicating the subject number (used for 
-plotting).  If not provided, this defaults to the beginning of the 
-inner groups: For example with 
-\code{concentration~time|Study+Subject/Analyte}, the inner groups 
-start with the first grouping variable before a \code{/}, 
-\code{Subject}.  If there is only one grouping variable, it is 
+\item{subject}{The column indicating the subject number (used for
+plotting).  If not provided, this defaults to the beginning of the
+inner groups: For example with
+\code{concentration~time|Study+Subject/Analyte}, the inner groups
+start with the first grouping variable before a \code{/},
+\code{Subject}.  If there is only one grouping variable, it is
 assumed to be the subject (e.g. \code{concentration~time|Subject}),
-and if there are multiple grouping variables without a \code{/}, 
+and if there are multiple grouping variables without a \code{/},
 subject is assumed to be the last one.  For single-subject data, it
 is assigned as \code{NULL}.}
 
-\item{labels}{(optional) Labels for use when plotting.  They are a 
-named list where the names correspond to the names in the data 
-frame and the values are used for xlab and/or ylab as appropriate.}
-
-\item{units}{(optional) Units for use when plotting and calculating 
-parameters.  Note that unit conversions and simplifications are not
-done; the text is used as-is.}
-
-\item{time.nominal}{(optional) The name of the nominal time column 
+\item{time.nominal}{(optional) The name of the nominal time column
 (if the main time variable is actual time.  The \code{time.nominal}
-is not used during calculations; it is available to assist with 
+is not used during calculations; it is available to assist with
 data summary and checking.}
 
 \item{exclude}{(optional) The name of a column with concentrations to
-exclude from calculations and summarization.  If given, the column 
+exclude from calculations and summarization.  If given, the column
 should have values of \code{NA} or \code{""} for concentrations to
 include and non-empty text for concentrations to exclude.}
+
+\item{duration}{(optional) The duration of collection as is typically
+used for concentration measurements in urine or feces.}
+
+\item{volume}{(optional) The volume (or mass) of collection as is
+typically used for urine or feces measurements.}
+
+\item{exclude_half.life, include_half.life}{Points to exclude from the
+half-life calculation (still using normal selection rules for the
+other points) or to include for the half-life (using specifically
+those points and bypassing automatic point selection).}
 }
 \value{
 A PKNCAconc object that can be used for automated NCA.
@@ -63,4 +68,3 @@ Create a PKNCAconc object
 \seealso{
 \code{\link{PKNCAdata}}, \code{\link{PKNCAdose}}
 }
-

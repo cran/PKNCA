@@ -44,6 +44,16 @@ as.data.frame.PKNCAresults <- function(x, ..., out.format=c('long', 'wide')) {
   ret
 }
 
+#' Extract all the original data from a PKNCAconc or PKNCAdose object
+#' @param object R object to extract the data from.
+#' @export
+getData.PKNCAresults <- function(object)
+  object$result
+
+#' @rdname getDataName
+getDataName.PKNCAresults <- function(object)
+  "result"
+
 #' @rdname getGroups.PKNCAconc
 #' @export
 getGroups.PKNCAresults <- function(object,
@@ -101,6 +111,8 @@ roundingSummarize <- function(x, name) {
 
 #' Summarize PKNCA results
 #' 
+#' @details Excluded results will not be included in the summary.
+#' 
 #' @param object The results to summarize
 #' @param drop.group Which group(s) should be dropped from the formula?
 #' @param not.requested.string A character string to use when a parameter 
@@ -125,6 +137,9 @@ summary.PKNCAresults <- function(object, ...,
   allGroups <- getGroups(object)
   groups <- unique(c("start", "end",
                      setdiff(names(allGroups), drop.group)))
+  exclude_col <- object$exclude
+  # Ensure that the exclude_col is NA instead of "" for subsequent processing.
+  object$result[[exclude_col]] <- normalize_exclude(object$result[[exclude_col]])
   summaryFormula <- stats::as.formula(paste0("~", paste(groups, collapse="+")))
   summaryInstructions <- PKNCA.set.summary()
   ## Find any parameters that request any summaries
@@ -155,7 +170,8 @@ summary.PKNCAresults <- function(object, ...,
       if (any(current.interval[,n])) {
         currentData <- merge(
           ret[i, groups, drop=FALSE],
-          object$result[object$result$PPTESTCD %in% n,,drop=FALSE])
+          object$result[object$result$PPTESTCD %in% n &
+                          is.na(object$result[[exclude_col]]),,drop=FALSE])
         if (nrow(currentData) == 0) {
           warning("No results to summarize for ", n, " in result row ", i)
         } else {

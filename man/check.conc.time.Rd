@@ -21,6 +21,8 @@ None
 If the concentrations or times are invalid, will provide an error.
 Reasons for being invalid are
 \itemize{
+  \item \code{time} is not a number
+  \item \code{conc} is not a number
   \item Any \code{time} value is NA
   \item \code{time} is not monotonically increasing
   \item \code{conc} and \code{time} are not the same length
@@ -33,4 +35,3 @@ Some cases may generate warnings but allow the data to proceed.
     error; it will generate a warning.
 }
 }
-

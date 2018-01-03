@@ -4,18 +4,23 @@
 #' @param reason The reason to add as a reason for exclusion.
 #' @param mask A logical vector or numeric index of values to exclude 
 #'   (see details).
-#' @param FUN A function to operate on the data to select reasons for 
-#'   exclusions (see details).
+#' @param FUN A function to operate on the data (one group at a time) to
+#'   select reasons for exclusions (see details).
 #' @return The object with updated information in the exclude column. 
 #'   The exclude column will contain the \code{reason} if \code{mask} or
 #'   \code{FUN} indicate.  If a previous reason for exclusion was given,
-#'   then subsequent reasons for exclusion will be added to the first
+#'   then subsequent reasons for exclusion will be added to the first 
 #'   with a semicolon space ("; ") separator.
 #'   
 #' @details Only one of \code{mask} or \code{FUN} may be given.  If 
-#'   \code{FUN} is given, it will be called on the object as 
-#'   \code{FUN(object)} and it must return a logical vector equivalent 
-#'   to \code{mask}.
+#'   \code{FUN} is given, it will be called with two arguments:  a 
+#'   data.frame (or similar object) that consists of a single group of 
+#'   the data and the full object (e.g. the PKNCAconc object), 
+#'   \code{FUN(current_group, object)}, and it must return a logical 
+#'   vector equivalent to \code{mask} or a character vector with the 
+#'   reason text given when data should be excluded or 
+#'   \code{NA_character_} when the data shoudl be included (for the
+#'   current exclusion test).
 #' @examples
 #' myconc <- PKNCAconc(data.frame(subject=1,
 #'                                time=0:6,
@@ -25,36 +30,44 @@
 #'         reason="Carryover",
 #'         mask=c(TRUE, rep(FALSE, 6)))
 #' @export
+#' @importFrom dplyr "%>%"
+#' @importFrom dplyr n
+#' @importFrom rlang syms
 exclude <- function(object, reason, mask, FUN)
   UseMethod("exclude")
 
-#' @rdname exclude
+utils::globalVariables(c("exclude_current_group_XXX", "row_number_XXX", "exclude_current_group_XXX_row_num"))
+#' @describeIn exclude The general case for data exclusion
 #' @export
-exclude.PKNCAconc <- function(object, reason, mask, FUN) {
-  exclude.helper(object, reason, mask, FUN)
-}
-
-#' @rdname exclude
-#' @export
-exclude.PKNCAdose <- function(object, reason, mask, FUN) {
-  exclude.helper(object, reason, mask, FUN)
-}
-
-#' @rdname exclude
-#' @export
-exclude.PKNCAresults <- function(object, reason, mask, FUN) {
-  exclude.helper(object, reason, mask, FUN, dataname="result")
-}
-
-exclude.helper <- function(object, reason, mask, FUN, dataname="data") {
+exclude.default <- function(object, reason, mask, FUN) {
+  dataname <- getDataName(object)
   # Check inputs
   if (missing(mask) & !missing(FUN)) {
-    mask <- do.call(FUN, list(object))
+    # operate on one group at a time
+    groupnames <- c(names(getGroups(object)),
+                    intersect(names(object[[dataname]]),
+                              c("start", "end")))
+    mask_df <-
+      object[[dataname]] %>%
+      dplyr::mutate(row_number_XXX=1:n()) %>%
+      dplyr::group_by(!!! rlang::syms(groupnames)) %>%
+      dplyr::mutate(exclude_current_group_XXX_row_num=row_number_XXX,
+                    exclude_current_group_XXX=do.call(FUN,
+                                                      list(as.data.frame(., stringsAsFactors=FALSE)[.$row_number_XXX %in% row_number_XXX,,drop=FALSE],
+                                                           object))) %>%
+      dplyr::mutate(exclude_lengths_match=length(exclude_current_group_XXX) ==
+                      length(exclude_current_group_XXX_row_num))
+    # Extract the output and ensure that the output order equals the input order
+    mask <- mask_df$exclude_current_group_XXX[order(mask_df$exclude_current_group_XXX_row_num)]
+    if (is.character(mask)) {
+      reason <- mask
+      mask <- !is.na(reason)
+    }
   } else if (!xor(missing(mask), missing(FUN))) {
     stop("Either mask for FUN must be given (but not both).")
   }
-  if (!(length(reason) == 1)) {
-    stop("reason must be a scalar.")
+  if (!(length(reason) %in% c(1, nrow(object[[dataname]])))) {
+    stop("reason must be a scalar or have the same length as the data.")
   } else if (!is.character(reason)) {
     stop("reason must be a character string.")
   }
@@ -63,10 +76,13 @@ exclude.helper <- function(object, reason, mask, FUN, dataname="data") {
   } else if (!(object$exclude %in% names(object[[dataname]]))) {
     stop("exclude column must exist in object[['", dataname, "']].")
   }
+  # Make a scalar reason a vector
+  if (length(reason) == 1)
+    reason <- rep(reason, length(mask))
   # Find the original value of the 'exclude' column.
   orig <- object[[dataname]][[object$exclude]]
   if (length(mask) != length(orig)) {
-    stop("mask or the return value from FUN must match the length of the data.")
+    stop("mask must match the length of the data.")
   }
   # No current value for exclude
   mask.none <- orig %in% c(NA, "")
@@ -76,10 +92,10 @@ exclude.helper <- function(object, reason, mask, FUN, dataname="data") {
   mask.multiple <- mask & (!mask.one)
   ret <- orig
   if (any(mask.one)) {
-    ret[mask.one] <- reason
+    ret[mask.one] <- reason[mask.one]
   }
   if (any(mask.multiple)) {
-    ret[mask.multiple] <- paste(ret[mask.multiple], reason, sep="; ")
+    ret[mask.multiple] <- paste(ret[mask.multiple], reason[mask.one], sep="; ")
   }
   object[[dataname]][,object$exclude] <- ret
   object
@@ -138,4 +154,23 @@ setExcludeColumn <- function(object, exclude, dataname="data") {
     object[["exclude"]] <- exclude
   }
   object
+}
+
+#' Normalize the exclude column by setting blanks to NA
+#'
+#' @param object The object to extract the exclude column from
+#' @return The exclude vector where \code{NA} indicates not to exclude
+#'   and anything else indicates to exclude.
+normalize_exclude <- function(object) {
+  dataname <- getDataName(object)
+  if (is.null(dataname)) {
+    ret <- object
+  } else {
+    ret <- object[[dataname]][[object[["exclude"]]]]
+  }
+  mask_blank <- ret %in% ""
+  if (any(mask_blank)) {
+    ret[mask_blank] <- NA
+  }
+  ret
 }

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Bill Denney" />
+
+<meta name="date" content="2018-01-02" />
+
+<title>AUC Calculation with PKNCA</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">AUC Calculation with PKNCA</h1>
+<h4 class="author"><em>Bill Denney</em></h4>
+<h4 class="date"><em>2018-01-02</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#preparation">Preparation</a></li>
+<li><a href="#auc-to-the-last-value-above-the-limit-of-quantification-auclast">AUC to the Last Value Above the Limit of Quantification (AUC<sub>last</sub>)</a></li>
+<li><a href="#aucall">AUC<sub>all</sub></a></li>
+<li><a href="#auc-to-infinity-aucinfty">AUC to Infinity (AUC<sub><span class="math inline">\(\infty\)</span></sub>)</a></li>
+<li><a href="#partial-aucs">Partial AUCs</a></li>
+</ul>
+</div>
+
+<p>Area Under the Curve (AUC) is a commonly-used metric for assessing exposure to a drug. Many variants of AUC exist, and the information below will assist in determining both the appropriate AUC and how to calculate it.</p>
+<div id="preparation" class="section level1">
+<h1>Preparation</h1>
+<p>For the below examples, the following data will be used.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressPackageStartupMessages</span>({
+  <span class="kw">library</span>(PKNCA)
+  <span class="kw">library</span>(dplyr)
+  <span class="kw">library</span>(cowplot)
+  <span class="kw">library</span>(knitr)
+})</code></pre></div>
+<pre><code>## Warning: package 'dplyr' was built under R version 3.4.3</code></pre>
+<pre><code>## Warning: package 'cowplot' was built under R version 3.4.3</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_conc &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">conc=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">2.5</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="fl">1.5</span>, <span class="fl">1.2</span>, <span class="fl">1.1</span>, <span class="dv">0</span>, <span class="dv">0</span>),
+                      <span class="dt">time=</span><span class="kw">c</span>(<span class="dv">0</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">12</span>, <span class="dv">24</span>),
+                      <span class="dt">subject=</span><span class="dv">1</span>)
+my_conc<span class="op">$</span>BLOQ &lt;-<span class="st"> </span>my_conc<span class="op">$</span>conc <span class="op">==</span><span class="st"> </span><span class="dv">0</span>
+my_conc<span class="op">$</span>measured &lt;-<span class="st"> </span><span class="ot">TRUE</span>
+
+<span class="kw">ggplot</span>(my_conc,
+       <span class="kw">aes</span>(<span class="dt">x=</span>time,
+           <span class="dt">y=</span>conc,
+           <span class="dt">shape=</span>BLOQ,
+           <span class="dt">group=</span>subject)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">size=</span><span class="dv">4</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks=</span>my_conc<span class="op">$</span>time) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position=</span><span class="kw">c</span>(<span class="fl">0.8</span>, <span class="fl">0.8</span>))</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>For the purpose of illustration, NCA parameters will also be calculated for each of the AUC types below. Note that in the results, more parameters are returned than were requested. The additional parameters are the set of parameters required to calculate the requested parameters.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">conc_obj &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(my_conc, conc<span class="op">~</span>time<span class="op">|</span>subject)
+data_obj &lt;-<span class="st"> </span><span class="kw">PKNCAdata</span>(<span class="dt">data.conc=</span>conc_obj,
+                      <span class="dt">intervals=</span><span class="kw">data.frame</span>(<span class="dt">start=</span><span class="dv">0</span>,
+                                           <span class="dt">end=</span><span class="dv">24</span>,
+                                           <span class="dt">aucall=</span><span class="ot">TRUE</span>,
+                                           <span class="dt">auclast=</span><span class="ot">TRUE</span>,
+                                           <span class="dt">aucinf.pred=</span><span class="ot">TRUE</span>,
+                                           <span class="dt">aucinf.obs=</span><span class="ot">TRUE</span>))
+results_obj &lt;-<span class="st"> </span><span class="kw">pk.nca</span>(data_obj)</code></pre></div>
+<pre><code>## No dose information provided, assuming default dosing information.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">kable</span>(results_obj<span class="op">$</span>result)</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">start</th>
+<th align="right">end</th>
+<th align="right">subject</th>
+<th align="left">PPTESTCD</th>
+<th align="right">PPORRES</th>
+<th align="left">exclude</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">auclast</td>
+<td align="right">12.9965842</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">aucall</td>
+<td align="right">15.1965842</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">tmax</td>
+<td align="right">2.0000000</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">tlast</td>
+<td align="right">8.0000000</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">clast.obs</td>
+<td align="right">1.1000000</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">lambda.z</td>
+<td align="right">0.1075592</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">r.squared</td>
+<td align="right">0.7580245</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">adj.r.squared</td>
+<td align="right">0.6370368</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">lambda.z.time.first</td>
+<td align="right">3.0000000</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">lambda.z.n.points</td>
+<td align="right">4.0000000</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">clast.pred</td>
+<td align="right">1.0216136</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">half.life</td>
+<td align="right">6.4443313</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">span.ratio</td>
+<td align="right">0.7758757</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">aucinf.obs</td>
+<td align="right">23.2235095</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">24</td>
+<td align="right">1</td>
+<td align="left">aucinf.pred</td>
+<td align="right">22.4947355</td>
+<td align="left">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="auc-to-the-last-value-above-the-limit-of-quantification-auclast" class="section level1">
+<h1>AUC to the Last Value Above the Limit of Quantification (AUC<sub>last</sub>)</h1>
+<p>AUC<sub>0-last</sub> calculates the AUC from time 0 to the last value above the limit of quantification, <code>tlast</code> (within PKNCA, this is the last value above 0). In the figure below, AUC<sub>0-last</sub> integrate the shaded region. Integration after <code>tlast</code> is 0.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tlast &lt;-<span class="st"> </span><span class="kw">pk.calc.tlast</span>(<span class="dt">conc=</span>my_conc<span class="op">$</span>conc,
+                       <span class="dt">time=</span>my_conc<span class="op">$</span>time)
+tlast</code></pre></div>
+<pre><code>## [1] 8</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_conc<span class="op">$</span>include_auclast &lt;-<span class="st"> </span>my_conc<span class="op">$</span>time <span class="op">&lt;=</span><span class="st"> </span>tlast
+
+<span class="kw">ggplot</span>(my_conc,
+       <span class="kw">aes</span>(<span class="dt">x=</span>time,
+           <span class="dt">y=</span>conc,
+           <span class="dt">shape=</span>BLOQ,
+           <span class="dt">group=</span>subject)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="dt">data=</span>my_conc[my_conc<span class="op">$</span>include_auclast,],
+              <span class="kw">aes</span>(<span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>conc),
+              <span class="dt">fill=</span><span class="st">&quot;lightblue&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">size=</span><span class="dv">4</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks=</span>my_conc<span class="op">$</span>time) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position=</span><span class="kw">c</span>(<span class="fl">0.8</span>, <span class="fl">0.8</span>))</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="aucall" class="section level1">
+<h1>AUC<sub>all</sub></h1>
+<p>AUC<sub>all</sub> starts with AUC<sub>0-last</sub> and then integrates from <code>tlast</code> to the first point after <code>tlast</code> with a linear interpolation to zero. From the second point after <code>tlast</code> to <span class="math inline">\(\infty\)</span> is considered zero.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">first_after_tlast &lt;-<span class="st"> </span>my_conc<span class="op">$</span>time[my_conc<span class="op">$</span>time <span class="op">&gt;</span><span class="st"> </span>tlast][<span class="dv">1</span>]
+first_after_tlast</code></pre></div>
+<pre><code>## [1] 12</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_conc<span class="op">$</span>include_aucall &lt;-<span class="st"> </span>my_conc<span class="op">$</span>time <span class="op">&lt;=</span><span class="st"> </span>first_after_tlast
+
+<span class="kw">ggplot</span>(my_conc,
+       <span class="kw">aes</span>(<span class="dt">x=</span>time,
+           <span class="dt">y=</span>conc,
+           <span class="dt">shape=</span>BLOQ,
+           <span class="dt">group=</span>subject)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="dt">data=</span>my_conc[my_conc<span class="op">$</span>include_aucall,],
+              <span class="kw">aes</span>(<span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>conc),
+              <span class="dt">fill=</span><span class="st">&quot;lightblue&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">size=</span><span class="dv">4</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks=</span>my_conc<span class="op">$</span>time) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position=</span><span class="kw">c</span>(<span class="fl">0.8</span>, <span class="fl">0.8</span>))</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="auc-to-infinity-aucinfty" class="section level1">
+<h1>AUC to Infinity (AUC<sub><span class="math inline">\(\infty\)</span></sub>)</h1>
+<p>AUC<sub>0-<span class="math inline">\(\infty\)</span></sub> is commonly used for single-dose data. It calculates the AUC<sub>0-last</sub> and then extrapolates to <span class="math inline">\(\infty\)</span> using the estimated half-life. Two starting points are used to estimate from <code>tlast</code> to <span class="math inline">\(\infty\)</span>, the observed or half-life predicted concentration at <code>tlast</code> (<code>clast.obs</code> and <code>clast.pred</code>).</p>
+<p>The two figures below illustrate the integration with AUC<sub>0-<span class="math inline">\(\infty\)</span>,obs</sub> and AUC~0-<span class="math inline">\(\infty\)</span>,pred$. The difference between the tow figures is most evident at time=8 where there is a discontinuity in integration at <code>tlast</code> due to using <code>clast.pred</code> after that point and <code>clast.obs</code> before that point. (To illustrate the integration differences, BLOQ indicator shapes have been removed. BLOQ is handled identically to previous figures.)</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Add one row to illustrate extrapolation beyond observed data</span>
+my_conc &lt;-
+<span class="st">  </span><span class="kw">rbind</span>(my_conc,
+        <span class="kw">data.frame</span>(<span class="dt">conc=</span><span class="ot">NA</span>,
+                   <span class="dt">time=</span><span class="dv">36</span>,
+                   <span class="dt">subject=</span><span class="dv">1</span>,
+                   <span class="dt">BLOQ=</span><span class="ot">NA</span>,
+                   <span class="dt">measured=</span><span class="ot">FALSE</span>,
+                   <span class="dt">include_auclast=</span><span class="ot">FALSE</span>,
+                   <span class="dt">include_aucall=</span><span class="ot">FALSE</span>))
+<span class="co"># Extrapolate concentrations for aucinf.obs</span>
+my_conc<span class="op">$</span>conc_aucinf.obs &lt;-<span class="st"> </span>my_conc<span class="op">$</span>conc
+my_conc<span class="op">$</span>conc_aucinf.obs[my_conc<span class="op">$</span>BLOQ <span class="op">|</span><span class="st"> </span><span class="kw">is.na</span>(my_conc<span class="op">$</span>BLOQ)] &lt;-
+<span class="st">  </span><span class="kw">interp.extrap.conc</span>(<span class="dt">conc=</span>my_conc<span class="op">$</span>conc,
+                     <span class="dt">time=</span>my_conc<span class="op">$</span>time,
+                     <span class="dt">time.out=</span>my_conc<span class="op">$</span>time[my_conc<span class="op">$</span>BLOQ <span class="op">|</span><span class="st"> </span><span class="kw">is.na</span>(my_conc<span class="op">$</span>BLOQ)],
+                     <span class="dt">lambda.z=</span>results_obj<span class="op">$</span>result<span class="op">$</span>PPORRES[results_obj<span class="op">$</span>result<span class="op">$</span>PPTESTCD <span class="op">%in%</span><span class="st"> &quot;lambda.z&quot;</span>])
+
+<span class="co"># Extrapolate concentrations for aucinf.pred</span>
+my_conc<span class="op">$</span>conc_aucinf.pred &lt;-<span class="st"> </span>my_conc<span class="op">$</span>conc
+my_conc<span class="op">$</span>conc_aucinf.pred[my_conc<span class="op">$</span>BLOQ <span class="op">|</span><span class="st"> </span><span class="kw">is.na</span>(my_conc<span class="op">$</span>BLOQ)] &lt;-
+<span class="st">  </span><span class="kw">interp.extrap.conc</span>(<span class="dt">conc=</span>my_conc<span class="op">$</span>conc,
+                     <span class="dt">time=</span>my_conc<span class="op">$</span>time,
+                     <span class="dt">time.out=</span>my_conc<span class="op">$</span>time[my_conc<span class="op">$</span>BLOQ <span class="op">|</span><span class="st"> </span><span class="kw">is.na</span>(my_conc<span class="op">$</span>BLOQ)],
+                     <span class="dt">lambda.z=</span>results_obj<span class="op">$</span>result<span class="op">$</span>PPORRES[results_obj<span class="op">$</span>result<span class="op">$</span>PPTESTCD <span class="op">%in%</span><span class="st"> &quot;lambda.z&quot;</span>],
+                     <span class="dt">clast=</span>results_obj<span class="op">$</span>result<span class="op">$</span>PPORRES[results_obj<span class="op">$</span>result<span class="op">$</span>PPTESTCD <span class="op">%in%</span><span class="st"> &quot;clast.pred&quot;</span>])
+my_conc<span class="op">$</span>conc_aucinf.pred[my_conc<span class="op">$</span>time <span class="op">==</span><span class="st"> </span>tlast] &lt;-
+<span class="st">  </span>results_obj<span class="op">$</span>result<span class="op">$</span>PPORRES[results_obj<span class="op">$</span>result<span class="op">$</span>PPTESTCD <span class="op">%in%</span><span class="st"> &quot;clast.pred&quot;</span>]
+
+<span class="kw">ggplot</span>(my_conc[<span class="op">!</span><span class="kw">is.na</span>(my_conc<span class="op">$</span>conc),],
+       <span class="kw">aes</span>(<span class="dt">x=</span>time,
+           <span class="dt">y=</span>conc,
+           <span class="co">#shape=BLOQ,</span>
+           <span class="dt">group=</span>subject)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="dt">data=</span>my_conc,
+              <span class="kw">aes</span>(<span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>conc_aucinf.obs),
+              <span class="dt">fill=</span><span class="st">&quot;lightblue&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span>
+<span class="st">  </span><span class="co">#geom_point(size=2) +</span>
+<span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks=</span>my_conc<span class="op">$</span>time) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position=</span><span class="kw">c</span>(<span class="fl">0.8</span>, <span class="fl">0.8</span>)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">labs</span>(<span class="dt">title=</span><span class="st">&quot;Extrapolation using AUCinf,obs&quot;</span>)</code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkAAAAEgCAMAAABrWDzDAAAA4VBMVEUAAAAAACsAAFUAKysAK1UAK4AAVYAAVaorAAArACsrAFUrKwArKysrK1UrK4ArVVUrVYArVaorgKorgNRVAABVKwBVKytVVStVVVVVVYBVgKpVgNRVqtRVqv+AKwCAKyuAVQCAVSuAVVWAgFWAgKqAqoCAqqqAqtSAqv+A1NSA1P+qVQCqVSuqVYCqgFWqqoCqqqqqqtSq1Kqq1NSq1P+q/6qq/9Sq//+t2ObUgCvUgFXUqlXUqoDU1IDU1KrU1NTU1P/U/6rU/9TU////qlX/1ID/1Kr/1NT//6r//9T///+8/8/sAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAPRklEQVR4nO2df2PjtBnHlaNdMw7GHcnBxtGO2wZs9W1s0HE1d9sx6pQk7/8FzZIsW/JPWbJsSf5+/mjTRHKU5/lEkmUlJWcALCBLNwCEDQQCVkAgYAUEAlZAIGAFBAJWQCBgBQQCVkAgYAUEAlZAIGBFIAKlRHD5oDxw+vubMcc53bQdoHmv8eHayAh58kYuftyTK/b326f5K/r4rr1hr7eEPG8cLCmO5QuBC/T4Ylw4G3liB3AsUJI3+1ouXgh0fFG8pl3bkbLikcbBIJABXQKNDWcjTzPkI9eFFD2OIlD+l+C6pVpKNrctd0MgI1IpbIct4b3Gkzf0vZ3/ymP99Qvy5O78jr6nP749szh//xkhF3esyrv85gdfPJQpLMvxA/xYJLYsRrP3t9d59VvxpDxveeZpn/BTPvJsnt2JwymFT+yWnOaMbD7nf6oC5W+Ki2/zPvCGvisaR2ItKxWqWla8sGfshZUNWY4ABaKR39Ef1+dSIN43Zfz9TMOekOq26L/yDPE8VeUUgapiZY9XZlAWqHiwHPvkwrxb2TyV2puQy/9smXiKQOwdQB8//fH5z80jKQJJLRMvjNatGrIcwQgk9fZ5sDdfb4twFoG8vDu/z+//zQPtoHYsznmP9JaNHYdtkZwdz5NarvRAKsZ6h7viNkMSiKb/gR56V6W9LJy7efVwSqSs0jqFOYpAYibNaR5JGsLkliXstbIXJjVkOUIUiAa0eHeWAolZxH//8ZRJk/C72OPFeEJ/lXOgqlwpkFSsOGL+PCLHkkD5vRc/8HvLtJeFy3KlQBltaSq6p0ogLrCgeaS03v2JF1O+cKkhyxGkQKwf3/EbXCAe69MrXqZMJHtEpK26XS8n+qWyWHFEqZOQBOKjlDSlkgqLg0hzoKTo3XZaAlVPWwmktEx9YaIhyxGMQMpAn22L6CoC0YBe/OW/e0mgfES5FhrQ20IVtRy7Vy7WJRBP+iM//d78tZl2UaMSiPWW1QRmaAhrE0hpWSLJVDVkOYIUiL31pHd6EWue3uN+qAdqlNPugUSv8fjnp0Q5d7rt7IGUvrO4m41R0iQ6P48y6YGkhjgL/CBBCpQn5SkfwxSBMjGD2PXPgdRyHXOgmkD8jqyasJ6+KqdUcuH6HEha7OFn7nQETcqJevM0/rYpUG0OVL2wqiGOwq5BMAIJ8mDRk5L/7Vl8U+knP1mh+bjqPwuTy7GqbWdhDYHyu2mdHbXo0wc6fLSlvX4WJubhvL/JxKuozviLzqlDoGbLpBcmNWTufFQEKBA9i79lmeLr/Wwh8fYsZeRKXS6prwPJ5dgB2taBagKVU5k8h69LCZppr68DlSeIaTGGcdg1rvJSxvPOOdCp0TL5hVUNWY4ABcrE6EXfuHTd9k4+C7v4Ni2GrR9fiQVbvpD78izyJJVjB/hBXol+yZ+vJtD5kGf72fd8Jbq8BtpMOzvg7+7ECFNOdIpehFf94Et+zOJi6g/nIYGklikr0dXF2MUIRKDRLHzJKJlsWEmuhsssCQSa+nnpgCStQFpy2LZdaPUICDQtYpo80bzk9OrlJMdxBwSamMfPtotfIZ+TWAUCMwGBgBUQCFgBgYAVEAhYAYGAFWYCQTtQAIGAFRAIWAGBgBWaKqTq1R0IBAr0VEjpbjrJIAgECrRUOO7ZZ1KqHQoQCBToqwCBQAv6KqQYwkATXRWqD7Sw/VLOngcExpghrNrmC4FAwYjESqdho3Uw6LNAEIxIrLS/e7xA9zAoTrTyytXJql3GY20g9xAoUvTymrAPdVbfRgKBQIFmXssvGh1Vqyx+D4FiZZaLqVQgGBQncwjE/IFAcQKBgBUQCFgxg0DcHwgUJ/MJBIOixL1Awh8IFCUQCFjhXKDSHwgUJTMKBINixLVAkj8QKEYgELDCsUCyPxAoRiAQsGJOgWBQhLgVSPUHAkUIBAJWOBWo5g8EipBZBYJB8eFSoIY/ECg+IBCwwqFATX8gUHxAIGDFvALBoOiAQMAKCASsgEDACggErHAnUJs/MCg6IBCwAgIBKyAQsGJugWBQZEAgYAUEAlZAIGAFBAJWzC4QDIoLCASscCZQlz8QKC4gELBifoFgUFRAIGAFBAJWQCBgBQQCViwgEAyKCb1knm5I+V+bNWtBoHWglczTzeb2nJKrMbUg0DrQSib/n6npqP+ZCoHWwYhkjvu33z0CwaCIGJHLZEwP1OcPBIoI/VxmxSyaUIaPC4HWgXYuM2kOjR4ICHRzmcln8bYCwaB40ExlqvgDgYBAL5UpuR5Zq18gGBQNmutAO/UOCAQKtDKZsjMvMmYdCAKtBFcXUwcEgkGxAIGAFd2JPP1sUqssMSAQDIqEtjyeXtOLFsf95cOYWmqBIX8gUCS05TElVJ3Ta3ntebiWWmBQIBgUBy1pPO756dZxX109Ha5VKwCBVkKrQFwcCASGaUnj6YavO2ekcxI0hUAwKAraspgR8sk3331OatcvBmqpBSDQSmjN4rundOH54ttxtZQCGgLBoBjoSOLp/fvOc/juWlIBCLQSHK1EQ6C10J7EX98zOteipxEIBkVAWw6PL/jVd+L0NB4CRUFbDhOy+eKflH+Znsbr+QODIqBnJXpcLfVxCLQWelaix9VSH9cUCAYFT+tK9Gw9EAQKnrYMHraXd+NrKY9DoLXQOoQR27MwbYFgUOi0DWF/+n3BH1yfhUGg4HGzEq0vEAwKHAgErGjP37vPP/rok+6L8VMKBIPCpnVT/Q0hmy3p3k82qUAwKGjaN9Vf5Kfxjy/IruXBzlrK4xBoLfQsJB62pltaR/kDg4LGyab6kQLBoIDpuZh62M4lEAwKl/btHGzykxp/sBACrYf2a2Hk42+++4x0X1OdWiAYFCytmXtkWxIvuq+oTi4QDAoVJ5/KMBAIBgWKk0sZEGg9OPl+IBOBYFCYOPl+ICOBYFCQOPl+IDOBYFCIuPh+IEN/IFCIuLiUYSoQDAoQF98PZCzQvdY/AgI+4eL7gcwFEhJBo2Bw8f1AdgLJGsEj73GxEj2FQIpH5i8PuMbFSvSEAskawSMfCUIgxSOjBgNXhCRQpZFRo4ELwhOISXRv1GwwPdoCHT6UVhWXFig3CAr5ga5A6rJ0b60Z/Llnz2HxssFUaAqUqV/VsbhA98WT2Lx0MAV6AmVkl/klkDAICi2M9hyoFGjwXHoegUqDoNCijBdosNZMAlUGQaEFiUIgOLQcAQukGgSFliFkgWoGQaElCFqgukFQaH7CFqhhEByam+gEgkLz4uBi6pwCtRoEhWZkeoFm9afDICg0G8EL1GEQHJqJ8AXqNAgKzUHMAkGhGYhAoD6DoJBrYhCo1yA45JYoBBowCAo5JA6BhgyCQs5YiUBQyBWRCKRhEMMsSKCbWATSNYhiFinQyuQCLeTPKIMohvECNeIRaKxBFMOggYp1C8QwjBxgRCSQsUEUw/CBmASyMohhGMQ1E5VA9gZRDCO5UuISaBqDKIbhXB8QqAfDmK6KyASa2CCKYWDXQmwCOTCIYhjdFRCdQI4MYhjGOGqmFmhxf5waRDGNdKRAICNMwx0fEQo0i0EU05hHRYwCzWYQxTTwsRClQLMaRDGNfgTEKdDsBjFMcxA0EGhiTBMRKpEKtKBBFNNsBEisAi1sEMU0JWERrUAeGEQxzUswxCuQJwZRTJMTAhBoNkxT5DcTC+RV0rxqTIFxonwlZoG8NIhinC0PiVogbw2iGKfML+IWyGuDKMZ58wYItDzGyfOByAUKw6AGxumcn9gFCtSgOsb5dU70AkViUB3jhE9N/AJFalADYwXsgEDRYuzENCqY1fIyWV42agGMJTFSQSUjZHM7XMvTVHnarOWxtadHBZUstyeTDApMIBikiyOBTje7/GdyFaxAMMiUaQQ6bK/zn2n1Pwsh0FqYSKDf3p6Vf3oZnEAwyJBpBOLTn2ISRCg6tfyC+MvSobFivEDatcAamHYIA6tj2kk0WB3TnsaD1THtQiJYHZoqpHqXMsDqmP7fPYFVAYGAFYYCgZVjKVCnWOP/6C6l+TSaeNxpety04bZBoOXxuGkQyKrOTHjctLkFAqsDAgErIBCwAgIBKyAQsAICASsmFKj22bHDh2L70OmGELIT99euyyaXD/zGcU9XOKstI13k9cn1qIbxlqit8AGlRWUcPKFM02Hbm5XpBKpt+Tjuxf6z001+byoaQbelScUyIgLHtz0OktKnGWUQb4naCh9QWlTFwQ/KNGV5u4777rBNJlBt01neHQmBlP2Mx/2OlhXF8m5HBE7aMdv7NFdnZW/bIEVLGrsqF0dukRQHLyjTxNPaE7bJBFITlJFdTQh5P1olUHr5lQhcqiXFaIHUlsit8APeIikO/kBjPTguTCcQeyY5V6pAifRnKtKYVyrH/uQjrTnK+CFMbkniUQ/EYS2S4+APLNRP/r3vTctkAjU++qMKlFWNyMoG0f5RBO64pzeSYYNqc3WdppUtyfyaRZ+LFslx8AaeppSO/9WI0WQmgTJl9nq64dFK819q4IYnQvQde9iO8qA8aObTHJrBW9SMgxfQNPHBoict8wxh9Xc+94xVUQPHZ1J9T2MwF86qidmIWnPAW9QSBz/I08Qj3ZMWR5PosyJQWs9cUbjY3SY1bnDO1ujoNCha0mjF4hQtaomDH+Rp4rHrSYur03hZoFQKDVdHntYW77zGA+1oFlPgpVPvEqS0yK8eqAzzcT8Qb2cLidWTqjMWGiguW/U3v8HOzwc7CdM50Mg6M9CMi0eUaUpr+aoz4aWM2jWKUqCihxaPJWpnXQUu0evFk9FXJFhLaq3wALVFnglUZSPrjzcupgIrIBCwAgIBKyAQsAICASsgELACAgErIBCwAgIBKyCQFr9We1CAAgTS4acP30CgdiCQDv7thPUGCKQDBOoEAg3DPgB4xYaw5PKXV2Tz8nx6RchzOqI95jc2X6x4bINAwygCfUW3YHxJ76GbHOjHNrU+TxstEEiH5EkxiU7I5d353Zb+fEvY358+nE+vvdvsOB8QSIdKILr963TDPyt9+XDYsr6n72MvsQOBdKgEEuoIgYr98Os9w4dAOgwKtN6zNAikQ7dAvu3Unx0IpAOd+rQJdLrZvMxvvt1iDgT6SMvTeFUgcRrv0Wc95gYC6XB8QS5/aROILSSSZ3dLN3A5IBCwAgIBKyAQsAICASsgELACAgErIBCwAgIBKyAQsAICASsgELACAgErIBCw4v/XQTNr3hkrNAAAAABJRU5ErkJggg==" /><!-- --></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(my_conc[<span class="op">!</span><span class="kw">is.na</span>(my_conc<span class="op">$</span>conc),],
+       <span class="kw">aes</span>(<span class="dt">x=</span>time,
+           <span class="dt">y=</span>conc,
+           <span class="co">#shape=BLOQ,</span>
+           <span class="dt">group=</span>subject)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_ribbon</span>(
+    <span class="dt">data=</span><span class="kw">arrange</span>(
+      <span class="kw">bind_rows</span>(<span class="kw">mutate</span>(my_conc,
+                       <span class="dt">before=</span><span class="ot">FALSE</span>),
+                <span class="kw">mutate</span>(<span class="kw">filter</span>(my_conc, time <span class="op">==</span><span class="st"> </span>tlast),
+                       <span class="dt">conc_aucinf.pred=</span>conc,
+                       <span class="dt">before=</span><span class="ot">TRUE</span>)),
+      time, <span class="kw">desc</span>(before)),
+    <span class="kw">aes</span>(<span class="dt">ymin=</span><span class="dv">0</span>,
+        <span class="dt">ymax=</span>conc_aucinf.pred),
+    <span class="dt">fill=</span><span class="st">&quot;lightblue&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span>
+<span class="st">  </span><span class="co">#geom_point(size=2) +</span>
+<span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks=</span>my_conc<span class="op">$</span>time) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position=</span><span class="kw">c</span>(<span class="fl">0.8</span>, <span class="fl">0.8</span>)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">labs</span>(<span class="dt">title=</span><span class="st">&quot;Extrapolation using AUCinf,pred&quot;</span>)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="partial-aucs" class="section level1">
+<h1>Partial AUCs</h1>
+<p>Partial AUCs integrate part of the area within a time range of interest. Partial AUCs are often of interest to assess bioequivalence with more detail than AUC<sub>0-<span class="math inline">\(\infty\)</span></sub> or AUC<sub>0-last</sub> may indicate. Within PKNCA, partial AUCs are treated like AUC<sub>last</sub> with start and end times separately selected. (In a future version of PKNCA, they will be more simply calculated using an AUC<sub>interval</sub>.)</p>
+<p>When the starting and ending times are observed within the data, partial AUCs can be calculated using the parameter <code>auclast</code> as illustrated below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Interpolation not required</span>
+data_obs_obj &lt;-<span class="st"> </span><span class="kw">PKNCAdata</span>(conc_obj, <span class="dt">intervals=</span><span class="kw">data.frame</span>(<span class="dt">start=</span><span class="dv">0</span>, <span class="dt">end=</span><span class="dv">2</span>, <span class="dt">auclast=</span><span class="ot">TRUE</span>))
+results_obs_obj &lt;-<span class="st"> </span><span class="kw">pk.nca</span>(data_obs_obj)</code></pre></div>
+<pre><code>## No dose information provided, assuming default dosing information.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">kable</span>(results_obs_obj<span class="op">$</span>result)</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">start</th>
+<th align="right">end</th>
+<th align="right">subject</th>
+<th align="left">PPTESTCD</th>
+<th align="right">PPORRES</th>
+<th align="left">exclude</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="left">auclast</td>
+<td align="right">4</td>
+<td align="left">NA</td>
+</tr>
+</tbody>
+</table>
+<p>When the starting and ending times are not observed within the data or when samples are below the limit of quantification, concentrations must be interpolated and added to the dataset before calculation as illustrated below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Interpolation required</span>
+my_conc_interp &lt;-
+<span class="st">  </span><span class="kw">arrange</span>(
+    <span class="kw">bind_rows</span>(
+      my_conc,
+      <span class="kw">data.frame</span>(<span class="dt">conc=</span><span class="kw">interp.extrap.conc</span>(<span class="dt">conc=</span>my_conc<span class="op">$</span>conc, <span class="dt">time=</span>my_conc<span class="op">$</span>time, <span class="dt">time.out=</span><span class="fl">1.5</span>),
+                 <span class="dt">time=</span><span class="fl">1.5</span>,
+                 <span class="dt">subject=</span><span class="dv">1</span>)),
+    time)
+<span class="kw">kable</span>(my_conc_interp)</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">conc</th>
+<th align="right">time</th>
+<th align="right">subject</th>
+<th align="left">BLOQ</th>
+<th align="left">measured</th>
+<th align="left">include_auclast</th>
+<th align="left">include_aucall</th>
+<th align="right">conc_aucinf.obs</th>
+<th align="right">conc_aucinf.pred</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.00</td>
+<td align="right">0.0</td>
+<td align="right">1</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="right">2.50</td>
+<td align="right">1.0</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="right">2.5000000</td>
+<td align="right">2.5000000</td>
+</tr>
+<tr class="odd">
+<td align="right">2.75</td>
+<td align="right">1.5</td>
+<td align="right">1</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="right">3.00</td>
+<td align="right">2.0</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="right">3.0000000</td>
+<td align="right">3.0000000</td>
+</tr>
+<tr class="odd">
+<td align="right">2.00</td>
+<td align="right">3.0</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="right">2.0000000</td>
+<td align="right">2.0000000</td>
+</tr>
+<tr class="even">
+<td align="right">1.50</td>
+<td align="right">4.0</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="right">1.5000000</td>
+<td align="right">1.5000000</td>
+</tr>
+<tr class="odd">
+<td align="right">1.20</td>
+<td align="right">5.0</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="right">1.2000000</td>
+<td align="right">1.2000000</td>
+</tr>
+<tr class="even">
+<td align="right">1.10</td>
+<td align="right">8.0</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="right">1.1000000</td>
+<td align="right">1.0216136</td>
+</tr>
+<tr class="odd">
+<td align="right">0.00</td>
+<td align="right">12.0</td>
+<td align="right">1</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">0.7153906</td>
+<td align="right">0.6644116</td>
+</tr>
+<tr class="even">
+<td align="right">0.00</td>
+<td align="right">24.0</td>
+<td align="right">1</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0.1967862</td>
+<td align="right">0.1827632</td>
+</tr>
+<tr class="odd">
+<td align="right">NA</td>
+<td align="right">36.0</td>
+<td align="right">1</td>
+<td align="left">NA</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0.0541310</td>
+<td align="right">0.0502736</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">conc_interp_obj &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(my_conc_interp, conc<span class="op">~</span>time<span class="op">|</span>subject)
+data_interp_obj &lt;-<span class="st"> </span><span class="kw">PKNCAdata</span>(conc_interp_obj, <span class="dt">intervals=</span><span class="kw">data.frame</span>(<span class="dt">start=</span><span class="dv">0</span>, <span class="dt">end=</span><span class="fl">1.5</span>, <span class="dt">auclast=</span><span class="ot">TRUE</span>))
+results_interp &lt;-<span class="st"> </span><span class="kw">pk.nca</span>(data_interp_obj)</code></pre></div>
+<pre><code>## No dose information provided, assuming default dosing information.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_interp<span class="op">$</span>result</code></pre></div>
+<pre><code>##   start end subject PPTESTCD PPORRES exclude
+## 1     0 1.5       1  auclast  2.5625    &lt;NA&gt;</code></pre>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

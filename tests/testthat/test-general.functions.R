@@ -20,6 +20,8 @@ test_that("check.conc.time", {
                  regexp="Negative concentrations found")
   expect_warning(check.conc.time(conc=c(NA, -1, 1)),
                  regexp="Negative concentrations found")
+  expect_warning(check.conc.time(conc=NA),
+                 regexp="All concentration data is missing")
   expect_error(check.conc.time(time=NA),
                regexp="Time may not be NA")
   expect_error(check.conc.time(time=c(0, 0)),
@@ -29,7 +31,15 @@ test_that("check.conc.time", {
   expect_error(check.conc.time(conc=1, time=1:2),
                regexp="Conc and time must be the same length")
   expect_error(check.conc.time(conc=1:2, time=2),
-               regexp="Conc and time must be the same length")  
+               regexp="Conc and time must be the same length")
+  expect_error(check.conc.time(conc="A"),
+               regexp="Concentration data must be numeric and not a factor")
+  expect_error(check.conc.time(conc=factor("A")),
+               regexp="Concentration data must be numeric and not a factor")
+  expect_error(check.conc.time(time="A"),
+               regexp="Time data must be numeric and not a factor")
+  expect_error(check.conc.time(time=factor("A")),
+               regexp="Time data must be numeric and not a factor")
 })
 
 context("Rounding to string values")
@@ -91,4 +101,17 @@ test_that("Significance", {
   ## All zeros
   expect_equal(signifString(0, digits=3), "0.000")
   expect_equal(signifString(c(0, NA), digits=3), c("0.000", "NA"))
+  
+  # Data Frames
+  expect_equal(signifString(data.frame(A=c(0, 1.111111),
+                                       B=factor(LETTERS[1:2]),
+                                       C=LETTERS[1:2],
+                                       stringsAsFactors=FALSE),
+                            digits=3),
+               data.frame(A=c("0.000", "1.11"),
+                          B=factor(LETTERS[1:2]),
+                          C=LETTERS[1:2],
+                          stringsAsFactors=FALSE),
+               check.attributes=FALSE,
+               info="Data frame significance is calculated correctly")
 })

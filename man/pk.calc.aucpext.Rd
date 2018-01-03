@@ -2,35 +2,22 @@
 % Please edit documentation in R/pk.calc.simple.R
 \name{pk.calc.aucpext}
 \alias{pk.calc.aucpext}
-\alias{pk.calc.aucpext.obs}
-\alias{pk.calc.aucpext.pred}
 \title{Calculate the AUC percent extrapolated}
 \usage{
 pk.calc.aucpext(auclast, aucinf)
-
-pk.calc.aucpext.obs(auclast, aucinf.obs)
-
-pk.calc.aucpext.pred(auclast, aucinf.pred)
 }
 \arguments{
-\item{auclast}{the area under the curve from time 0 to the last measurement
-above the limit of quantification}
+\item{auclast}{the area under the curve from time 0 to the last 
+measurement above the limit of quantification}
 
-\item{aucinf, aucinf.obs, aucinf.pred}{the area under the curve from time 0 to
-infinity}
+\item{aucinf}{the area under the curve from time 0 to infinity}
 }
 \value{
-the numeric value of the AUC percent extrapolated
+The numeric value of the AUC percent extrapolated or 
+  \code{NA_real_} if andy of the following are true 
+  \code{is.na(aucinf)}, \code{is.na(auclast)}, \code{aucinf <= 0},
+  or \code{auclast <= 0}.
 }
 \description{
 Calculate the AUC percent extrapolated
 }
-\section{Functions}{
-\itemize{
-\item \code{pk.calc.aucpext.obs}: Compute the percent extrapolated AUCinf from the 
-observed Clast
-
-\item \code{pk.calc.aucpext.pred}: Compute the percent extrapolated AUCinf from the 
-observed Clast
-}}
-
