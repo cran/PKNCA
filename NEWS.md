@@ -4,6 +4,16 @@ will continue until then.  These will be especially noticable around
 the inclusion of IV NCA parameters and additional specifications of
 the dosing including dose amount and route.
 
+# PKNCA 0.8.5
+
+* Cleaned AUCint names
+* Added dose-count within interval (to warn of multiple doses within an
+  interval)
+* Various documentation updates
+* signifString and roundString now by default use scientific notation
+  for values >=1e6 and <=1e-6
+* Fix bug in option handling within `pk.nca` (Fix #68)
+
 # PKNCA 0.8.4
 
 * Added AUCint flavors

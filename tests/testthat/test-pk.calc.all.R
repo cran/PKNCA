@@ -192,8 +192,8 @@ test_that("Calculations when no dose info is given", {
   myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
   mydata <- PKNCAdata(myconc, intervals=data.frame(start=0, end=24, cmax=TRUE, cl.last=TRUE))
   expect_message(myresult <- pk.nca(mydata),
-                 regexp="No dose information provided, assuming default dosing information.",
-                 info="Default dosing information is assumed if no dosing information is given.")
+                 regexp="No dose information provided, calculations requiring dose will return NA.",
+                 info="Dosing information not required.")
   expect_equal(myresult$result,
                data.frame(start=0,
                           end=24,
@@ -331,7 +331,7 @@ test_that("pk.nca can calculate values with group-level data", {
   mydata_impute <-
     PKNCAdata(myconc_impute, mydose,
               intervals=data.frame(treatment="Trt 1", start=0, end=24,
-                                   aucint.last=TRUE,
+                                   aucint.last.dose=TRUE,
                                    stringsAsFactors=FALSE))
   mydata_observe <-
     PKNCAdata(myconc_observe, mydose,
@@ -343,4 +343,61 @@ test_that("pk.nca can calculate values with group-level data", {
   expect_equal(as.data.frame(myres_impute)$PPORRES,
                as.data.frame(myres_observe)$PPORRES,
                info="Manually imputing values gives the same result as aucint")
+})
+
+test_that("Missing dose info for some subjects gives a warning, not a difficult-to-interpret error", {
+  tmpconc <- generate.conc(2, 1, 0:24)
+  tmpdose <- generate.dose(tmpconc)[1,]
+  myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
+  mydose <- PKNCAdose(tmpdose, formula=dose~time|treatment+ID)
+  mydata <-  PKNCAdata(myconc, mydose,
+                       intervals=data.frame(start=0, end=24,
+                                            cl.last=TRUE))
+  expect_warning(myresult <- pk.nca(mydata),
+                 regexp="The following intervals are missing dosing data:",
+                 fixed=TRUE,
+                 info="Warning is issued when dose data are missing for an interval but provided for some data.")
+  expect_true(all(is.na(myresult$result[["PPORRES"]]) == c(FALSE, FALSE, FALSE, TRUE)) &
+                all(myresult$result[["PPTESTCD"]] == rep(c("auclast", "cl.last"), 2)),
+              info="cl.last is not calculated when dose information is missing, but only for the subject where dose info is missing.")
+})
+
+# Fix issue #68
+test_that("Ensure that options are respected during pk.nca call", {
+  doses <- data.frame(ID=1:2, Time=0, Dose=0.5)
+  
+  conc.data <- c(0, 1, 2, 1.3, 0.4, 0.35, 0.125)
+  time.data <- c(0, 1, 2, 4,   8,   24,   48)
+  concs <- merge(doses[c("ID")], data.frame(Conc=conc.data, Time=time.data))
+  
+  myconc <- PKNCA::PKNCAconc(concs, formula=Conc~Time|ID)
+  mydose <- PKNCA::PKNCAdose(doses, formula=Dose~Time|ID)
+  
+  myintervals <- data.frame(start=c(0,0,0),
+                            end=c(24,48,Inf),
+                            auclast=TRUE,
+                            aucinf.obs=TRUE,
+                            aucinf.pred=TRUE,
+                            aumclast=TRUE,
+                            aumcall=TRUE,
+                            half.life=TRUE)
+  
+  linear.mydata <- PKNCA::PKNCAdata(myconc, mydose, intervals = myintervals,
+                                    options = list(auc.method = "linear"))
+  linear.results <- PKNCA::pk.nca(linear.mydata)
+  
+  linlog.mydata <- PKNCA::PKNCAdata(myconc, mydose, intervals = myintervals,
+                                    options = list(auc.method = "lin up/log down"))
+  linlog.results <- PKNCA::pk.nca(linlog.mydata)
+  expect_true(all.equal(linear.results$result$PPORRES[linear.results$result$PPTESTCD %in% "aucinf.obs" &
+                                                         linear.results$result$ID %in% 1 &
+                                                         linear.results$result$end %in% Inf],
+                         24.54319,
+                         tolerance=0.0001) &
+              all.equal(linlog.results$result$PPORRES[linlog.results$result$PPTESTCD %in% "aucinf.obs" &
+                                                        linlog.results$result$ID %in% 1 &
+                                                        linlog.results$result$end %in% Inf],
+                        23.68317,
+                        tolerance=0.0001),
+              info="linear and loglinear effects are calculated differently.")
 })

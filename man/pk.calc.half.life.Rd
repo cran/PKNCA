@@ -5,13 +5,9 @@
 \title{Compute the half-life and associated parameters}
 \usage{
 pk.calc.half.life(conc, time, tmax, tlast, manually.selected.points = FALSE,
-  options = list(), min.hl.points = PKNCA.choose.option("min.hl.points",
-  options), adj.r.squared.factor = PKNCA.choose.option("adj.r.squared.factor",
-  options), conc.blq = PKNCA.choose.option("conc.blq", options),
-  conc.na = PKNCA.choose.option("conc.na", options),
-  first.tmax = PKNCA.choose.option("first.tmax", options),
-  allow.tmax.in.half.life = PKNCA.choose.option("allow.tmax.in.half.life",
-  options), check = TRUE)
+  options = list(), min.hl.points = NULL, adj.r.squared.factor = NULL,
+  conc.blq = NULL, conc.na = NULL, first.tmax = NULL,
+  allow.tmax.in.half.life = NULL, check = TRUE)
 }
 \arguments{
 \item{conc}{Concentration measured}
@@ -73,12 +69,14 @@ A data frame with one row and columns for
  }
 }
 \description{
+Compute the half-life and associated parameters
+}
+\details{
 If \code{manually.selected.points} is \code{FALSE} (default), the
 half-life is calculated by computing the best fit line for all 
 available sets of points.  The best one is chosen by the following 
 rules in order:
-}
-\details{
+
 \itemize{
  \item{At least \code{min.hl.points} points included} 
  \item{A \code{lambda.z} > 0}

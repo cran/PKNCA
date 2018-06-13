@@ -8,6 +8,8 @@
 #' in the concentration data.
 #' @seealso \code{\link{PKNCAdata}}, \code{\link{PKNCA.options}}
 #' @export
+#' @importFrom utils capture.output
+#' @importFrom dplyr bind_rows
 pk.nca <- function(data) {
   if (nrow(data$intervals) == 0) {
     warning("No intervals given; no calculations done.")
@@ -15,7 +17,7 @@ pk.nca <- function(data) {
   } else {
     if (identical(NA, data$dose)) {
       # If no dose information is given, add NULL dose information.
-      message("No dose information provided, assuming default dosing information.")
+      message("No dose information provided, calculations requiring dose will return NA.")
       tmp.dose.data <- unique(getGroups(data$conc))
       data$dose <-
         PKNCAdose(data=tmp.dose.data,
@@ -33,7 +35,7 @@ pk.nca <- function(data) {
     }
     ## Merge the options into the default options.
     tmp.opt <- PKNCA.options()
-    tmp.opt[names(options)] <- data$options
+    tmp.opt[names(data$options)] <- data$options
     data$options <- tmp.opt
     splitdata <- split.PKNCAdata(data)
     # Calculations will only be performed when an interval is requested
@@ -43,8 +45,35 @@ pk.nca <- function(data) {
                (!is.null(x$intervals)) &&
                  (nrow(x$intervals) > 0)
              })
+    mask_has_dose <-
+      sapply(splitdata,
+             FUN=function(x) {
+               !is.null(x$dose)
+             })
+    mask_has_conc <-
+      sapply(splitdata,
+             FUN=function(x) {
+               !is.null(x$conc)
+             })
     if (any(!mask_has_interval)) {
       message(sum(!mask_has_interval), " groups have no interval calculations requested.")
+    }
+    if (any(mask_missing_dose <- !mask_has_dose & mask_has_conc & mask_has_interval)) {
+      missing_groups <- list()
+      for (current_idx in which(mask_missing_dose)) {
+        tmp_dose_data <- unique(getGroups(splitdata[[current_idx]]$conc))
+        splitdata[[current_idx]]$dose <-
+          PKNCAdose(data=tmp_dose_data,
+                    formula=as.formula(
+                      paste0(".~.|",
+                             paste(names(tmp_dose_data), collapse="+"))))
+        missing_groups <- append(missing_groups, tmp_dose_data)
+      }
+      warning("The following intervals are missing dosing data:\n",
+              paste(
+                capture.output(
+                  print(as.data.frame(dplyr::bind_rows(missing_groups)))),
+                collapse="\n"))
     }
     ## Calculate the results
     tmp.results <- list()
@@ -302,6 +331,8 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
                          "...")
       arglist <- stats::setNames(object=as.list(arglist), arglist)
       arglist[names(all.intervals[[n]]$formalsmap)] <- all.intervals[[n]]$formalsmap
+      # Drop arguments that were set to NULL by the formalsmap
+      arglist <- arglist[!sapply(arglist, is.null)]
       for (arg_formal in names(arglist)) {
         arg_mapped <- arglist[[arg_formal]]
         if (arg_mapped == "conc") {
@@ -329,7 +360,7 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
         } else if (arg_mapped == "time.group") {
           ## Realign the time to be relative to the start of the
           ## interval
-          call.args[[arg_formal]] <- time.group - interval$start[1]
+          call.args[[arg_formal]] <- time.group
         } else if (arg_mapped == "volume.group") {
           call.args[[arg_formal]] <- volume.group
         } else if (arg_mapped == "duration.conc.group") {
@@ -339,7 +370,7 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
         } else if (arg_mapped == "time.dose.group") {
           ## Realign the time to be relative to the start of the
           ## interval
-          call.args[[arg_formal]] <- time.dose.group - interval$start[1]
+          call.args[[arg_formal]] <- time.dose.group
         } else if (arg_mapped == "duration.dose.group") {
           call.args[[arg_formal]] <- duration.dose.group
         } else if (arg_mapped == "route.group") {

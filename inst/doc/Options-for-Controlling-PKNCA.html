@@ -36,7 +36,7 @@
 
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<p>PKNCA has many options that control its function. These options have effects throughout the package. The options are controlled using either the <code>PKNCA.options</code> function or by passing the <code>options</code> argument to any of the functions with that as an argument. All options supported by the current version of PKNCA (0.8.4) are listed below with their descriptions.</p>
+<p>PKNCA has many options that control its function. These options have effects throughout the package. The options are controlled using either the <code>PKNCA.options</code> function or by passing the <code>options</code> argument to any of the functions with that as an argument. All options supported by the current version of PKNCA (0.8.5) are listed below with their descriptions.</p>
 </div>
 <div id="options" class="section level1">
 <h1>Options</h1>
@@ -115,7 +115,9 @@
 <th align="left">aumclast</th>
 <th align="left">aumcall</th>
 <th align="left">aucint.last</th>
+<th align="left">aucint.last.dose</th>
 <th align="left">aucint.all</th>
+<th align="left">aucint.all.dose</th>
 <th align="left">auclast.dn</th>
 <th align="left">aucall.dn</th>
 <th align="left">aumclast.dn</th>
@@ -168,7 +170,9 @@
 <th align="left">aumcinf.obs</th>
 <th align="left">aumcinf.pred</th>
 <th align="left">aucint.inf.obs</th>
+<th align="left">aucint.inf.obs.dose</th>
 <th align="left">aucint.inf.pred</th>
+<th align="left">aucint.inf.pred.dose</th>
 <th align="left">aucinf.obs.dn</th>
 <th align="left">aucinf.pred.dn</th>
 <th align="left">aumcinf.obs.dn</th>
@@ -298,6 +302,10 @@
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="right">0</td>
@@ -312,30 +320,9 @@
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
-<td align="left">FALSE</td>
-<td align="left">TRUE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
@@ -355,7 +342,32 @@
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>

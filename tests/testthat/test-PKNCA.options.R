@@ -295,6 +295,25 @@ test_that("PKNCA.choose.option", {
                                      foo="bar",
                                      max.aucinf.pext=10)),
                10)
+  
+  ## Manage NULL and the "value" argument
+  expect_equal(PKNCA.choose.option("single.dose.aucs"),
+               PKNCA.options(name="single.dose.aucs"),
+               info="PKNCA.choose.option gives the default option when nothing else is given")
+  expect_equal(PKNCA.choose.option("single.dose.aucs",
+                                   options=list(single.dose.aucs=data.frame(start=0, end=1, cmax=TRUE))),
+               check.interval.specification(data.frame(start=0, end=1, cmax=TRUE)),
+               info="PKNCA.choose.option gives the default option when nothing else is given")
+  expect_equal(PKNCA.choose.option("single.dose.aucs",
+                                   value=data.frame(start=0, end=1, cmax=TRUE, tmax=TRUE),
+                                   options=list(single.dose.aucs=data.frame(start=0, end=1, cmax=TRUE))),
+               check.interval.specification(data.frame(start=0, end=1, cmax=TRUE, tmax=TRUE)),
+               info="PKNCA.choose.option gives the default option when nothing else is given")
+  expect_equal(PKNCA.choose.option("single.dose.aucs",
+                                   value=NULL,
+                                   options=list(single.dose.aucs=data.frame(start=0, end=1, cmax=TRUE))),
+               check.interval.specification(data.frame(start=0, end=1, cmax=TRUE)),
+               info="PKNCA.choose.option gives the default option when nothing else is given")
 })
 
 context("PKNCA summary setting")
@@ -351,6 +370,15 @@ test_that("PKNCA.set.summary input checking", {
     tmp$name <- n
     do.call(PKNCA.set.summary, tmp)
   }
+})
+
+test_that("PKNCA.set.summary exists for all paramters", {
+  missing_summaries <-
+    setdiff(setdiff(names(get.interval.cols()),
+                    names(PKNCA.set.summary())),
+            c("start", "end"))
+  expect_true(length(missing_summaries) == 0,
+              info="All parameters have summary functions")
 })
 
 test_that("PKNCA.options.describe", {
