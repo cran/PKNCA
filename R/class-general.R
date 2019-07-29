@@ -8,6 +8,7 @@ nlme::getGroups
 #' @param x The object to extract the formula from
 #' @param \dots Unused
 #' @return The vector of the dependent variable from the object.
+#' @family PKNCA object extractors
 #' @export
 getDepVar <- function(x, ...)
   UseMethod("getDepVar", x)
@@ -18,6 +19,7 @@ getDepVar <- function(x, ...)
 #' @param x The object to extract the formula from
 #' @param \dots Unused
 #' @return The vector of the independent variable from the object.
+#' @family PKNCA object extractors
 #' @export
 getIndepVar <- function(x, ...)
   UseMethod("getIndepVar", x)
@@ -54,6 +56,7 @@ getColumnValueOrNot <- function(data, value, prefix="X") {
 #' object.
 #'
 #' @param object The object to get the data name from.
+#' @family PKNCA object extractors
 #' @return A character scalar with the name of the data object (or NULL
 #'   if the method does not apply).
 getDataName <- function(object)
@@ -168,41 +171,4 @@ getAttributeColumn <- function(object, attr_name, warn_missing=c("attr", "column
   } else {
     object[[dataname]][, columns, drop=FALSE]
   }
-}
-
-#' When parsing the input for \code{PKNCAconc} and \code{PKNCAdose} 
-#' allow either formula or character inputs.
-#' 
-#' @param formula A formula with an optional left side, right side, and
-#'   groups after a pipe.
-#' @param lhs,rhs,groups Alternate definition of the formula
-#' @return A list with named elements for the "lhs", "rhs", and "groups"
-formulaOrNames <- function(formula=NA_character_,
-                           lhs=NA_character_, rhs=NA_character_, groups=c()) {
-  ret <- list()
-  if (!is.na(formula)) {
-    parsedFormula <- parseFormula(formula, require.two.sided=FALSE)
-    ret$lhs <- all.vars(parsedFormula$lhs)
-    ret$rhs <- all.vars(parsedFormula$rhs)
-    ret$groups <- all.vars(parsedFormula$groupFormula)
-  } else {
-    ret$lhs <- lhs
-    ret$rhs <- rhs
-    ret$groups <- groups
-  }
-  if (identical(ret$lhs, ".")) {
-    ret$lhs <- NA_character_
-  } else if (length(ret$lhs) != 1) {
-    stop("The left side of the formula must have only one variable")
-  } else if (is.na(ret$lhs)) {
-    ret$lhs <- NA_character_
-  }
-  if (identical(ret$rhs, ".")) {
-    ret$rhs <- NA_character_
-  } else if (length(ret$rhs) != 1) {
-    stop("The right side of the formula must have only one variable")
-  } else if (is.na(ret$rhs)) {
-    ret$rhs <- NA_character_
-  }
-  ret
 }

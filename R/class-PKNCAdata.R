@@ -28,8 +28,8 @@
 #' @details If \code{data.dose} is not given or is \code{NA}, then the 
 #'   \code{intervals} must be given.  At least one of \code{data.dose}
 #'   and \code{intervals} must be given.
-#' @seealso \code{\link{PKNCAconc}}, \code{\link{PKNCAdose}}, 
-#'   \code{\link{choose.auc.intervals}}, \code{\link{pk.nca}}
+#' @family PKNCA objects
+#' @seealso \code{\link{choose.auc.intervals}}, \code{\link{pk.nca}}
 #' @export
 PKNCAdata <- function(data.conc, data.dose, ...)
   UseMethod("PKNCAdata", data.conc)
@@ -52,6 +52,9 @@ PKNCAdata.PKNCAdose <- function(data.conc, data.dose, ...) {
 PKNCAdata.default <- function(data.conc, data.dose, ...,
                               formula.conc, formula.dose,
                               intervals, options=list()) {
+  if (length(list(...))) {
+    stop("Unknown argument provided to PKNCAdata.  All arguments other than `data.conc` and `data.dose` must be named.")
+  }
   ret <- list()
   ## Generate the conc element
   if (inherits(data.conc, "PKNCAconc")) {
@@ -107,14 +110,21 @@ PKNCAdata.default <- function(data.conc, data.dose, ...,
       tmp.group <- groupid[i,,drop=FALSE]
       if (!is.null(tmp.conc.dose[[i]]$conc)) {
         rownames(tmp.group) <- NULL
-        new.intervals <-
-          cbind(
-            tmp.group,
-            choose.auc.intervals(tmp.conc.dose[[i]]$conc$data[,indep.var.conc],
-                                 tmp.conc.dose[[i]]$dose$data[,indep.var.dose],
-                                 options=options))
-        intervals <-
-          rbind(intervals, new.intervals)
+        generated_intervals <-
+          choose.auc.intervals(
+            tmp.conc.dose[[i]]$conc$data[,indep.var.conc],
+            tmp.conc.dose[[i]]$dose$data[,indep.var.dose],
+            options=options
+          )
+        if (nrow(generated_intervals)) {
+          new.intervals <- cbind(tmp.group, generated_intervals)
+          intervals <- rbind(intervals, new.intervals)
+        } else {
+          warning("No intervals generated likely due to limited concentration data for ",
+                  paste(names(tmp.group),
+                        unlist(lapply(tmp.group, as.character)),
+                        sep="=", collapse=", "))
+        }
       } else {
         warning("No intervals generated due to no concentration data for ",
                 paste(names(tmp.group),
@@ -227,8 +237,3 @@ split.PKNCAdata <- function(x, ...) {
   }
   ret
 }
-
-#' @rdname plot.PKNCAconc
-#' @export
-plot.PKNCAdata <- function(x, ...)
-  graphics::plot(x$conc, ...)

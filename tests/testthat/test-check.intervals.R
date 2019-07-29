@@ -151,7 +151,7 @@ test_that("get.parameter.deps", {
                c("kel.obs"),
                info="Parameters that have nothing that depend on them return themselves only.")
   expect_equal(get.parameter.deps("ctrough"),
-               c("ctrough", "ctrough.dn"),
+               c("ctrough", "ctrough.dn", "ptr"),
                info="Parameters with formalsmap-related dependencies return themselves and the formalsmap-related dependencies.")
   expect_equal(get.parameter.deps("start"),
                character(0),
@@ -159,4 +159,12 @@ test_that("get.parameter.deps", {
   expect_equal(get.parameter.deps("cl.obs"),
                c("cl.obs", "vss.iv.obs", "vss.obs", "vz.obs"),
                info="Parameters with dependencies return them.")
+})
+
+test_that("check.intervals requires a valid value", {
+  expect_error(
+    check.interval.specification(data.frame(start=0, end=1, cmax="A")),
+    regexp="Invalid value(s) in column cmax:A",
+    fixed=TRUE
+  )
 })

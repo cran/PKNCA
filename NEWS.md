@@ -4,6 +4,41 @@ will continue until then.  These will be especially noticable around
 the inclusion of IV NCA parameters and additional specifications of
 the dosing including dose amount and route.
 
+# PKNCA 0.9.1
+
+* Correct vignette building
+
+# PKNCA 0.9.0
+
+* Breaking Change: `plot.PKNCAconc()` was moved to the pknca.reporting package
+  (https://github.com/billdenney/pknca.reporting)
+* Breaking Change: `summary.PKNCAresults()` now provides a caption
+  including the summary method for each parameter.  If you change
+  summary functions using `PKNCA.set.summary()`, you must now use the
+  `description` option to set the description of the summary.
+* Breaking Change: ptr now accurately uses ctrough instead of cmin (fix #106)
+* Issue fixed where aucint* calculations now respect BLQ and NA rules like other calculations. (#104)
+* When half.life is not calculated due to insufficient number of points (default < 3), an exclusion reason is added. (#102)
+* tibbles now work as the interval argument for `PKNCAdata()` (fix #72)
+* Issue fixed with summarization of data that has exclusions.
+  Exclusions are now correctly handled as missing instead of never
+  calculated.
+* parseFormula now internally uses NULL for no-group formula definitions.
+* signifString and roundString now have sci_range (deprecating si_range) and
+  sci_sep arguments.
+* Documentation is improved, especially around the selection of
+  parameters for intervals.
+* Multiple dose data with a single concentration measurement no longer
+  generates an error (fixes #84).
+* The "start" and "end" columns may now be dropped from the summary of
+  `PKNCAresults` objects.
+* `PKNCAdata()` is more restrictive on unknown arguments issuing an error
+  when unknonwn arguments are present.
+* `intervals` argument to `PKNCAdata()` may now be a tibble (fixes #72).
+* Documentation has been extensively updated (fixes #81).
+* CRAN changes: Vignettes now better respect not loading suggested
+  packages.  Tests are now more permissive in timing.
+
 # PKNCA 0.8.5
 
 * Cleaned AUCint names

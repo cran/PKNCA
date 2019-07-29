@@ -1,12 +1,21 @@
 #' Compute NCA parameters for each interval for each subject.
 #'
-#' The computations assume that all calculation options are set in
-#' \code{\link{PKNCA.options}}.
+#' The \code{pk.nca} function computes the NCA parameters from a
+#' \code{PKNCAdata} onject.  All options for the calculation and input data are
+#' set in prior functions (\code{PKNCAconc}, \code{PKNCAdose}, and
+#' \code{PKNCAdata}).  Options for calculations are set either in
+#' \code{PKNCAdata} or with the current default options in \code{PKNCA.options}.
 #'
+#' When performing calculations, all time results are relative to the start of
+#' the interval.  For example, if an interval starts at 168 hours, ends at 192
+#' hours, and and the maximum concentration is at 169 hours,
+#' \code{tmax=169-168=1}.
+#' 
 #' @param data A PKNCAdata object
-#' @return A data frame with a row for each interval for each grouping
-#' in the concentration data.
-#' @seealso \code{\link{PKNCAdata}}, \code{\link{PKNCA.options}}
+#' @return A \code{PKNCAresults} object.
+#' @seealso \code{\link{PKNCAdata}}, \code{\link{PKNCA.options}},
+#'  \code{\link{summary.PKNCAresults}}, \code{\link{as.data.frame.PKNCAresults}},
+#'  \code{\link{exclude}}
 #' @export
 #' @importFrom utils capture.output
 #' @importFrom dplyr bind_rows
@@ -220,7 +229,7 @@ pk.nca.intervals <- function(conc.dose, intervals, options) {
             duration.dose.group=dose_data_group[[col.duration.dose]],
             route.group=dose_data_group[[col.route]],
             # Generic data
-            interval=all.intervals[i,],
+            interval=all.intervals[i, , drop=FALSE],
             options=options)
           if (!is.null(col.include_half.life)) {
             args$include_half.life <- conc_data_interval[[col.include_half.life]]
@@ -297,8 +306,9 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
                             dose.group=NULL, time.dose.group=NULL, duration.dose.group=NULL, route.group=NULL,
                             include_half.life=NULL, exclude_half.life=NULL,
                             interval, options=list()) {
-  if (!is.data.frame(interval))
+  if (!is.data.frame(interval)) {
     stop("interval must be a data.frame")
+  }
   if (nrow(interval) != 1)
     stop("interval must be a one-row data.frame")
   ## Prepare the return value using SDTM names
@@ -317,13 +327,16 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
   }
   ## Make sure that we calculate all of the dependencies.  Do this in
   ## reverse order for dependencies of dependencies.
-  for (n in rev(names(all.intervals)))
-    if (interval[1,n])
-      for (deps in all.intervals[[n]]$depends)
+  for (n in rev(names(all.intervals))) {
+    if (interval[[1,n]]) {
+      for (deps in all.intervals[[n]]$depends) {
         interval[1,deps] <- TRUE
+      }
+    }
+  }
   ## Do the calculations
   for (n in names(all.intervals))
-    if (interval[1,n] & !is.na(all.intervals[[n]]$FUN)) {
+    if (interval[[1,n]] & !is.na(all.intervals[[n]]$FUN)) {
       call.args <- list()
       ## Prepare to call the function by setting up its arguments.
       ## Ignore the "..." argument if it exists.
@@ -411,19 +424,25 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
       }
       # Do the calculation
       tmp.result <- do.call(all.intervals[[n]]$FUN, call.args)
+      exclude_reason <-
+        if (!is.null(attr(tmp.result, "exclude"))) {
+          attr(tmp.result, "exclude")
+        } else {
+          NA_character_
+        }
       ## If the function returns a data frame, save all the returned
       ## values, otherwise, save the value returned.
       if (is.data.frame(tmp.result)) {
         ret <- rbind(ret,
                      data.frame(PPTESTCD=names(tmp.result),
                                 PPORRES=unlist(tmp.result, use.names=FALSE),
-                                exclude=NA_character_,
+                                exclude=exclude_reason,
                                 stringsAsFactors=FALSE))
       } else {
         ret <- rbind(ret,
                      data.frame(PPTESTCD=n,
                                 PPORRES=tmp.result,
-                                exclude=NA_character_,
+                                exclude=exclude_reason,
                                 stringsAsFactors=FALSE))
       }
     }

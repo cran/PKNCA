@@ -1,10 +1,14 @@
 #' Compute the half-life and associated parameters
-#' 
-#' @details 
-#' If \code{manually.selected.points} is \code{FALSE} (default), the
-#' half-life is calculated by computing the best fit line for all 
-#' available sets of points.  The best one is chosen by the following 
-#' rules in order:
+#'
+#' The terminal elimination half-life is estimated from the final points in the
+#' concentration-time curve using semi-log regression (\code{log(conc)~time})
+#' with automated selection of the points for calculation (unless
+#' \code{manually.selected.points} is \code{TRUE}).
+#'
+#' @details If \code{manually.selected.points} is \code{FALSE} (default), the
+#' half-life is calculated by computing the best fit line for all points at or
+#' after tmax (based on the value of \code{allow.tmax.in.half.life}.  The best
+#' half-life is chosen by the following rules in order:
 #' 
 #' \itemize{
 #'  \item{At least \code{min.hl.points} points included} 
@@ -66,6 +70,7 @@
 #' lambda-z."  Pharmacokinetic & Pharmacodynamic Data Analysis: Concepts
 #' and Applications, 4th Edition.  Stockholm, Sweden: Swedish 
 #' Pharmaceutical Press, 2000.  167-9.
+#' @family NCA parameter calculations
 #' @export
 pk.calc.half.life <- function(conc, time, tmax, tlast,
                               manually.selected.points=FALSE,
@@ -78,12 +83,30 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
                               allow.tmax.in.half.life=NULL,
                               check=TRUE) {
   ## Check inputs
-  min.hl.points <- PKNCA.choose.option(name="min.hl.points", value=min.hl.points, options=options)
-  adj.r.squared.factor <- PKNCA.choose.option(name="adj.r.squared.factor", value=adj.r.squared.factor, options=options)
-  conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
-  conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
-  first.tmax <- PKNCA.choose.option(name="first.tmax", value=first.tmax, options=options)
-  allow.tmax.in.half.life <- PKNCA.choose.option(name="allow.tmax.in.half.life", value=allow.tmax.in.half.life, options=options)
+  min.hl.points <-
+    PKNCA.choose.option(
+      name="min.hl.points", value=min.hl.points, options=options
+    )
+  adj.r.squared.factor <-
+    PKNCA.choose.option(
+      name="adj.r.squared.factor", value=adj.r.squared.factor, options=options
+    )
+  conc.blq <-
+    PKNCA.choose.option(
+      name="conc.blq", value=conc.blq, options=options
+    )
+  conc.na <-
+    PKNCA.choose.option(
+      name="conc.na", value=conc.na, options=options
+    )
+  first.tmax <-
+    PKNCA.choose.option(
+      name="first.tmax", value=first.tmax, options=options
+    )
+  allow.tmax.in.half.life <-
+    PKNCA.choose.option(
+      name="allow.tmax.in.half.life", value=allow.tmax.in.half.life, options=options
+    )
   if (check) {
     check.conc.time(conc, time)
     data <- clean.conc.blq(conc, time, conc.blq=conc.blq, conc.na=conc.na)
@@ -111,11 +134,14 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
     half.life=NA,
     ## T1/2 span range
     span.ratio=NA)
-  ret_replacements <- c("lambda.z", "r.squared", "adj.r.squared", "lambda.z.time.first",
-                        "lambda.z.n.points", "clast.pred", "half.life", "span.ratio")
+  ret_replacements <-
+    c("lambda.z", "r.squared", "adj.r.squared", "lambda.z.time.first",
+      "lambda.z.n.points", "clast.pred", "half.life", "span.ratio")
   if (missing(tmax)) {
-    ret$tmax <- pk.calc.tmax(data$conc, data$time,
-                             first.tmax=first.tmax, check=FALSE)
+    ret$tmax <-
+      pk.calc.tmax(
+        data$conc, data$time, first.tmax=first.tmax, check=FALSE
+      )
   } else {
     ret$tmax <- tmax
   }
@@ -126,14 +152,13 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
   }
   ## Data frame to use for computation of half-life
   if (allow.tmax.in.half.life) {
-    dfK <- data[data$time >= ret$tmax,]
+    dfK <- data[data$time >= ret$tmax, ]
   } else {
-    dfK <- data[data$time > ret$tmax,]
+    dfK <- data[data$time > ret$tmax, ]
   }
   if (manually.selected.points) {
     if (nrow(data) > 0) {
-      fit <- fit_half_life(data=data,
-                           tlast=ret$tlast)
+      fit <- fit_half_life(data=data, tlast=ret$tlast)
       ret[,ret_replacements] <- fit[,ret_replacements]
     } else {
       warning("No data to manually fit for half-life (all concentrations may be 0)")
@@ -141,30 +166,38 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
   } else if (nrow(dfK) >= min.hl.points) {
     ## If we have enough data to estimate a slope, then
     half_lives_for_selection <-
-      data.frame(r.squared=-Inf,
-                 adj.r.squared=-Inf,
-                 clast.pred=NA_real_,
-                 lambda.z=NA_real_,
-                 lambda.z.n.points=NA_integer_,
-                 lambda.z.time.first=dfK$time,
-                 log_conc=dfK$log_conc,
-                 span.ratio=NA_real_,
-                 half.life=NA_real_)
+      data.frame(
+        r.squared=-Inf,
+        adj.r.squared=-Inf,
+        clast.pred=NA_real_,
+        lambda.z=NA_real_,
+        lambda.z.n.points=NA_integer_,
+        lambda.z.time.first=dfK$time,
+        log_conc=dfK$log_conc,
+        span.ratio=NA_real_,
+        half.life=NA_real_
+      )
     half_lives_for_selection <-
-      half_lives_for_selection[order(-half_lives_for_selection$lambda.z.time.first),]
+      half_lives_for_selection[order(-half_lives_for_selection$lambda.z.time.first), ]
     for(i in min.hl.points:nrow(half_lives_for_selection)) {
       ## Fit the terminal slopes until the adjusted r-squared value
       ## is not improving (or it only gets worse by a small factor).
-      fit <- fit_half_life(
-        data=data.frame(log_conc=half_lives_for_selection$log_conc[1:i],
-                        time=half_lives_for_selection$lambda.z.time.first[1:i]),
-        tlast=ret$tlast)
+      fit <-
+        fit_half_life(
+          data=
+            data.frame(
+              log_conc=half_lives_for_selection$log_conc[1:i],
+              time=half_lives_for_selection$lambda.z.time.first[1:i]
+            ),
+          tlast=ret$tlast
+        )
       half_lives_for_selection[i,names(fit)] <- fit
     }
     ## Find the best model
     mask.best <-
-      (half_lives_for_selection$adj.r.squared > (max(half_lives_for_selection$adj.r.squared) - adj.r.squared.factor) &
-       half_lives_for_selection$lambda.z > 0)
+      half_lives_for_selection$adj.r.squared >
+      (max(half_lives_for_selection$adj.r.squared) - adj.r.squared.factor) &
+      half_lives_for_selection$lambda.z > 0
     ## Missing values are not the best
     mask.best[is.na(mask.best)] <- FALSE
     if (sum(mask.best) > 1) {
@@ -180,9 +213,12 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
       ret[,ret_replacements] <- half_lives_for_selection[mask.best, ret_replacements]
     }
   } else {
-    warning(sprintf(
-      "Too few points for half-life calculation (min.hl.points=%g with only %g points)",
-      min.hl.points, nrow(dfK)))
+    attr(ret, "exclude") <-
+      sprintf(
+        "Too few points for half-life calculation (min.hl.points=%g with only %g points)",
+        min.hl.points, nrow(dfK)
+      )
+    warning(attr(ret, "exclude"))
   }
   ## Drop the inputs of tmax and tlast, if given.
   if (!missing(tmax))
@@ -208,12 +244,14 @@ fit_half_life <- function(data, tlast) {
   fit <- stats::lm(log_conc~time, data=data, na.action=stats::na.exclude)
   sfit <- summary(fit)
   ret <-
-    data.frame(r.squared=sfit$r.squared,
-               adj.r.squared=adj.r.squared(sfit$r.squared, nrow(data)),
-               lambda.z=-stats::coef(fit)["time"],
-               clast.pred=exp(stats::predict(fit, newdata=data.frame(time=tlast))),
-               lambda.z.time.first=min(data$time, na.rm=TRUE),
-               lambda.z.n.points=nrow(data))
+    data.frame(
+      r.squared=sfit$r.squared,
+      adj.r.squared=adj.r.squared(sfit$r.squared, nrow(data)),
+      lambda.z=-stats::coef(fit)["time"],
+      clast.pred=exp(stats::predict(fit, newdata=data.frame(time=tlast))),
+      lambda.z.time.first=min(data$time, na.rm=TRUE),
+      lambda.z.n.points=nrow(data)
+    )
   ret$half.life <- log(2)/ret$lambda.z
   ret$span.ratio <- (max(data$time) - min(data$time))/ret$half.life
   ret
@@ -225,46 +263,86 @@ add.interval.col("half.life",
                  values=c(FALSE, TRUE),
                  desc="The (terminal) half-life",
                  depends=c("tmax", "tlast"))
-PKNCA.set.summary("half.life", business.mean, business.sd)
+PKNCA.set.summary(
+  name="half.life",
+  description="arithmetic mean and standard deviation",
+  point=business.mean,
+  spread=business.sd
+)
 add.interval.col("r.squared",
                  FUN=NA,
                  values=c(FALSE, TRUE),
                  desc="The r^2 value of the half-life calculation",
                  depends=c("half.life"))
-PKNCA.set.summary("r.squared", business.mean, business.sd)
+PKNCA.set.summary(
+  name="r.squared",
+  description="arithmetic mean and standard deviation",
+  point=business.mean,
+  spread=business.sd
+)
 add.interval.col("adj.r.squared",
                  FUN=NA,
                  values=c(FALSE, TRUE),
                  desc="The adjusted r^2 value of the half-life calculation",
                  depends=c("half.life"))
-PKNCA.set.summary("adj.r.squared", business.mean, business.sd)
+PKNCA.set.summary(
+  name="adj.r.squared",
+  description="arithmetic mean and standard deviation",
+  point=business.mean,
+  spread=business.sd
+)
 add.interval.col("lambda.z",
                  FUN=NA,
                  values=c(FALSE, TRUE),
                  desc="The elimination rate of the terminal half-life",
                  depends=c("half.life"))
-PKNCA.set.summary("lambda.z", business.geomean, business.geocv)
+PKNCA.set.summary(
+  name="lambda.z",
+  description="geometric mean and geometric coefficient of variation",
+  point=business.geomean,
+  spread=business.geocv
+)
 add.interval.col("lambda.z.time.first",
                  FUN=NA,
                  values=c(FALSE, TRUE),
                  desc="The first time point used for the calculation of half-life",
                  depends=c("half.life"))
-PKNCA.set.summary("lambda.z.time.first", business.median, business.range)
+PKNCA.set.summary(
+  name="lambda.z.time.first",
+  description="median and range",
+  point=business.median,
+  spread=business.range
+)
 add.interval.col("lambda.z.n.points",
                  FUN=NA,
                  values=c(FALSE, TRUE),
                  desc="The number of points used for the calculation of half-life",
                  depends=c("half.life"))
-PKNCA.set.summary("lambda.z.n.points", business.median, business.range)
+PKNCA.set.summary(
+  name="lambda.z.n.points",
+  description="median and range",
+  point=business.median,
+  spread=business.range
+)
 add.interval.col("clast.pred",
                  FUN=NA,
                  values=c(FALSE, TRUE),
                  desc="The concentration at Tlast as predicted by the half-life",
                  depends=c("half.life"))
-PKNCA.set.summary("clast.pred", business.geomean, business.geocv)
+PKNCA.set.summary(
+  name="clast.pred",
+  description="geometric mean and geometric coefficient of variation",
+  point=business.geomean,
+  spread=business.geocv
+)
 add.interval.col("span.ratio",
                  FUN=NA,
                  values=c(FALSE, TRUE),
                  desc="The ratio of the half-life to the duration used for half-life calculation",
                  depends=c("half.life"))
-PKNCA.set.summary("span.ratio", business.geomean, business.geocv)
+PKNCA.set.summary(
+  name="span.ratio",
+  description="geometric mean and geometric coefficient of variation",
+  point=business.geomean,
+  spread=business.geocv
+)

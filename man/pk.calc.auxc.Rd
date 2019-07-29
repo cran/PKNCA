@@ -5,13 +5,10 @@
 \alias{pk.calc.auc}
 \alias{pk.calc.aumc}
 \alias{pk.calc.auc.last}
-\alias{pk.calc.auc}
-\alias{pk.calc.auc.last}
 \alias{pk.calc.auc.inf}
 \alias{pk.calc.auc.inf.obs}
 \alias{pk.calc.auc.inf.pred}
 \alias{pk.calc.auc.all}
-\alias{pk.calc.aumc}
 \alias{pk.calc.aumc.last}
 \alias{pk.calc.aumc.inf}
 \alias{pk.calc.aumc.inf.obs}
@@ -31,9 +28,11 @@ pk.calc.auc.last(conc, time, ..., options = list())
 
 pk.calc.auc.inf(conc, time, ..., options = list(), lambda.z)
 
-pk.calc.auc.inf.obs(conc, time, clast.obs, ..., options = list(), lambda.z)
+pk.calc.auc.inf.obs(conc, time, clast.obs, ..., options = list(),
+  lambda.z)
 
-pk.calc.auc.inf.pred(conc, time, clast.pred, ..., options = list(), lambda.z)
+pk.calc.auc.inf.pred(conc, time, clast.pred, ..., options = list(),
+  lambda.z)
 
 pk.calc.auc.all(conc, time, ..., options = list())
 
@@ -43,9 +42,11 @@ pk.calc.aumc.last(conc, time, ..., options = list())
 
 pk.calc.aumc.inf(conc, time, ..., options = list(), lambda.z)
 
-pk.calc.aumc.inf.obs(conc, time, clast.obs, ..., options = list(), lambda.z)
+pk.calc.aumc.inf.obs(conc, time, clast.obs, ..., options = list(),
+  lambda.z)
 
-pk.calc.aumc.inf.pred(conc, time, clast.pred, ..., options = list(), lambda.z)
+pk.calc.aumc.inf.pred(conc, time, clast.pred, ..., options = list(),
+  lambda.z)
 
 pk.calc.aumc.all(conc, time, ..., options = list())
 }
@@ -158,6 +159,8 @@ and Applications, 4th Edition.  Stockholm, Sweden: Swedish Pharmaceutical
 Press, 2000.  164-7.
 }
 \seealso{
-\code{\link{pk.calc.auc.all}}, \code{\link{pk.calc.auc.last}},
-  \code{\link{clean.conc.blq}}
+\code{\link{clean.conc.blq}}
+
+Other AUC calculations: \code{\link{pk.calc.aucint}}
 }
+\concept{AUC calculations}

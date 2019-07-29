@@ -4,13 +4,15 @@
 \alias{PKNCA.set.summary}
 \title{Define how NCA parameters are summarized.}
 \usage{
-PKNCA.set.summary(name, point, spread, rounding = list(signif = 3),
-  reset = FALSE)
+PKNCA.set.summary(name, description, point, spread,
+  rounding = list(signif = 3), reset = FALSE)
 }
 \arguments{
 \item{name}{The parameter name or a vector of parameter names.  It
 must have already been defined (see
 \code{\link{add.interval.col}}).}
+
+\item{description}{A single-line description of the summary}
 
 \item{point}{The function to calculate the point estimate for the
 summary.  The function will be called as \code{point(x)} and must
@@ -37,6 +39,21 @@ All current summary settings (invisibly)
 \description{
 Define how NCA parameters are summarized.
 }
+\examples{
+\dontrun{
+PKNCA.set.summary(
+  name="half.life",
+  description="arithmetic mean and standard deviation",
+  point=business.mean,
+  spread=business.sd,
+  rounding=list(signif=3)
+)
+}
+}
 \seealso{
 \code{\link{summary.PKNCAresults}}
+
+Other PKNCA calculation and summary settings: \code{\link{PKNCA.choose.option}},
+  \code{\link{PKNCA.options}}
 }
+\concept{PKNCA calculation and summary settings}

@@ -1,16 +1,24 @@
+## ----check-ggplot, include=!requireNamespace("ggplot2"), results="asis"----
+cat("ggplot2 is required for this vignette to work correctly.  Please install the ggplot2 library and retry building the vignette.")
+
 ## ----setup---------------------------------------------------------------
 suppressPackageStartupMessages({
   library(PKNCA)
   library(dplyr)
   library(cowplot)
   library(knitr)
+  library(ggplot2)
 })
+scale_colour_discrete <- scale_colour_hue
+scale_fill_discrete <- scale_fill_hue
+
 my_conc <- data.frame(conc=c(0, 2.5, 3, 2, 1.5, 1.2, 1.1, 0, 0),
                       time=c(0:5, 8, 12, 24),
                       subject=1)
 my_conc$BLOQ <- my_conc$conc == 0
 my_conc$measured <- TRUE
 
+## ----setup-visualization, eval=requireNamespace("ggplot2")---------------
 ggplot(my_conc,
        aes(x=time,
            y=conc,
@@ -31,7 +39,7 @@ data_obj <- PKNCAdata(data.conc=conc_obj,
                                            aucinf.pred=TRUE,
                                            aucinf.obs=TRUE))
 results_obj <- pk.nca(data_obj)
-kable(results_obj$result)
+kable(as.data.frame(results_obj))
 
 ## ----auclast-------------------------------------------------------------
 tlast <- pk.calc.tlast(conc=my_conc$conc,
@@ -40,6 +48,7 @@ tlast
 
 my_conc$include_auclast <- my_conc$time <= tlast
 
+## ----auclast-visualization, eval=requireNamespace("ggplot2")-------------
 ggplot(my_conc,
        aes(x=time,
            y=conc,
@@ -59,6 +68,7 @@ first_after_tlast
 
 my_conc$include_aucall <- my_conc$time <= first_after_tlast
 
+## ----aucall-visualization, eval=requireNamespace("ggplot2")--------------
 ggplot(my_conc,
        aes(x=time,
            y=conc,
@@ -89,7 +99,7 @@ my_conc$conc_aucinf.obs[my_conc$BLOQ | is.na(my_conc$BLOQ)] <-
   interp.extrap.conc(conc=my_conc$conc,
                      time=my_conc$time,
                      time.out=my_conc$time[my_conc$BLOQ | is.na(my_conc$BLOQ)],
-                     lambda.z=results_obj$result$PPORRES[results_obj$result$PPTESTCD %in% "lambda.z"])
+                     lambda.z=as.data.frame(results_obj)$PPORRES[as.data.frame(results_obj)$PPTESTCD %in% "lambda.z"])
 
 # Extrapolate concentrations for aucinf.pred
 my_conc$conc_aucinf.pred <- my_conc$conc
@@ -97,11 +107,12 @@ my_conc$conc_aucinf.pred[my_conc$BLOQ | is.na(my_conc$BLOQ)] <-
   interp.extrap.conc(conc=my_conc$conc,
                      time=my_conc$time,
                      time.out=my_conc$time[my_conc$BLOQ | is.na(my_conc$BLOQ)],
-                     lambda.z=results_obj$result$PPORRES[results_obj$result$PPTESTCD %in% "lambda.z"],
-                     clast=results_obj$result$PPORRES[results_obj$result$PPTESTCD %in% "clast.pred"])
+                     lambda.z=as.data.frame(results_obj)$PPORRES[as.data.frame(results_obj)$PPTESTCD %in% "lambda.z"],
+                     clast=as.data.frame(results_obj)$PPORRES[as.data.frame(results_obj)$PPTESTCD %in% "clast.pred"])
 my_conc$conc_aucinf.pred[my_conc$time == tlast] <-
-  results_obj$result$PPORRES[results_obj$result$PPTESTCD %in% "clast.pred"]
+  as.data.frame(results_obj)$PPORRES[as.data.frame(results_obj)$PPTESTCD %in% "clast.pred"]
 
+## ----aucinf-visualization, eval=requireNamespace("ggplot2")--------------
 ggplot(my_conc[!is.na(my_conc$conc),],
        aes(x=time,
            y=conc,
@@ -142,7 +153,7 @@ ggplot(my_conc[!is.na(my_conc$conc),],
 # Interpolation not required
 data_obs_obj <- PKNCAdata(conc_obj, intervals=data.frame(start=0, end=2, auclast=TRUE))
 results_obs_obj <- pk.nca(data_obs_obj)
-kable(results_obs_obj$result)
+kable(as.data.frame(results_obs_obj))
 
 ## ----partial_auc_interpolated--------------------------------------------
 # Interpolation required
@@ -159,5 +170,5 @@ kable(my_conc_interp)
 conc_interp_obj <- PKNCAconc(my_conc_interp, conc~time|subject)
 data_interp_obj <- PKNCAdata(conc_interp_obj, intervals=data.frame(start=0, end=1.5, auclast=TRUE))
 results_interp <- pk.nca(data_interp_obj)
-results_interp$result
+as.data.frame(results_interp)
 

@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -18,47 +19,282 @@
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
 
-<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -68,15 +304,29 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Superposition of Pharmacokinetic Data</h1>
-<h4 class="author"><em>Bill Denney</em></h4>
+<h4 class="author">Bill Denney</h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#load-the-data">Load the data</a></li>
+<li><a href="#compute-the-superposition-from-single-dose-data-to-steady-state">Compute the Superposition from Single-Dose Data to Steady-State</a></li>
+<li><a href="#nonstandard-superposition-computations">Nonstandard Superposition Computations</a><ul>
+<li><a href="#compute-the-superposition-from-single-dose-data-to-a-specific-dose">Compute the Superposition from Single-Dose Data to a Specific Dose</a></li>
+<li><a href="#compute-the-superposition-from-single-dose-data-with-1-dose-per-interval">Compute the Superposition from Single-Dose Data with &gt;1 Dose Per Interval</a><ul>
+<li><a href="#show-the-curve-to-steady-state">Show the Curve to Steady-State</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#time-point-selection-and-addition">Time Point Selection and Addition</a></li>
+<li><a href="#interpolation-and-extrapolation-methods">Interpolation and Extrapolation Methods</a></li>
+</ul>
+</div>
 
 <p>Examples simplify understanding. Below is an example of how to use the theophylline dataset to estimate the concentration for each subject after multiple doses.</p>
 <div id="load-the-data" class="section level1">
 <h1>Load the data</h1>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## It is always a good idea to look at the data
-knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(datasets<span class="op">::</span>Theoph))</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co">## It is always a good idea to look at the data</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(datasets<span class="op">::</span>Theoph))</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -133,22 +383,22 @@ knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">he
 </tbody>
 </table>
 <p>The columns that we will be interested in for our analysis are conc, Time, and Subject in the concentration data.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## By default it is groupedData; convert it to a data frame for use
-my.conc &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(<span class="kw">as.data.frame</span>(datasets<span class="op">::</span>Theoph), conc<span class="op">~</span>Time<span class="op">|</span>Subject)</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">## By default it is groupedData; convert it to a data frame for use</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>conc_obj &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(<span class="kw">as.data.frame</span>(datasets<span class="op">::</span>Theoph), conc<span class="op">~</span>Time<span class="op">|</span>Subject)</span></code></pre></div>
 </div>
 <div id="compute-the-superposition-from-single-dose-data-to-steady-state" class="section level1">
 <h1>Compute the Superposition from Single-Dose Data to Steady-State</h1>
 <p>With a simple call, we can have the estimated steady-state concentration for each subject. At minimum, the time between dosing (<code>tau</code>) must be provided.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">steady.state &lt;-<span class="st"> </span><span class="kw">superposition</span>(my.conc, <span class="dt">tau=</span><span class="dv">24</span>)</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>steady_state &lt;-<span class="st"> </span><span class="kw">superposition</span>(conc_obj, <span class="dt">tau=</span><span class="dv">24</span>)</span></code></pre></div>
 <pre><code>## Error in superposition.numeric(tmp.data[[x]]$data[[conc.col]], tmp.data[[x]]$data[[time.col]], : The first concentration must be 0 (and not NA).  To change this set check.blq=FALSE.</code></pre>
 <p>The error noting that the first concentration must be zero is due to the fact that superposition usually occurs with single-dose data. If the first concentration is nonzero, the data are not likely to be single-dose (or a data error should be fixed). Let’s find the offending data.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">subset</span>(datasets<span class="op">::</span>Theoph, Time <span class="op">==</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span>conc <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>),
-             <span class="dt">caption=</span><span class="st">&quot;Nonzero predose measurements&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">subset</span>(datasets<span class="op">::</span>Theoph, Time <span class="op">==</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span>conc <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>),</span>
+<span id="cb5-2"><a href="#cb5-2"></a>             <span class="dt">caption=</span><span class="st">&quot;Nonzero predose measurements&quot;</span>,</span>
+<span id="cb5-3"><a href="#cb5-3"></a>             <span class="dt">row.names=</span><span class="ot">FALSE</span>)</span></code></pre></div>
 <table>
 <caption>Nonzero predose measurements</caption>
 <thead>
 <tr class="header">
-<th></th>
 <th align="left">Subject</th>
 <th align="right">Wt</th>
 <th align="right">Dose</th>
@@ -158,7 +408,6 @@ my.conc &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(<span cl
 </thead>
 <tbody>
 <tr class="odd">
-<td>1</td>
 <td align="left">1</td>
 <td align="right">79.6</td>
 <td align="right">4.02</td>
@@ -166,7 +415,6 @@ my.conc &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(<span cl
 <td align="right">0.74</td>
 </tr>
 <tr class="even">
-<td>67</td>
 <td align="left">7</td>
 <td align="right">64.6</td>
 <td align="right">4.95</td>
@@ -174,7 +422,6 @@ my.conc &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(<span cl
 <td align="right">0.15</td>
 </tr>
 <tr class="odd">
-<td>100</td>
 <td align="left">10</td>
 <td align="right">58.2</td>
 <td align="right">5.50</td>
@@ -184,15 +431,15 @@ my.conc &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(<span cl
 </tbody>
 </table>
 <p>For this example, we will assume that these were errors, correct them to zero, and recalculate.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Correct nonzero concentrations at time 0 to be BLQ.
-theoph.corrected &lt;-<span class="st"> </span>datasets<span class="op">::</span>Theoph
-theoph.corrected<span class="op">$</span>conc[theoph.corrected<span class="op">$</span>Time <span class="op">==</span><span class="st"> </span><span class="dv">0</span>] &lt;-<span class="st"> </span><span class="dv">0</span>
-my.conc.corrected &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(theoph.corrected, conc<span class="op">~</span>Time<span class="op">|</span>Subject)
-
-## Calculate the new steady-state concentrations with 24 hour dosing
-steady.state &lt;-<span class="st"> </span><span class="kw">superposition</span>(my.conc.corrected, <span class="dt">tau=</span><span class="dv">24</span>)
-knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(steady.state, <span class="dt">n=</span><span class="dv">14</span>),
-             <span class="dt">caption=</span><span class="st">&quot;Superposition at steady-state&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">## Correct nonzero concentrations at time 0 to be BLQ.</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>theoph_corrected &lt;-<span class="st"> </span>datasets<span class="op">::</span>Theoph</span>
+<span id="cb6-3"><a href="#cb6-3"></a>theoph_corrected<span class="op">$</span>conc[theoph_corrected<span class="op">$</span>Time <span class="op">==</span><span class="st"> </span><span class="dv">0</span>] &lt;-<span class="st"> </span><span class="dv">0</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a>conc_obj_corrected &lt;-<span class="st"> </span><span class="kw">PKNCAconc</span>(theoph_corrected, conc<span class="op">~</span>Time<span class="op">|</span>Subject)</span>
+<span id="cb6-5"><a href="#cb6-5"></a></span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="co">## Calculate the new steady-state concentrations with 24 hour dosing</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a>steady_state &lt;-<span class="st"> </span><span class="kw">superposition</span>(conc_obj_corrected, <span class="dt">tau=</span><span class="dv">24</span>)</span>
+<span id="cb6-8"><a href="#cb6-8"></a>knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(steady_state, <span class="dt">n=</span><span class="dv">14</span>),</span>
+<span id="cb6-9"><a href="#cb6-9"></a>             <span class="dt">caption=</span><span class="st">&quot;Superposition at steady-state&quot;</span>)</span></code></pre></div>
 <table>
 <caption>Superposition at steady-state</caption>
 <thead>
@@ -282,10 +529,10 @@ knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">he
 <div id="compute-the-superposition-from-single-dose-data-to-a-specific-dose" class="section level2">
 <h2>Compute the Superposition from Single-Dose Data to a Specific Dose</h2>
 <p>If simulation to a specific dose is needed, the number of dosing intervals (<code>n.tau</code>) can be specified.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Calculate the unsteady-state concentrations with 24 hour dosing
-unsteady.state &lt;-<span class="st"> </span><span class="kw">superposition</span>(my.conc.corrected, <span class="dt">tau=</span><span class="dv">24</span>, <span class="dt">n.tau=</span><span class="dv">2</span>)
-knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(unsteady.state, <span class="dt">n=</span><span class="dv">14</span>),
-             <span class="dt">caption=</span><span class="st">&quot;Superposition before steady-state&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">## Calculate the unsteady-state concentrations with 24 hour dosing</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>unsteady_state &lt;-<span class="st"> </span><span class="kw">superposition</span>(conc_obj_corrected, <span class="dt">tau=</span><span class="dv">24</span>, <span class="dt">n.tau=</span><span class="dv">2</span>)</span>
+<span id="cb7-3"><a href="#cb7-3"></a>knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(unsteady_state, <span class="dt">n=</span><span class="dv">14</span>),</span>
+<span id="cb7-4"><a href="#cb7-4"></a>             <span class="dt">caption=</span><span class="st">&quot;Superposition before steady-state&quot;</span>)</span></code></pre></div>
 <table>
 <caption>Superposition before steady-state</caption>
 <thead>
@@ -372,10 +619,10 @@ knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">he
 <div id="compute-the-superposition-from-single-dose-data-with-1-dose-per-interval" class="section level2">
 <h2>Compute the Superposition from Single-Dose Data with &gt;1 Dose Per Interval</h2>
 <p>Some dosing intervals are more complex than once per X hours (or days or weeks or…). To predict more complex dosing with superposition, give the dose times within the interval. The <code>dose.times</code> must all be less than <code>tau</code> (otherwise they are not in the interval).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Calculate the new steady-state concentrations with 24 hour dosing
-complex.interval.steady.state &lt;-<span class="st"> </span><span class="kw">superposition</span>(my.conc.corrected, <span class="dt">tau=</span><span class="dv">24</span>, <span class="dt">dose.times=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>))
-knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(complex.interval.steady.state, <span class="dt">n=</span><span class="dv">10</span>),
-             <span class="dt">caption=</span><span class="st">&quot;Superposition at steady-state with complex dosing&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">## Calculate the new steady-state concentrations with 24 hour dosing</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>complex_interval_steady_state &lt;-<span class="st"> </span><span class="kw">superposition</span>(conc_obj_corrected, <span class="dt">tau=</span><span class="dv">24</span>, <span class="dt">dose.times=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>))</span>
+<span id="cb8-3"><a href="#cb8-3"></a>knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(complex_interval_steady_state, <span class="dt">n=</span><span class="dv">10</span>),</span>
+<span id="cb8-4"><a href="#cb8-4"></a>             <span class="dt">caption=</span><span class="st">&quot;Superposition at steady-state with complex dosing&quot;</span>)</span></code></pre></div>
 <table>
 <caption>Superposition at steady-state with complex dosing</caption>
 <thead>
@@ -438,29 +685,28 @@ knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">he
 </tr>
 </tbody>
 </table>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">xyplot</span>(conc<span class="op">~</span>time, <span class="dt">groups=</span>Subject, <span class="dt">type=</span><span class="st">&quot;l&quot;</span>,
-       <span class="dt">data=</span>complex.interval.steady.state)</code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">ggplot</span>(complex_interval_steady_state,</span>
+<span id="cb9-2"><a href="#cb9-2"></a>       <span class="kw">aes</span>(<span class="dt">y=</span>conc, <span class="dt">x=</span>time, <span class="dt">colour=</span>Subject)) <span class="op">+</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="st">  </span><span class="kw">geom_line</span>()</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>With this more complex dosing interval, the number of time points estimated increases. The next section describes the selection of time points.</p>
 <div id="show-the-curve-to-steady-state" class="section level3">
 <h3>Show the Curve to Steady-State</h3>
 <p>To determine the concentration curve to get to steady-state, you can give all the dose times considered required to get to steady-state. To do this, specify tau as the total time to steady-state, specify <code>n.tau</code> as <code>1</code> to indicate that only one round of dosing should be administered.</p>
 <p>This command does not technically go to steady-state; if the <code>dose.times</code> are not sufficiently long to reach steady-state, it only goes for as many doses as requested.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">up.to.steady.state &lt;-<span class="st"> </span><span class="kw">superposition</span>(my.conc.corrected,
-                                    <span class="dt">tau=</span><span class="dv">4</span><span class="op">*</span><span class="dv">24</span>,
-                                    <span class="dt">n.tau=</span><span class="dv">1</span>,
-                                    <span class="dt">dose.times=</span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">3</span><span class="op">*</span><span class="dv">24</span>, <span class="dt">by=</span><span class="dv">12</span>))
-<span class="kw">xyplot</span>(conc<span class="op">~</span>time,
-       <span class="dt">groups=</span>Subject,
-       <span class="dt">data=</span>up.to.steady.state,
-       <span class="dt">type=</span><span class="st">&quot;l&quot;</span>)</code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>up_to_steady_state &lt;-<span class="st"> </span><span class="kw">superposition</span>(conc_obj_corrected,</span>
+<span id="cb10-2"><a href="#cb10-2"></a>                                    <span class="dt">tau=</span><span class="dv">4</span><span class="op">*</span><span class="dv">24</span>,</span>
+<span id="cb10-3"><a href="#cb10-3"></a>                                    <span class="dt">n.tau=</span><span class="dv">1</span>,</span>
+<span id="cb10-4"><a href="#cb10-4"></a>                                    <span class="dt">dose.times=</span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">3</span><span class="op">*</span><span class="dv">24</span>, <span class="dt">by=</span><span class="dv">12</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">ggplot</span>(up_to_steady_state, <span class="kw">aes</span>(<span class="dt">x=</span>time, <span class="dt">y=</span>conc, <span class="dt">colour=</span>Subject)) <span class="op">+</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="st">  </span><span class="kw">geom_line</span>()</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 </div>
 </div>
 <div id="time-point-selection-and-addition" class="section level1">
 <h1>Time Point Selection and Addition</h1>
-<p>Superposition is often used to estimate NCA parameters with nonparametric methods. To ensure that estimated parameters are as accurate as possible (espectially <span class="math inline">\(C_max\)</span>), each dose has every post-dose time point included. Specifically, each dose will have the following times:</p>
+<p>Superposition is often used to estimate NCA parameters with nonparametric methods. To ensure that estimated parameters are as accurate as possible (especially <span class="math inline">\(C_{max}\)</span>), each dose has every post-dose time point included. Specifically, each dose will have the following times:</p>
 <ul>
 <li>0 (zero) and <code>tau</code>,</li>
 <li>The time of each dose (the <code>dose.times</code> argument)</li>
@@ -468,17 +714,17 @@ knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">he
 <li>each time from the <code>additional.times</code> argument.</li>
 </ul>
 <p>How the number of time points increases can be seen by comparing the time points for subject 1 in the steady-state single dosing and the complex dosing examples above.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">steady.state<span class="op">$</span>time[steady.state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>]</code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>steady_state<span class="op">$</span>time[steady_state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>]</span></code></pre></div>
 <pre><code>##  [1]  0.00  0.25  0.37  0.57  1.12  2.02  3.82  5.10  7.03  9.05 12.12
 ## [12] 24.00</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(steady.state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="kw">sum</span>(steady_state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] 12</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">complex.interval.steady.state<span class="op">$</span>time[complex.interval.steady.state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>]</code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>complex_interval_steady_state<span class="op">$</span>time[complex_interval_steady_state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>]</span></code></pre></div>
 <pre><code>##  [1]  0.00  0.25  0.37  0.57  1.12  2.00  2.02  2.25  2.37  2.57  3.12
 ## [12]  3.82  4.00  4.02  4.25  4.37  4.57  5.10  5.12  5.82  6.02  7.03
 ## [23]  7.10  7.82  9.03  9.05  9.10 11.03 11.05 12.12 13.05 14.12 16.12
 ## [34] 24.00</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(complex.interval.steady.state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="kw">sum</span>(complex_interval_steady_state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] 34</code></pre>
 </div>
 <div id="interpolation-and-extrapolation-methods" class="section level1">
@@ -486,6 +732,9 @@ knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">he
 <p>The interpolation and extrapolation methods align with those used for calculating the AUC. By default, interpolation uses the <code>PKNCA.options</code> selection for <code>&quot;auc.method&quot;</code> and extrapolation follows the curve of <span class="math inline">\(AUC_{inf}\)</span>. These can be modified with the <code>interp.method</code> and <code>extrap.method</code> arguments.</p>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

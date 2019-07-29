@@ -16,3 +16,14 @@ Get the columns that can be used in an interval specification
 \examples{
 get.interval.cols()
 }
+\seealso{
+\code{\link{check.interval.specification}} and the vignette "Selection of
+  Calculation Intervals"
+
+Other Interval specifications: \code{\link{add.interval.col}},
+  \code{\link{check.interval.deps}},
+  \code{\link{check.interval.specification}},
+  \code{\link{choose.auc.intervals}},
+  \code{\link{get.parameter.deps}}
+}
+\concept{Interval specifications}

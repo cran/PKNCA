@@ -28,6 +28,7 @@
 #' ## parseFormula("a~b", require.groups=TRUE) # This is an error
 #' parseFormula("a~b|c")
 #' parseFormula("a~b|c")$groups
+#' @family Formula parsing
 #' @export
 parseFormula <- function (form,
                           require.groups=FALSE,
@@ -47,9 +48,9 @@ parseFormula <- function (form,
   lhs <- findOperator(form, "~", "left")
   rhs <- findOperator(form, "~", "right")
   groups <- findOperator(rhs, "|", "right")
-  if (identical(groups, NULL)) {
-    groups <- NA
-    grpFormula <- NA
+  if (is.null(groups)) {
+    groups <- NULL
+    grpFormula <- NULL
   } else {
     grpFormula <- stats::as.formula(call("~", groups),
                                     env=environment(form))
@@ -59,7 +60,7 @@ parseFormula <- function (form,
       identical(lhs, NA))
     stop("formula is one-sided with require.two.sided set to TRUE")
   if (require.groups &
-      identical(groups, NA)) {
+      is.null(groups)) {
     stop("rhs of formula must be a conditioning expression")
   }
   if (identical(lhs, NA)) {
@@ -86,7 +87,7 @@ print.parseFormula <- function(x, ...) {
   } else {
     cat("A two-sided formula ")
   }
-  if (identical(x$groups, NA)) {
+  if (is.null(x$groups)) {
     cat("without groups.\n  ")
   } else {
     cat("with groups.\n  ")
@@ -103,6 +104,7 @@ print.parseFormula <- function(x, ...) {
 #' dropping the left hand side?
 #' @param \dots Unused.
 #' @return A formula (optionally with portions removed)
+#' @family Formula parsing
 #' @export
 formula.parseFormula <- function(x, drop.groups=FALSE, drop.lhs=FALSE, ...) {
   if (identical(x$lhs, NA) | drop.lhs) {
@@ -110,7 +112,7 @@ formula.parseFormula <- function(x, drop.groups=FALSE, drop.lhs=FALSE, ...) {
   } else {
     ret <- stats::as.formula(call("~", x$lhs, x$rhs))
   }
-  if (!identical(x$groups, NA) & !drop.groups)
+  if (!is.null(x$groups) & !drop.groups)
     ret <- stats::as.formula(paste0(deparse(ret), "|", deparse(x$groups)))
   environment(ret) <- x$env
   ret
@@ -127,6 +129,7 @@ formula.parseFormula <- function(x, drop.groups=FALSE, drop.lhs=FALSE, ...) {
 #' @return The side of the operator requested, NA if requesting the
 #' left side of a unary operator, and NULL if the operator is not
 #' found.
+#' @family Formula parsing
 #' @export
 findOperator <- function(x, op, side) {
   side <- match.arg(tolower(side),
@@ -134,6 +137,8 @@ findOperator <- function(x, op, side) {
   if (inherits(x, "name")) {
     ## This is a specific variable, we never found the operator going
     ## down this branch of the tree.
+    return(NULL)
+  } else if (is.null(x)) {
     return(NULL)
   } else if (inherits(x, "call") |
              inherits(x, "formula") |

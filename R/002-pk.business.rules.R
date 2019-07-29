@@ -35,7 +35,7 @@ pk.business <- function(FUN,
 #' @param na.rm Should missing values be removed?
 #' @return The scalar value of the geometric mean, geometric standard 
 #'   deviation, or geometric coefficient of variation.
-#' @aliases geosd, geocv
+#' @aliases geosd geocv
 #' @references Kirkwood T. B.L. Geometric means and measures of
 #' dispersion. Biometrics 1979; 35: 908-909
 #' @export
@@ -54,12 +54,14 @@ geomean <- function(x, na.rm=FALSE) {
   }
 }
 
-#' @describeIn geomean Compute the geometric standard deviation.
+#' @describeIn geomean Compute the geometric standard deviation,
+#'   \code{exp(sd(log(x)))}.
 #' @export
 geosd <- function(x, na.rm=FALSE)
   exp(stats::sd(log(x), na.rm=na.rm))
 
-#' @describeIn geomean Compute the geometric coefficient of variation.
+#' @describeIn geomean Compute the geometric coefficient of variation,
+#'   \code{sqrt(exp(sd(log(x))^2)-1)*100}.
 #' @export
 geocv <- function(x, na.rm=FALSE)
   sqrt(exp(stats::sd(log(x), na.rm=na.rm)^2)-1)*100

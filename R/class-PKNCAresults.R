@@ -12,6 +12,7 @@
 #'   should have values of \code{NA} or \code{""} for concentrations to
 #'   include and non-empty text for concentrations to exclude.
 #' @return A PKNCAresults object with each of the above within.
+#' @family PKNCA objects
 #' @export
 PKNCAresults <- function(result, data, exclude) {
   ## Add all the parts into the object
@@ -35,6 +36,7 @@ PKNCAresults <- function(result, data, exclude) {
 #' @param out.format Should the output be 'long' (default) or 'wide'?
 #' @return A data frame of results
 #' @export
+#' @importFrom tidyr spread_
 as.data.frame.PKNCAresults <- function(x, ..., out.format=c('long', 'wide')) {
   ret <- x$result
   out.format <- match.arg(out.format)
@@ -127,7 +129,29 @@ roundingSummarize <- function(x, name) {
 #' @param ... Ignored.
 #' @return A data frame of NCA parameter results summarized according to the 
 #'   summarization settings.
-#' @seealso \code{\link{PKNCA.set.summary}}
+#' @seealso \code{\link{PKNCA.set.summary}}, \code{\link{print.summary_PKNCAresults}}
+#' @examples
+#' conc_obj <- PKNCAconc(as.data.frame(datasets::Theoph), conc~Time|Subject)
+#' d_dose <- unique(datasets::Theoph[datasets::Theoph$Time == 0,
+#'                                   c("Dose", "Time", "Subject")])
+#' dose_obj <- PKNCAdose(d_dose, Dose~Time|Subject)
+#' data_obj_automatic <- PKNCAdata(conc_obj, dose_obj)
+#' results_obj_automatic <- pk.nca(data_obj_automatic)
+#' # To get standard results run summary
+#' summary(results_obj_automatic)
+#' # To enable numeric conversion and extraction, do not give a spread function
+#' # and subsequently run as.numeric on the result columns.
+#' PKNCA.set.summary(
+#'   name=c("auclast", "cmax", "half.life", "aucinf.obs"),
+#'   point=business.geomean,
+#'   description="geometric mean"
+#' )
+#' PKNCA.set.summary(
+#'   name=c("tmax"),
+#'   point=business.median,
+#'   description="median"
+#' )
+#' summary(results_obj_automatic, not.requested.string="NA")
 #' @export
 summary.PKNCAresults <- function(object, ...,
                                  drop.group=object$data$conc$subject,
@@ -135,8 +159,10 @@ summary.PKNCAresults <- function(object, ...,
                                  not.requested.string=".",
                                  not.calculated.string="NC") {
   allGroups <- getGroups(object)
-  groups <- unique(c("start", "end",
-                     setdiff(names(allGroups), drop.group)))
+  if (any(c("start", "end") %in% drop.group)) {
+    warning("drop.group including start or end may result in incorrect groupings (such as inaccurate comparison of intervals).  Drop these with care.")
+  }
+  groups <- unique(setdiff(c("start", "end", names(allGroups)), drop.group))
   exclude_col <- object$exclude
   # Ensure that the exclude_col is NA instead of "" for subsequent processing.
   object$result[[exclude_col]] <- normalize_exclude(object$result[[exclude_col]])
@@ -159,7 +185,7 @@ summary.PKNCAresults <- function(object, ...,
   ret <- cbind(ret,
                resultDataCols)
   ret[,names(resultDataCols)] <- not.requested.string
-  ## Loop over every group that needs summarization
+  # Loop over every group that needs summarization
   for (i in seq_len(nrow(ret)))
     ## Loop over every column that needs summarziation
     for (n in names(resultDataCols)) {
@@ -172,8 +198,8 @@ summary.PKNCAresults <- function(object, ...,
       if (any(current.interval[,n])) {
         currentData <- merge(
           ret[i, groups, drop=FALSE],
-          object$result[object$result$PPTESTCD %in% n &
-                          is.na(object$result[[exclude_col]]),,drop=FALSE])
+          object$result[object$result$PPTESTCD %in% n,,drop=FALSE])
+        currentData$PPORRES[!is.na(currentData[[exclude_col]])] <- NA
         if (nrow(currentData) == 0) {
           warning("No results to summarize for ", n, " in result row ", i)
         } else {
@@ -226,5 +252,49 @@ summary.PKNCAresults <- function(object, ...,
     }
     ret$N <- as.character(ret$N)
   }
-  ret
+  # Extract the summarization descriptions for the caption
+  summary_descriptions <-
+    unlist(
+      lapply(
+        X=summaryInstructions[names(resultDataCols)],
+        FUN=`[[`,
+        i="description"
+      )
+    )
+  simplified_summary_descriptions <- summary_descriptions[!duplicated(summary_descriptions)]
+  for (idx in seq_along(simplified_summary_descriptions)) {
+    names(simplified_summary_descriptions)[idx] <-
+      paste(names(summary_descriptions)[summary_descriptions %in% simplified_summary_descriptions[idx]],
+            collapse=", ")
+  }
+  as_summary_PKNCAresults(
+    ret,
+    caption=paste(
+      names(simplified_summary_descriptions),
+      simplified_summary_descriptions,
+      sep=": ",
+      collapse="; "
+    )
+  )
+}
+
+as_summary_PKNCAresults <- function(data, caption) {
+  structure(
+    data,
+    caption=caption,
+    class=c("summary_PKNCAresults", "data.frame")
+  )
+}
+
+#' Print the results summary
+#' @param x A summary_PKNCAresults object
+#' @param ... passed to print.data.frame (\code{row.names} is always set to
+#'   \code{FALSE})
+#' @return \code{x} invisibly
+#' @seealso \code{\link{summary.PKNCAresults}}
+#' @export
+print.summary_PKNCAresults <- function(x, ...) {
+  print.data.frame(x, row.names=FALSE, ...)
+  cat(paste0("\nCaption: ", attr(x, "caption"), "\n"), fill=TRUE)
+  invisible(x)
 }

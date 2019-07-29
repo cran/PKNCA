@@ -71,6 +71,7 @@ assign("interval.cols", list(), envir=.PKNCAEnv)
 #'                  depends=c("cmax"))
 #' }
 #' @importFrom utils getAnywhere
+#' @family Interval specifications
 #' @export
 add.interval.col <- function(name,
                              FUN,
@@ -166,8 +167,8 @@ sort.interval.cols <- function() {
         ## be next.
         deps <- unique(unlist(current[[nextorder]]$depends))
         if (!all(deps %in% names(myorder)))
-          stop("Invalid dependencies for interval column:",
-               names(myorder)[nextorder])
+          stop("Invalid dependencies for interval column (please report this as a bug):", # nocov
+               names(myorder)[nextorder]) # nocov
         if (!any(is.na(myorder[deps]))) {
           myorder[nextorder] <- nextnum
           nextnum <- nextnum + 1
@@ -182,8 +183,11 @@ sort.interval.cols <- function() {
 #' Get the columns that can be used in an interval specification
 #' @return A list with named elements for each parameter.  Each list element
 #'   contains the parameter definition.
+#' @seealso \code{\link{check.interval.specification}} and the vignette "Selection of
+#'   Calculation Intervals"
 #' @examples
 #' get.interval.cols()
+#' @family Interval specifications
 #' @export
 get.interval.cols <- function() {
   sort.interval.cols()
