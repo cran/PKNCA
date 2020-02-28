@@ -1,9 +1,9 @@
-## ----setup, include=FALSE------------------------------------------------
+## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 library(PKNCA)
 library(dplyr)
 
-## ----generatecombs, echo=FALSE-------------------------------------------
+## ----generatecombs, echo=FALSE------------------------------------------------
 method.choices <- names(PKNCA:::interp.extrap.conc.dose.select)
 method.choices <-
   factor(method.choices, levels=method.choices, ordered=TRUE)
@@ -27,7 +27,7 @@ all_combs <-
   all_combs[do.call(order,
                     args=append(as.list(all_combs), list(na.last=FALSE))),]
 
-## ----methodsummary, results="asis", echo=FALSE---------------------------
+## ----methodsummary, results="asis", echo=FALSE--------------------------------
 methodorder <- names(sort(summary(factor(all_combs$Method)), decreasing=TRUE))
 
 for (n in methodorder) {
@@ -41,7 +41,7 @@ for (n in methodorder) {
   cat("\n")
 }
 
-## ----methodlisting, echo=FALSE-------------------------------------------
+## ----methodlisting, echo=FALSE------------------------------------------------
 knitr::kable(
   all_combs[,c("event_before", "event", "event_after", "Method")],
     row.names=FALSE,

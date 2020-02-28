@@ -1,7 +1,7 @@
-## ----check-ggplot, include=!requireNamespace("ggplot2"), results="asis"----
+## ----check-ggplot, include=!requireNamespace("ggplot2"), results="asis"-------
 cat("ggplot2 is required for this vignette to work correctly.  Please install the ggplot2 library and retry building the vignette.")
 
-## ----setup---------------------------------------------------------------
+## ----setup--------------------------------------------------------------------
 suppressPackageStartupMessages({
   library(PKNCA)
   library(dplyr)
@@ -18,7 +18,7 @@ my_conc <- data.frame(conc=c(0, 2.5, 3, 2, 1.5, 1.2, 1.1, 0, 0),
 my_conc$BLOQ <- my_conc$conc == 0
 my_conc$measured <- TRUE
 
-## ----setup-visualization, eval=requireNamespace("ggplot2")---------------
+## ----setup-visualization, eval=requireNamespace("ggplot2")--------------------
 ggplot(my_conc,
        aes(x=time,
            y=conc,
@@ -29,7 +29,7 @@ ggplot(my_conc,
   scale_x_continuous(breaks=my_conc$time) +
   theme(legend.position=c(0.8, 0.8))
 
-## ----calc_nca------------------------------------------------------------
+## ----calc_nca-----------------------------------------------------------------
 conc_obj <- PKNCAconc(my_conc, conc~time|subject)
 data_obj <- PKNCAdata(data.conc=conc_obj,
                       intervals=data.frame(start=0,
@@ -41,14 +41,14 @@ data_obj <- PKNCAdata(data.conc=conc_obj,
 results_obj <- pk.nca(data_obj)
 kable(as.data.frame(results_obj))
 
-## ----auclast-------------------------------------------------------------
+## ----auclast------------------------------------------------------------------
 tlast <- pk.calc.tlast(conc=my_conc$conc,
                        time=my_conc$time)
 tlast
 
 my_conc$include_auclast <- my_conc$time <= tlast
 
-## ----auclast-visualization, eval=requireNamespace("ggplot2")-------------
+## ----auclast-visualization, eval=requireNamespace("ggplot2")------------------
 ggplot(my_conc,
        aes(x=time,
            y=conc,
@@ -62,13 +62,13 @@ ggplot(my_conc,
   scale_x_continuous(breaks=my_conc$time) +
   theme(legend.position=c(0.8, 0.8))
 
-## ----aucall--------------------------------------------------------------
+## ----aucall-------------------------------------------------------------------
 first_after_tlast <- my_conc$time[my_conc$time > tlast][1]
 first_after_tlast
 
 my_conc$include_aucall <- my_conc$time <= first_after_tlast
 
-## ----aucall-visualization, eval=requireNamespace("ggplot2")--------------
+## ----aucall-visualization, eval=requireNamespace("ggplot2")-------------------
 ggplot(my_conc,
        aes(x=time,
            y=conc,
@@ -82,7 +82,7 @@ ggplot(my_conc,
   scale_x_continuous(breaks=my_conc$time) +
   theme(legend.position=c(0.8, 0.8))
 
-## ----aucinf, fig.width=6-------------------------------------------------
+## ----aucinf, fig.width=6------------------------------------------------------
 # Add one row to illustrate extrapolation beyond observed data
 my_conc <-
   rbind(my_conc,
@@ -112,7 +112,7 @@ my_conc$conc_aucinf.pred[my_conc$BLOQ | is.na(my_conc$BLOQ)] <-
 my_conc$conc_aucinf.pred[my_conc$time == tlast] <-
   as.data.frame(results_obj)$PPORRES[as.data.frame(results_obj)$PPTESTCD %in% "clast.pred"]
 
-## ----aucinf-visualization, eval=requireNamespace("ggplot2")--------------
+## ----aucinf-visualization, eval=requireNamespace("ggplot2")-------------------
 ggplot(my_conc[!is.na(my_conc$conc),],
        aes(x=time,
            y=conc,
@@ -149,13 +149,13 @@ ggplot(my_conc[!is.na(my_conc$conc),],
   theme(legend.position=c(0.8, 0.8)) +
   labs(title="Extrapolation using AUCinf,pred")
 
-## ----partial_auc_observed------------------------------------------------
+## ----partial_auc_observed-----------------------------------------------------
 # Interpolation not required
 data_obs_obj <- PKNCAdata(conc_obj, intervals=data.frame(start=0, end=2, auclast=TRUE))
 results_obs_obj <- pk.nca(data_obs_obj)
 kable(as.data.frame(results_obs_obj))
 
-## ----partial_auc_interpolated--------------------------------------------
+## ----partial_auc_interpolated-------------------------------------------------
 # Interpolation required
 my_conc_interp <-
   arrange(

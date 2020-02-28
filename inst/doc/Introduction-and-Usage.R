@@ -1,7 +1,7 @@
-## ----setup, echo=FALSE, include=FALSE------------------------------------
+## ----setup, echo=FALSE, include=FALSE-----------------------------------------
 library(PKNCA)
 
-## ----setup_data----------------------------------------------------------
+## ----setup_data---------------------------------------------------------------
 library(PKNCA)
 library(dplyr, quietly=TRUE)
 
@@ -35,25 +35,25 @@ results_obj <- pk.nca(data_obj)
 ## Summarize the results
 summary(results_obj)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 PKNCA.options()
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  PKNCA.options(default=TRUE)
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  PKNCA.set.summary(name="cmax",
 #                    point=business.geomean,
 #                    spread=business.geocv,
 #                    rounding=list(signif=3))
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  PKNCA.set.summary(name="tmax",
 #                    point=business.median,
 #                    spread=business.range,
 #                    rounding=list(round=2))
 
-## ----custom_summary_fun, eval=FALSE--------------------------------------
+## ----custom_summary_fun, eval=FALSE-------------------------------------------
 #  median_na <- function(x) {
 #    median(x, na.rm=TRUE)
 #  }
@@ -65,7 +65,7 @@ PKNCA.options()
 #                    spread=quantprob_na,
 #                    rounding=list(signif=3))
 
-## ----multi_summary_settings, eval=FALSE----------------------------------
+## ----multi_summary_settings, eval=FALSE---------------------------------------
 #  median_na <- function(x) {
 #    median(x, na.rm=TRUE)
 #  }
@@ -77,7 +77,7 @@ PKNCA.options()
 #                    spread=quantprob_na,
 #                    rounding=list(signif=3))
 
-## ----grouping, eval=FALSE------------------------------------------------
+## ----grouping, eval=FALSE-----------------------------------------------------
 #  ## Generate a faux multi-study, multi-analyte dataset.
 #  d_conc_parent <- d_conc
 #  d_conc_parent$Subject <- as.numeric(as.character(d_conc_parent$Subject))
@@ -108,7 +108,7 @@ PKNCA.options()
 #  results_obj <- pk.nca(data_obj)
 #  summary(results_obj)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 intervals <-
   data.frame(start=0, end=c(24, Inf),
              cmax=c(FALSE, TRUE),
@@ -116,10 +116,10 @@ intervals <-
              auclast=TRUE,
              aucinf.obs=c(FALSE, TRUE))
 
-## ----asis=TRUE, echo=FALSE-----------------------------------------------
+## ----asis=TRUE, echo=FALSE----------------------------------------------------
 knitr::kable(PKNCA.options()$single.dose.aucs)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## find.tau can work when all doses have the same interval...
 dose_times <- seq(0, 168, by=24)
 print(dose_times)
@@ -131,7 +131,7 @@ dose_times <- sort(c(seq(0, 168, by=24),
 print(dose_times)
 PKNCA::find.tau(dose_times)
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  intervals_manual <-
 #    data.frame(start=0, end=c(24, Inf),
 #               cmax=c(FALSE, TRUE),
@@ -141,7 +141,7 @@ PKNCA::find.tau(dose_times)
 #  data_obj <- PKNCAdata(conc_obj, dose_obj,
 #                        intervals=intervals_manual)
 
-## ----eval=FALSE----------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  data_obj <- PKNCAdata(conc_obj, dose_obj)
 #  intervals_manual <- data_obj$intervals
 #  intervals_manual$aucinf.obs[1] <- TRUE

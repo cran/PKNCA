@@ -1,4 +1,4 @@
-## ----setup, include=FALSE------------------------------------------------
+## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(echo=TRUE,
                       fig.width=6,
                       fig.height=4)
@@ -10,10 +10,10 @@ source("../tests/testthat/generate.data.R")
 scale_colour_discrete <- scale_colour_hue
 scale_fill_discrete <- scale_fill_hue
 
-## ----check-ggplot, include=!requireNamespace("ggplot2"), results="asis"----
+## ----check-ggplot, include=!requireNamespace("ggplot2"), results="asis"-------
 cat("ggplot2 is required for this vignette to work correctly.  Please install the ggplot2 library and retry building the vignette.")
 
-## ----intro_interval_plot, echo=FALSE-------------------------------------
+## ----intro_interval_plot, echo=FALSE------------------------------------------
 # Simulate concentration-time data and setup the PKNCAconc object
 d_conc <-
   PKNCAconc(
@@ -32,7 +32,7 @@ d_conc_multi <-
                 dose.times=seq(0, 168-24, by=24),
                 n.tau=1)
 
-## ----intro_interval_plot-visualization, eval=requireNamespace("ggplot2")----
+## ----intro_interval_plot-visualization, eval=requireNamespace("ggplot2")------
 # Plot the concentration-time data and the interval
 ggplot(d_conc_multi, aes(x=time, y=conc)) +
   geom_ribbon(data=d_conc_multi[d_conc_multi$time >= 144,],
@@ -44,13 +44,13 @@ ggplot(d_conc_multi, aes(x=time, y=conc)) +
   labs(x="Time Since First Dose (hr)",
        y="Concentration\n(arbitrary units)")
 
-## ----intro_interval_spec-------------------------------------------------
+## ----intro_interval_spec------------------------------------------------------
 intervals_manual <- data.frame(start=144, end=168, auclast=TRUE)
 knitr::kable(intervals_manual)
 
 PKNCAdata(d_conc, intervals=intervals_manual)
 
-## ----select_group--------------------------------------------------------
+## ----select_group-------------------------------------------------------------
 intervals_manual <-
   data.frame(
     treatment=c("Drug 1 Single", "Drug 1 Multiple", "Drug 1 Multiple"),
@@ -61,7 +61,7 @@ intervals_manual <-
   )
 knitr::kable(intervals_manual)
 
-## ----infinity_interval_plot, echo=FALSE----------------------------------
+## ----infinity_interval_plot, echo=FALSE---------------------------------------
 # Simulate concentration-time data and setup the PKNCAconc object
 d_conc <-
   PKNCAconc(
@@ -86,7 +86,7 @@ ggplot(d_conc$data[d_conc$data$time <= 48,], aes(x=time, y=conc)) +
   labs(x="Time Since First Dose (hr)",
        y="Concentration\n(arbitrary units)")
 
-## ----infinity_interval_spec----------------------------------------------
+## ----infinity_interval_spec---------------------------------------------------
 intervals_manual <-
   data.frame(
     start=0,
@@ -98,7 +98,7 @@ print(intervals_manual)
 
 my.data <- PKNCAdata(d_conc, intervals=intervals_manual)
 
-## ----multiple_intervals_plot, echo=FALSE---------------------------------
+## ----multiple_intervals_plot, echo=FALSE--------------------------------------
 # Simulate concentration-time data and setup the PKNCAconc object
 d_conc <-
   PKNCAconc(
@@ -132,7 +132,7 @@ ggplot(d_conc_multi, aes(x=time, y=conc)) +
   labs(x="Time Since First Dose (hr)",
        y="Concentration\n(arbitrary units)")
 
-## ----multiple_intervals_spec---------------------------------------------
+## ----multiple_intervals_spec--------------------------------------------------
 intervals_manual <-
   data.frame(
     start=c(0, 144),
@@ -143,7 +143,7 @@ knitr::kable(intervals_manual)
 
 my.data <- PKNCAdata(d_conc, intervals=intervals_manual)
 
-## ----overlapping_intervals_plot, echo=FALSE------------------------------
+## ----overlapping_intervals_plot, echo=FALSE-----------------------------------
 # Simulate concentration-time data and setup the PKNCAconc object
 d_conc <-
   PKNCAconc(
@@ -173,7 +173,7 @@ ggplot(d_conc$data, aes(x=time, y=conc)) +
   labs(x="Time Since First Dose (hr)",
        y="Concentration\n(arbitrary units)")
 
-## ----overlapping_intervals_spec------------------------------------------
+## ----overlapping_intervals_spec-----------------------------------------------
 intervals_manual <-
   data.frame(
     start=0,
@@ -185,7 +185,7 @@ knitr::kable(intervals_manual)
 
 my.data <- PKNCAdata(d_conc, intervals=intervals_manual)
 
-## ----interval_yes_no, echo=FALSE, eval=requireNamespace("ggplot2")-------
+## ----interval_yes_no, echo=FALSE, eval=requireNamespace("ggplot2")------------
 ggplot_intervals <- function(definition, intervals) {
   intervals$within <-
     c("No", "Yes")[intervals$interval.start >= min(definition$start.x) &
@@ -237,7 +237,7 @@ ggplot_intervals(interval_definition,
                  show_intervals)
 
 
-## ----parameters-available, echo=FALSE------------------------------------
+## ----parameters-available, echo=FALSE-----------------------------------------
 interval_spec <- get.interval.cols()
 interval_spec <- interval_spec[sort(names(interval_spec))]
 

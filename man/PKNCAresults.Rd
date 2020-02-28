@@ -23,10 +23,12 @@ A PKNCAresults object with each of the above within.
 }
 \description{
 This function should not be run directly.  The object is created
-for summarization and plotting.
+for summarization.
 }
 \seealso{
-Other PKNCA objects: \code{\link{PKNCAconc}},
-  \code{\link{PKNCAdata}}, \code{\link{PKNCAdose}}
+Other PKNCA objects: 
+\code{\link{PKNCAconc}()},
+\code{\link{PKNCAdata}()},
+\code{\link{PKNCAdose}()}
 }
 \concept{PKNCA objects}

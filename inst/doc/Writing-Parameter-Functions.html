@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Bill Denney" />
 
@@ -31,9 +30,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -202,7 +198,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -252,7 +249,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><code>options</code> are the PKNCA options used for the current calculation usually as defined by the <code>PKNCA.option</code> function (though these options may be over-ridden by the <code>options</code> argument to the <code>PKNCAdata</code> function.</li>
 <li>Or, any NCA parameters by name (as given by <code>names(get.interval.cols())</code>).</li>
 </ul>
-<p>The function should return either a scalar which is the value for the parameter (usually the case) or a data.frame with parameters named for each parameter calculated. For an example of returning a data.frame, see the <code>half.life</code> function. The return value may have an attribute of <code>exclude</code> (set by <code>attr(return_value, &quot;exclude&quot;) &lt;- &quot;reason&quot;</code>) which will be included in the <code>exclude</code> column for results.</p>
+<p>The function should return either a scalar which is the value for the parameter (usually the case) or a data.frame with parameters named for each parameter calculated. For an example of returning a data.frame, see the <code>half.life</code> function.</p>
+<p>The return value may have an attribute of <code>exclude</code> (set by <code>attr(return_value, &quot;exclude&quot;) &lt;- &quot;reason&quot;</code>). If the <code>exclude</code> attribute is set to a character string, then that string will be included in the <code>exclude</code> column for results. If any of the input parameters have an exclude attribute set, then those are also added to the <code>exclude</code> column. The exception to the setting of the <code>exclude</code> column is if the <code>exclude</code> attribute is <code>&quot;DO NOT EXCLUDE&quot;</code>, then the <code>exclude</code> column is set to <code>NA_character_</code>.</p>
 </div>
 <div id="best-practices" class="section level2">
 <h2>Best Practices</h2>

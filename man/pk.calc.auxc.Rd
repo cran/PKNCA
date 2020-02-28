@@ -16,11 +16,22 @@
 \alias{pk.calc.aumc.all}
 \title{A compute the Area Under the (Moment) Curve}
 \usage{
-pk.calc.auxc(conc, time, interval = c(0, Inf),
-  clast = pk.calc.clast.obs(conc, time, check = FALSE), lambda.z = NA,
-  auc.type = "AUClast", options = list(), method = NULL,
-  conc.blq = NULL, conc.na = NULL, check = TRUE, fun.linear, fun.log,
-  fun.inf)
+pk.calc.auxc(
+  conc,
+  time,
+  interval = c(0, Inf),
+  clast = pk.calc.clast.obs(conc, time, check = FALSE),
+  lambda.z = NA,
+  auc.type = "AUClast",
+  options = list(),
+  method = NULL,
+  conc.blq = NULL,
+  conc.na = NULL,
+  check = TRUE,
+  fun.linear,
+  fun.log,
+  fun.inf
+)
 
 pk.calc.auc(conc, time, ..., options = list())
 
@@ -28,11 +39,9 @@ pk.calc.auc.last(conc, time, ..., options = list())
 
 pk.calc.auc.inf(conc, time, ..., options = list(), lambda.z)
 
-pk.calc.auc.inf.obs(conc, time, clast.obs, ..., options = list(),
-  lambda.z)
+pk.calc.auc.inf.obs(conc, time, clast.obs, ..., options = list(), lambda.z)
 
-pk.calc.auc.inf.pred(conc, time, clast.pred, ..., options = list(),
-  lambda.z)
+pk.calc.auc.inf.pred(conc, time, clast.pred, ..., options = list(), lambda.z)
 
 pk.calc.auc.all(conc, time, ..., options = list())
 
@@ -42,11 +51,9 @@ pk.calc.aumc.last(conc, time, ..., options = list())
 
 pk.calc.aumc.inf(conc, time, ..., options = list(), lambda.z)
 
-pk.calc.aumc.inf.obs(conc, time, clast.obs, ..., options = list(),
-  lambda.z)
+pk.calc.aumc.inf.obs(conc, time, clast.obs, ..., options = list(), lambda.z)
 
-pk.calc.aumc.inf.pred(conc, time, clast.pred, ..., options = list(),
-  lambda.z)
+pk.calc.aumc.inf.pred(conc, time, clast.pred, ..., options = list(), lambda.z)
 
 pk.calc.aumc.all(conc, time, ..., options = list())
 }
@@ -100,7 +107,7 @@ measurement to infinite time (not required for AUC or AUMC functions.}
 passed to \code{pk.calc.auxc}}
 }
 \value{
-A numeric value for the AU(M)C
+A numeric value for the AU(M)C.
 }
 \description{
 Compute the area under the curve (AUC) and the area under the moment curve
@@ -113,6 +120,8 @@ parameter to \code{c(0, "last")}.
 
 Extrapolation beyond Clast occurs using the half-life and Clast,obs;
 Clast,pred is not yet supported.
+
+If all conc input are zero, then the AU(M)C is zero.
 }
 \section{Functions}{
 \itemize{
@@ -161,6 +170,7 @@ Press, 2000.  164-7.
 \seealso{
 \code{\link{clean.conc.blq}}
 
-Other AUC calculations: \code{\link{pk.calc.aucint}}
+Other AUC calculations: 
+\code{\link{pk.calc.aucint}()}
 }
 \concept{AUC calculations}

@@ -13,8 +13,18 @@ PKNCAconc(data, ...)
 
 \method{PKNCAconc}{tbl_df}(data, ...)
 
-\method{PKNCAconc}{data.frame}(data, formula, subject, time.nominal,
-  exclude, duration, volume, exclude_half.life, include_half.life, ...)
+\method{PKNCAconc}{data.frame}(
+  data,
+  formula,
+  subject,
+  time.nominal,
+  exclude,
+  duration,
+  volume,
+  exclude_half.life,
+  include_half.life,
+  ...
+)
 }
 \arguments{
 \item{data}{A data frame with concentration (or amount for
@@ -30,16 +40,14 @@ used to describe concentration or amount.)  One special aspect of the
 assumed to be the \code{subject}; see the documentation for the
 \code{subject} argument for exceptions to this assumption.}
 
-\item{subject}{The column indicating the subject number (used for
-plotting).  If not provided, this defaults to the beginning of the
-inner groups: For example with
-\code{concentration~time|Study+Subject/Analyte}, the inner groups
-start with the first grouping variable before a \code{/},
-\code{Subject}.  If there is only one grouping variable, it is
-assumed to be the subject (e.g. \code{concentration~time|Subject}),
-and if there are multiple grouping variables without a \code{/},
-subject is assumed to be the last one.  For single-subject data, it
-is assigned as \code{NULL}.}
+\item{subject}{The column indicating the subject number.  If not provided,
+this defaults to the beginning of the inner groups: For example with
+\code{concentration~time|Study+Subject/Analyte}, the inner groups start
+with the first grouping variable before a \code{/}, \code{Subject}.  If
+there is only one grouping variable, it is assumed to be the subject (e.g.
+\code{concentration~time|Subject}), and if there are multiple grouping
+variables without a \code{/}, subject is assumed to be the last one.  For
+single-subject data, it is assigned as \code{NULL}.}
 
 \item{time.nominal}{(optional) The name of the nominal time column
 (if the main time variable is actual time.  The \code{time.nominal}
@@ -69,7 +77,9 @@ A PKNCAconc object that can be used for automated NCA.
 Create a PKNCAconc object
 }
 \seealso{
-Other PKNCA objects: \code{\link{PKNCAdata}},
-  \code{\link{PKNCAdose}}, \code{\link{PKNCAresults}}
+Other PKNCA objects: 
+\code{\link{PKNCAdata}()},
+\code{\link{PKNCAdose}()},
+\code{\link{PKNCAresults}()}
 }
 \concept{PKNCA objects}

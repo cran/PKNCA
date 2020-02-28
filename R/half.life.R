@@ -115,24 +115,23 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
   }
   data$log_conc <- log(data$conc)
   data <- data[data$conc > 0,]
-  ## Prepare the return values
+  # Prepare the return values
   ret <- data.frame(
-    ## Terminal elimination slope
+    # Terminal elimination slope
     lambda.z=NA,
-    ## R-squared of terminal elimination slope
+    # R-squared of terminal elimination slope
     r.squared=NA,
-    ## Adjusted r-squared of terminal elimination slope
+    # Adjusted r-squared of terminal elimination slope
     adj.r.squared=NA,
-    ## First time point used in the slope estimation
-    ## (for plotting later)
+    # First time point used in the slope estimation (for plotting later)
     lambda.z.time.first=NA,
-    ## Number of points in the half-life estimate
+    # Number of points in the half-life estimate
     lambda.z.n.points=NA,
-    ## Concentration at Tlast predicted by the half-life
+    # Concentration at Tlast predicted by the half-life
     clast.pred=NA,
-    ## Half-life
+    # Half-life
     half.life=NA,
-    ## T1/2 span range
+    # T1/2 span ratio
     span.ratio=NA)
   ret_replacements <-
     c("lambda.z", "r.squared", "adj.r.squared", "lambda.z.time.first",
@@ -161,7 +160,12 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
       fit <- fit_half_life(data=data, tlast=ret$tlast)
       ret[,ret_replacements] <- fit[,ret_replacements]
     } else {
-      warning("No data to manually fit for half-life (all concentrations may be 0)")
+      warning("No data to manually fit for half-life (all concentrations may be 0 or excluded)")
+      ret <-
+        structure(
+          ret,
+          exclude="No data to manually fit for half-life (all concentrations may be 0 or excluded)"
+        )
     }
   } else if (nrow(dfK) >= min.hl.points) {
     ## If we have enough data to estimate a slope, then
@@ -170,7 +174,7 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
         r.squared=-Inf,
         adj.r.squared=-Inf,
         clast.pred=NA_real_,
-        lambda.z=NA_real_,
+        lambda.z=-Inf,
         lambda.z.n.points=NA_integer_,
         lambda.z.time.first=dfK$time,
         log_conc=dfK$log_conc,
@@ -194,23 +198,28 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
       half_lives_for_selection[i,names(fit)] <- fit
     }
     ## Find the best model
-    mask.best <-
-      half_lives_for_selection$adj.r.squared >
-      (max(half_lives_for_selection$adj.r.squared) - adj.r.squared.factor) &
-      half_lives_for_selection$lambda.z > 0
+    mask_best <-
+      half_lives_for_selection$lambda.z > 0 &
+      if (min.hl.points == 2 & nrow(half_lives_for_selection) == 2) {
+        warning("2 points used for half-life calculation")
+        TRUE
+      } else {
+        half_lives_for_selection$adj.r.squared >
+          (max(half_lives_for_selection$adj.r.squared) - adj.r.squared.factor)
+      }
     ## Missing values are not the best
-    mask.best[is.na(mask.best)] <- FALSE
-    if (sum(mask.best) > 1) {
+    mask_best[is.na(mask_best)] <- FALSE
+    if (sum(mask_best) > 1) {
       ## If more than one models qualify, choose the one with the
       ## most points used.
-      mask.best <-
-        (mask.best &
-           half_lives_for_selection$lambda.z.n.points == max(half_lives_for_selection$lambda.z.n.points[mask.best]))
+      mask_best <-
+        (mask_best &
+           half_lives_for_selection$lambda.z.n.points == max(half_lives_for_selection$lambda.z.n.points[mask_best]))
     }
     ## If the half-life fit, set all associated parameters
-    if (any(mask.best)) {
+    if (any(mask_best)) {
       ## Put in all the computed values
-      ret[,ret_replacements] <- half_lives_for_selection[mask.best, ret_replacements]
+      ret[,ret_replacements] <- half_lives_for_selection[mask_best, ret_replacements]
     }
   } else {
     attr(ret, "exclude") <-
@@ -240,15 +249,16 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
 #'   "adj.r.squared", "PROB", "lambda.z", "clast.pred", 
 #'   "lambda.z.n.points", "half.life", "span.ratio"
 #' @seealso \code{\link{pk.calc.half.life}}
+#' @importFrom stats .lm.fit
 fit_half_life <- function(data, tlast) {
-  fit <- stats::lm(log_conc~time, data=data, na.action=stats::na.exclude)
-  sfit <- summary(fit)
+  fit <- stats::.lm.fit(x=cbind(1, data$time), y=data$log_conc)
+  r_squared <- 1 - sum(fit$residuals^2)/sum((data$log_conc - mean(data$log_conc))^2)
   ret <-
     data.frame(
-      r.squared=sfit$r.squared,
-      adj.r.squared=adj.r.squared(sfit$r.squared, nrow(data)),
-      lambda.z=-stats::coef(fit)["time"],
-      clast.pred=exp(stats::predict(fit, newdata=data.frame(time=tlast))),
+      r.squared=r_squared,
+      adj.r.squared=adj.r.squared(r_squared, nrow(data)),
+      lambda.z=-fit$coefficients[2],
+      clast.pred=exp(sum(fit$coefficients*c(1, tlast))),
       lambda.z.time.first=min(data$time, na.rm=TRUE),
       lambda.z.n.points=nrow(data)
     )

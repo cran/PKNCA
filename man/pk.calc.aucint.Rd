@@ -10,23 +10,69 @@
 extrapolation of concentrations for the beginning and end of the
 interval.}
 \usage{
-pk.calc.aucint(conc, time, interval = NULL, start = NULL, end = NULL,
-  clast = pk.calc.clast.obs(conc, time), lambda.z = NA,
-  time.dose = NULL, route = "extravascular", duration.dose = 0,
-  method = NULL, auc.type = "AUClast", conc.blq = NULL,
-  conc.na = NULL, check = TRUE, ..., options = list())
+pk.calc.aucint(
+  conc,
+  time,
+  interval = NULL,
+  start = NULL,
+  end = NULL,
+  clast = pk.calc.clast.obs(conc, time),
+  lambda.z = NA,
+  time.dose = NULL,
+  route = "extravascular",
+  duration.dose = 0,
+  method = NULL,
+  auc.type = "AUClast",
+  conc.blq = NULL,
+  conc.na = NULL,
+  check = TRUE,
+  ...,
+  options = list()
+)
 
-pk.calc.aucint.last(conc, time, start = NULL, end = NULL, time.dose,
-  ..., options = list())
+pk.calc.aucint.last(
+  conc,
+  time,
+  start = NULL,
+  end = NULL,
+  time.dose,
+  ...,
+  options = list()
+)
 
-pk.calc.aucint.all(conc, time, start = NULL, end = NULL, time.dose,
-  ..., options = list())
+pk.calc.aucint.all(
+  conc,
+  time,
+  start = NULL,
+  end = NULL,
+  time.dose,
+  ...,
+  options = list()
+)
 
-pk.calc.aucint.inf.obs(conc, time, start = NULL, end = NULL, time.dose,
-  lambda.z, clast.obs, ..., options = list())
+pk.calc.aucint.inf.obs(
+  conc,
+  time,
+  start = NULL,
+  end = NULL,
+  time.dose,
+  lambda.z,
+  clast.obs,
+  ...,
+  options = list()
+)
 
-pk.calc.aucint.inf.pred(conc, time, start = NULL, end = NULL,
-  time.dose, lambda.z, clast.pred, ..., options = list())
+pk.calc.aucint.inf.pred(
+  conc,
+  time,
+  start = NULL,
+  end = NULL,
+  time.dose,
+  lambda.z,
+  clast.pred,
+  ...,
+  options = list()
+)
 }
 \arguments{
 \item{conc}{Concentration measured}
@@ -84,22 +130,19 @@ interval.
 }
 \section{Functions}{
 \itemize{
-\item \code{pk.calc.aucint.last}: Interpolate or extrapolate concentrations
-for AUClast
+\item \code{pk.calc.aucint.last}: Interpolate or extrapolate concentrations for AUClast
 
-\item \code{pk.calc.aucint.all}: Interpolate or extrapolate concentrations
-for AUCall
+\item \code{pk.calc.aucint.all}: Interpolate or extrapolate concentrations for AUCall
 
-\item \code{pk.calc.aucint.inf.obs}: Interpolate or extrapolate concentrations
-for AUCinf.obs
+\item \code{pk.calc.aucint.inf.obs}: Interpolate or extrapolate concentrations for AUCinf.obs
 
-\item \code{pk.calc.aucint.inf.pred}: Interpolate or extrapolate concentrations
-for AUCinf.pred
+\item \code{pk.calc.aucint.inf.pred}: Interpolate or extrapolate concentrations for AUCinf.pred
 }}
 
 \seealso{
 \code{\link{PKNCA.options}}, \code{\link{interp.extrap.conc.dose}}
 
-Other AUC calculations: \code{\link{pk.calc.auxc}}
+Other AUC calculations: 
+\code{\link{pk.calc.auxc}()}
 }
 \concept{AUC calculations}

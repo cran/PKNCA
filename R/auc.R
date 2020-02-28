@@ -10,6 +10,8 @@
 #' Extrapolation beyond Clast occurs using the half-life and Clast,obs;
 #' Clast,pred is not yet supported.
 #' 
+#' If all conc input are zero, then the AU(M)C is zero.
+#' 
 #' @param conc Concentration measured
 #' @param time Time of concentration measurement (must be monotonically
 #'   increasing and the same length as the concentration data)
@@ -43,7 +45,7 @@
 #'   measurement to infinite time (not required for AUC or AUMC functions.
 #' @param ... For functions other than \code{pk.calc.auxc}, these values are
 #'   passed to \code{pk.calc.auxc}
-#' @return A numeric value for the AU(M)C
+#' @return A numeric value for the AU(M)C.
 #' @aliases pk.calc.auc pk.calc.aumc pk.calc.auc.last
 #' @family AUC calculations
 #' @seealso \code{\link{clean.conc.blq}}
@@ -74,7 +76,7 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
                          conc.na=NULL,
                          check=TRUE,
                          fun.linear, fun.log, fun.inf) {
-  ## Check the inputs
+  # Check the inputs
   method <- PKNCA.choose.option(name="auc.method", value=method, options=options)
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
@@ -91,11 +93,11 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
     data <- data.frame(conc, time)
   }
   if (nrow(data) == 0) {
-    ## All the data were missing
+    # All the data were missing
     return(NA)
   } else if (all(data$conc %in% c(0, NA))) {
-    ## All the data were missing or 0
-    return(0)
+    # All the data were missing or 0 before excluding points
+    return(structure(0, exclude="DO NOT EXCLUDE"))
   }
   auc.type <- match.arg(auc.type, c("AUClast", "AUCinf", "AUCall"))
   if (interval[1] >= interval[2])
@@ -104,93 +106,99 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
         is.finite(interval[2]))
     warning("Requesting AUCinf when the end of the interval is not Inf")
   ##############################
-  ## Subset the data to the range of interest
-  interval.start <- interval[1]
-  interval.end <- interval[2]
-  ## Find the first time point
-  if (interval.start < min(data$time)) {
+  # Subset the data to the range of interest
+  interval_start <- interval[1]
+  interval_end <- interval[2]
+  # Find the first time point
+  if (interval_start < min(data$time)) {
     warning(sprintf(
       "Requesting an AUC range starting (%g) before the first measurement (%g) is not allowed",
-      interval.start, min(data$time)))
+      interval_start, min(data$time)))
     return(NA)
-  } else if (interval.start > max(data$time)) {
-    ## Give this as a warning, but allow it to continue
+  } else if (interval_start > max(data$time)) {
+    # Give this as a warning, but allow it to continue
     warning(sprintf("AUC start time (%g) is after the maximum observed time (%g)",
-                    interval.start, max(data$time)))
+                    interval_start, max(data$time)))
   }
-  ## Ensure that we have clean concentration and time data.  This
-  ## means that we need to make sure that we have our starting point.
-  ## Interpolation ensures that (and will give the same answer if it
-  ## already exists in the right form).
-  conc.start <-
+  # Ensure that we have clean concentration and time data.  This means that we
+  # need to make sure that we have our starting point. Interpolation ensures
+  # that (and will give the same answer if it already exists in the right form).
+  conc_start <-
     interp.extrap.conc(data$conc, data$time,
-                       time.out=interval.start,
+                       time.out=interval_start,
                        lambda.z=lambda.z,
                        interp.method=method,
                        extrap.method=auc.type,
                        check=FALSE)
-  ## Add that concentration and time to the vectors removing the
-  ## original version if it was there.
-  data <- rbind(data.frame(conc=conc.start,
-                           time=interval.start),
-                data[!(data$time %in% interval.start),])
-  ## * either have our ending point or the ending point is Inf
-  if (is.finite(interval.end)) {
-    conc.end <-
+  # Add that concentration and time to the vectors removing the
+  # original version if it was there.
+  data <- rbind(data.frame(conc=conc_start,
+                           time=interval_start),
+                data[!(data$time %in% interval_start),])
+  # * either have our ending point or the ending point is Inf
+  if (is.finite(interval_end)) {
+    conc_end <-
       interp.extrap.conc(data$conc, data$time,
-                         interval.end,
+                         interval_end,
                          interp.method=method,
                          extrap.method=auc.type,
                          check=FALSE)
-    ## !mask.end because we may be replacing an entry that is a 0.
-    data <- rbind(data[!(data$time %in% interval.end),],
-                  data.frame(conc=conc.end,
-                             time=interval.end))
+    # !mask.end because we may be replacing an entry that is a 0.
+    data <- rbind(data[!(data$time %in% interval_end),],
+                  data.frame(conc=conc_end,
+                             time=interval_end))
   }
-  ## Subset the conc and time data to the interval of interest
-  data <- subset(data, (interval.start <= time &
-                          time <= interval.end))
-  ## Set the overall tlast
+  # Subset the conc and time data to the interval of interest
+  data <- data[interval_start <= data$time & data$time <= interval_end, , drop=FALSE]
+  # Set the overall tlast
   tlast <- pk.calc.tlast(data$conc, data$time, check=FALSE)
-  if (is.na(tlast)) {
-    ## All concentrations are BLQ (note that this has to be checked
-    ## after full subsetting and interpolation to ensure that it is
-    ## still true)
-    if (all(data$conc %in% 0)) {
-      ret <- 0
-    } else {
-      stop("Unknown error with NA tlast but non-BLQ concentrations") # nocov
-    }
+  if (all(data$conc %in% 0)) {
+    # All the data were missing or 0 after excluding points
+    ret <- structure(0, exclude="DO NOT EXCLUDE")
+  } else if (is.na(tlast)) {
+    # All concentrations are BLQ (note that this has to be checked
+    # after full subsetting and interpolation to ensure that it is
+    # still true)
+    stop("Unknown error with NA tlast but non-BLQ concentrations") # nocov
   } else {
-    ## ############################
-    ## Compute the AUxC
-    ## Compute it in linear space from the start to Tlast
+    # ############################
+    # Compute the AUxC
+    # Compute it in linear space from the start to Tlast
     if (auc.type %in% "AUCall" &
         tlast != max(data$time)) {
-      ## Include the first point after tlast if it exists and we are
-      ## looking for AUCall
-      idx.1 <- 1:sum(data$time <= tlast)
+      # Include the first point after tlast if it exists and we are
+      # looking for AUCall
+      idx_1 <- seq_len(sum(data$time <= tlast))
     } else {
-      idx.1 <- 1:(sum(data$time <= tlast) - 1)
+      idx_1 <- seq_len(sum(data$time <= tlast) - 1)
     }
-    idx.2 <- idx.1 + 1
-    ret <- fun.linear(data$conc[idx.1], data$conc[idx.2],
-                      data$time[idx.1], data$time[idx.2])
-    if (method %in% "lin up/log down") {
-      ## Compute log down if required (and if the later point is not 0)
-      mask.down <- (data$conc[idx.2] < data$conc[idx.1] &
-                      data$conc[idx.2] != 0)
-      idx.1 <- idx.1[mask.down]
-      idx.2 <- idx.2[mask.down]
-      ret[mask.down] <- fun.log(data$conc[idx.1], data$conc[idx.2],
-                                data$time[idx.1], data$time[idx.2])
+    idx_2 <- idx_1 + 1
+    if (method %in% "linear") {
+      ret <- fun.linear(data$conc[idx_1], data$conc[idx_2],
+                        data$time[idx_1], data$time[idx_2])
+    } else if (method %in% "lin up/log down") {
+      # Compute log down if required (and if the later point is not 0)
+      mask_down <- (data$conc[idx_2] < data$conc[idx_1] &
+                      data$conc[idx_2] != 0)
+      mask_up <- !mask_down
+      idx_1_down <- idx_1[mask_down]
+      idx_2_down <- idx_2[mask_down]
+      idx_1_up <- idx_1[mask_up]
+      idx_2_up <- idx_2[mask_up]
+      ret <- rep(NA_real_, length(idx_1))
+      ret[mask_up] <-
+        fun.linear(data$conc[idx_1_up], data$conc[idx_2_up],
+                   data$time[idx_1_up], data$time[idx_2_up])
+      ret[mask_down] <-
+        fun.log(data$conc[idx_1_down], data$conc[idx_2_down],
+                data$time[idx_1_down], data$time[idx_2_down])
     } else if (!(method %in% "linear")) {
       # This should have already been caught, but the test exists to double-check
       stop("Invalid AUC integration method") # nocov
     }
     if (auc.type %in% "AUCinf") {
-      ## Whether AUCinf,obs or AUCinf,pred is calculated depends on if
-      ## clast,obs or clast,pred is passed in.
+      # Whether AUCinf,obs or AUCinf,pred is calculated depends on if clast,obs
+      # or clast,pred is passed in.
       ret[length(ret)+1] <- fun.inf(clast, tlast, lambda.z)
     }
     ret <- sum(ret)

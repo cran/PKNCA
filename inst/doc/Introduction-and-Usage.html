@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Bill Denney" />
 
@@ -119,9 +118,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -290,7 +286,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -361,12 +358,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <span id="cb1-30"><a href="#cb1-30"></a></span>
 <span id="cb1-31"><a href="#cb1-31"></a><span class="co">## Summarize the results</span></span>
 <span id="cb1-32"><a href="#cb1-32"></a><span class="kw">summary</span>(results_obj)</span></code></pre></div>
-<pre><code>##  start end  N     auclast        cmax               tmax   half.life
-##      0  24 12 74.6 [24.3]           .                  .           .
-##      0 Inf 12           . 8.65 [17.0] 1.14 [0.630, 3.55] 8.18 [2.12]
-##  aucinf.obs
-##           .
-##  115 [28.4]
+<pre><code>##  start end  N     auclast        cmax               tmax   half.life aucinf.obs
+##      0  24 12 74.6 [24.3]           .                  .           .          .
+##      0 Inf 12           . 8.65 [17.0] 1.14 [0.630, 3.55] 8.18 [2.12] 115 [28.4]
 ## 
 ## Caption: auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation</code></pre>
 </div>
@@ -430,48 +424,45 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ##   start end auclast aucall aumclast aumcall aucint.last aucint.last.dose
 ## 1     0  24    TRUE  FALSE    FALSE   FALSE       FALSE            FALSE
 ## 2     0 Inf   FALSE  FALSE    FALSE   FALSE       FALSE            FALSE
-##   aucint.all aucint.all.dose auclast.dn aucall.dn aumclast.dn aumcall.dn
-## 1      FALSE           FALSE      FALSE     FALSE       FALSE      FALSE
-## 2      FALSE           FALSE      FALSE     FALSE       FALSE      FALSE
-##    cmax  cmin  tmax tlast tfirst clast.obs cl.last cl.all     f mrt.last
-## 1 FALSE FALSE FALSE FALSE  FALSE     FALSE   FALSE  FALSE FALSE    FALSE
-## 2  TRUE FALSE  TRUE FALSE  FALSE     FALSE   FALSE  FALSE FALSE    FALSE
-##   mrt.iv.last vss.last vss.iv.last   cav ctrough   ptr  tlag deg.fluc
-## 1       FALSE    FALSE       FALSE FALSE   FALSE FALSE FALSE    FALSE
-## 2       FALSE    FALSE       FALSE FALSE   FALSE FALSE FALSE    FALSE
-##   swing  ceoi    ae clr.last clr.obs clr.pred    fe half.life r.squared
-## 1 FALSE FALSE FALSE    FALSE   FALSE    FALSE FALSE     FALSE     FALSE
-## 2 FALSE FALSE FALSE    FALSE   FALSE    FALSE FALSE      TRUE     FALSE
-##   adj.r.squared lambda.z lambda.z.time.first lambda.z.n.points clast.pred
-## 1         FALSE    FALSE               FALSE             FALSE      FALSE
-## 2         FALSE    FALSE               FALSE             FALSE      FALSE
-##   span.ratio cmax.dn cmin.dn clast.obs.dn clast.pred.dn cav.dn ctrough.dn
-## 1      FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
-## 2      FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
-##   thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last aucinf.obs
-## 1          FALSE             FALSE    FALSE       FALSE      FALSE
-## 2          FALSE             FALSE    FALSE       FALSE       TRUE
-##   aucinf.pred aumcinf.obs aumcinf.pred aucint.inf.obs aucint.inf.obs.dose
-## 1       FALSE       FALSE        FALSE          FALSE               FALSE
-## 2       FALSE       FALSE        FALSE          FALSE               FALSE
-##   aucint.inf.pred aucint.inf.pred.dose aucinf.obs.dn aucinf.pred.dn
-## 1           FALSE                FALSE         FALSE          FALSE
-## 2           FALSE                FALSE         FALSE          FALSE
-##   aumcinf.obs.dn aumcinf.pred.dn aucpext.obs aucpext.pred cl.obs cl.pred
-## 1          FALSE           FALSE       FALSE        FALSE  FALSE   FALSE
-## 2          FALSE           FALSE       FALSE        FALSE  FALSE   FALSE
-##   mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred vz.obs
-## 1   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE
-## 2   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE
-##   vz.pred vss.obs vss.pred vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred
-## 1   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-## 2   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-##   vd.obs vd.pred thalf.eff.obs thalf.eff.pred thalf.eff.iv.obs
-## 1  FALSE   FALSE         FALSE          FALSE            FALSE
-## 2  FALSE   FALSE         FALSE          FALSE            FALSE
-##   thalf.eff.iv.pred kel.obs kel.pred kel.iv.obs kel.iv.pred
-## 1             FALSE   FALSE    FALSE      FALSE       FALSE
-## 2             FALSE   FALSE    FALSE      FALSE       FALSE</code></pre>
+##   aucint.all aucint.all.dose auclast.dn aucall.dn aumclast.dn aumcall.dn  cmax
+## 1      FALSE           FALSE      FALSE     FALSE       FALSE      FALSE FALSE
+## 2      FALSE           FALSE      FALSE     FALSE       FALSE      FALSE  TRUE
+##    cmin  tmax tlast tfirst clast.obs cl.last cl.all     f mrt.last mrt.iv.last
+## 1 FALSE FALSE FALSE  FALSE     FALSE   FALSE  FALSE FALSE    FALSE       FALSE
+## 2 FALSE  TRUE FALSE  FALSE     FALSE   FALSE  FALSE FALSE    FALSE       FALSE
+##   vss.last vss.iv.last   cav ctrough   ptr  tlag deg.fluc swing  ceoi    ae
+## 1    FALSE       FALSE FALSE   FALSE FALSE FALSE    FALSE FALSE FALSE FALSE
+## 2    FALSE       FALSE FALSE   FALSE FALSE FALSE    FALSE FALSE FALSE FALSE
+##   clr.last clr.obs clr.pred    fe half.life r.squared adj.r.squared lambda.z
+## 1    FALSE   FALSE    FALSE FALSE     FALSE     FALSE         FALSE    FALSE
+## 2    FALSE   FALSE    FALSE FALSE      TRUE     FALSE         FALSE    FALSE
+##   lambda.z.time.first lambda.z.n.points clast.pred span.ratio cmax.dn cmin.dn
+## 1               FALSE             FALSE      FALSE      FALSE   FALSE   FALSE
+## 2               FALSE             FALSE      FALSE      FALSE   FALSE   FALSE
+##   clast.obs.dn clast.pred.dn cav.dn ctrough.dn thalf.eff.last thalf.eff.iv.last
+## 1        FALSE         FALSE  FALSE      FALSE          FALSE             FALSE
+## 2        FALSE         FALSE  FALSE      FALSE          FALSE             FALSE
+##   kel.last kel.iv.last aucinf.obs aucinf.pred aumcinf.obs aumcinf.pred
+## 1    FALSE       FALSE      FALSE       FALSE       FALSE        FALSE
+## 2    FALSE       FALSE       TRUE       FALSE       FALSE        FALSE
+##   aucint.inf.obs aucint.inf.obs.dose aucint.inf.pred aucint.inf.pred.dose
+## 1          FALSE               FALSE           FALSE                FALSE
+## 2          FALSE               FALSE           FALSE                FALSE
+##   aucinf.obs.dn aucinf.pred.dn aumcinf.obs.dn aumcinf.pred.dn aucpext.obs
+## 1         FALSE          FALSE          FALSE           FALSE       FALSE
+## 2         FALSE          FALSE          FALSE           FALSE       FALSE
+##   aucpext.pred cl.obs cl.pred mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred
+## 1        FALSE  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE
+## 2        FALSE  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE
+##   mrt.md.obs mrt.md.pred vz.obs vz.pred vss.obs vss.pred vss.iv.obs vss.iv.pred
+## 1      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE
+## 2      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE
+##   vss.md.obs vss.md.pred vd.obs vd.pred thalf.eff.obs thalf.eff.pred
+## 1      FALSE       FALSE  FALSE   FALSE         FALSE          FALSE
+## 2      FALSE       FALSE  FALSE   FALSE         FALSE          FALSE
+##   thalf.eff.iv.obs thalf.eff.iv.pred kel.obs kel.pred kel.iv.obs kel.iv.pred
+## 1            FALSE             FALSE   FALSE    FALSE      FALSE       FALSE
+## 2            FALSE             FALSE   FALSE    FALSE      FALSE       FALSE</code></pre>
 <p>And, to reset the current values to the library defaults, run the function with the default argument set to <code>TRUE</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">PKNCA.options</span>(<span class="dt">default=</span><span class="ot">TRUE</span>)</span></code></pre></div>
 <p>Each of the options is documented where it is used; for example, the first.tmax option is documented in the <code>pk.calc.tmax</code> function.</p>

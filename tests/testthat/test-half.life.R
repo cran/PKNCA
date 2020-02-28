@@ -3,25 +3,23 @@ context("Half-life")
 test_that("pk.calc.half.life", {
   ## Confirm that half-life is correctly calculated with a simple
   ## exponential decay
-  expect_warning(v1 <-
+  v1 <-
     pk.calc.half.life(conc=c(1, 0.5, 0.25),
                       time=c(0, 1, 2),
                       min.hl.points=3,
                       allow.tmax.in.half.life=TRUE,
-                      adj.r.squared.factor=0.0001)$half.life,
-                 regexp="essentially perfect fit: summary may be unreliable")
+                      adj.r.squared.factor=0.0001)$half.life
   expect_equal(v1, 1)
 
   ## Ensure that when input data is not checked, the code works
   ## correctly.
-  expect_warning(v2 <-
+  v2 <-
     pk.calc.half.life(conc=c(1, 0.5, 0.25),
                       time=c(0, 1, 2),
                       min.hl.points=3,
                       allow.tmax.in.half.life=TRUE,
                       adj.r.squared.factor=0.0001,
-                      check=FALSE)$half.life,
-                 regexp="essentially perfect fit: summary may be unreliable")
+                      check=FALSE)$half.life
                  
   expect_equal(v2, 1)
 
@@ -158,17 +156,48 @@ test_that("half-life manual point selection", {
                         allow.tmax.in.half.life=FALSE,
                         check=FALSE)$clast.pred,
     info="manually-selected half-life respects tlast and generates a different clast.pred")
-  expect_warning(manual_blq <-
-                   pk.calc.half.life(conc=rep(0, 6),
-                                     time=c(0, 1, 2, 3, 4, 5),
-                                     manually.selected.points=TRUE,
-                                     min.hl.points=3,
-                                     tlast=20,
-                                     allow.tmax.in.half.life=FALSE,
-                                     check=FALSE),
-                 regexp="No data to manually fit for half-life (all concentrations may be 0)",
-                 fixed=TRUE,
-                 info="All BLQ with manual point selection gives a warning")
+  expect_warning(
+    manual_blq <-
+      pk.calc.half.life(
+        conc=rep(0, 6),
+        time=c(0, 1, 2, 3, 4, 5),
+        manually.selected.points=TRUE,
+        min.hl.points=3,
+        tlast=20,
+        allow.tmax.in.half.life=FALSE,
+        check=FALSE
+      ),
+    regexp="No data to manually fit for half-life (all concentrations may be 0 or excluded)",
+    fixed=TRUE,
+    info="All BLQ with manual point selection gives a warning"
+  )
   expect_true(all(is.na(unlist(manual_blq))),
               info="All BLQ with manual point selection gives all NA results")
+})
+
+test_that("two-point half-life succeeds (fix #114)", {
+  expect_equal(
+    expect_warning(
+      pk.calc.half.life(
+        conc=c(1, 0.5),
+        time=c(0, 1),
+        min.hl.points=2,
+        allow.tmax.in.half.life=TRUE,
+        check=FALSE
+      ),
+      regexp="n must be > 2 for adj.r.squared"
+    ),
+    data.frame(
+      lambda.z=log(2),
+      r.squared=1,
+      adj.r.squared=NA_real_,
+      lambda.z.time.first=0,
+      lambda.z.n.points=2,
+      clast.pred=0.5,
+      half.life=1,
+      span.ratio=1,
+      tmax=0,
+      tlast=1
+    )
+  )
 })

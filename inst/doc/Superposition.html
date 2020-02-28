@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Bill Denney" />
 
@@ -119,9 +118,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -290,7 +286,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -715,15 +712,13 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </ul>
 <p>How the number of time points increases can be seen by comparing the time points for subject 1 in the steady-state single dosing and the complex dosing examples above.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>steady_state<span class="op">$</span>time[steady_state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>]</span></code></pre></div>
-<pre><code>##  [1]  0.00  0.25  0.37  0.57  1.12  2.02  3.82  5.10  7.03  9.05 12.12
-## [12] 24.00</code></pre>
+<pre><code>##  [1]  0.00  0.25  0.37  0.57  1.12  2.02  3.82  5.10  7.03  9.05 12.12 24.00</code></pre>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="kw">sum</span>(steady_state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] 12</code></pre>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>complex_interval_steady_state<span class="op">$</span>time[complex_interval_steady_state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>]</span></code></pre></div>
-<pre><code>##  [1]  0.00  0.25  0.37  0.57  1.12  2.00  2.02  2.25  2.37  2.57  3.12
-## [12]  3.82  4.00  4.02  4.25  4.37  4.57  5.10  5.12  5.82  6.02  7.03
-## [23]  7.10  7.82  9.03  9.05  9.10 11.03 11.05 12.12 13.05 14.12 16.12
-## [34] 24.00</code></pre>
+<pre><code>##  [1]  0.00  0.25  0.37  0.57  1.12  2.00  2.02  2.25  2.37  2.57  3.12  3.82
+## [13]  4.00  4.02  4.25  4.37  4.57  5.10  5.12  5.82  6.02  7.03  7.10  7.82
+## [25]  9.03  9.05  9.10 11.03 11.05 12.12 13.05 14.12 16.12 24.00</code></pre>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="kw">sum</span>(complex_interval_steady_state<span class="op">$</span>Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] 34</code></pre>
 </div>

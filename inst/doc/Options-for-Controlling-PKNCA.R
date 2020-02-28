@@ -1,8 +1,8 @@
-## ----setup, include=FALSE------------------------------------------------
+## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 library(PKNCA)
 
-## ----options, echo=FALSE, results='asis'---------------------------------
+## ----options, echo=FALSE, results='asis'--------------------------------------
 PKNCA.options(default=TRUE)
 opts <- PKNCA.options()
 for (n in names(opts)) {

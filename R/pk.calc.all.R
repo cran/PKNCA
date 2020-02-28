@@ -12,27 +12,37 @@
 #' \code{tmax=169-168=1}.
 #' 
 #' @param data A PKNCAdata object
+#' @param verbose Indicate, by \code{message()}, the current state of
+#'   calculation.
 #' @return A \code{PKNCAresults} object.
 #' @seealso \code{\link{PKNCAdata}}, \code{\link{PKNCA.options}},
 #'  \code{\link{summary.PKNCAresults}}, \code{\link{as.data.frame.PKNCAresults}},
 #'  \code{\link{exclude}}
 #' @export
-#' @importFrom utils capture.output
 #' @importFrom dplyr bind_rows
-pk.nca <- function(data) {
+#' @importFrom parallel mclapply
+#' @importFrom stats as.formula update.formula
+#' @importFrom utils capture.output
+pk.nca <- function(data, verbose=FALSE) {
   if (nrow(data$intervals) == 0) {
     warning("No intervals given; no calculations done.")
     results <- data.frame()
   } else {
+    if (verbose) message("Setting up dosing information")
     if (identical(NA, data$dose)) {
       # If no dose information is given, add NULL dose information.
       message("No dose information provided, calculations requiring dose will return NA.")
       tmp.dose.data <- unique(getGroups(data$conc))
       data$dose <-
-        PKNCAdose(data=tmp.dose.data,
-                  formula=as.formula(
-                    paste0(".~.|",
-                           paste(names(tmp.dose.data), collapse="+"))))
+        PKNCAdose(
+          data=tmp.dose.data,
+          formula=stats::as.formula(
+            paste0(
+              ".~.|",
+              paste(names(tmp.dose.data), collapse="+")
+            )
+          )
+        )
     }
     if (identical(all.vars(parseFormula(data$dose)$lhs), character())) {
       ## If dose amount is not given, give a false dose column with all 
@@ -42,12 +52,14 @@ pk.nca <- function(data) {
       data$dose$formula <-
         stats::update.formula(data$dose$formula, paste0(col.dose, "~."))
     }
+    if (verbose) message("Setting up options")
     ## Merge the options into the default options.
     tmp.opt <- PKNCA.options()
     tmp.opt[names(data$options)] <- data$options
     data$options <- tmp.opt
     splitdata <- split.PKNCAdata(data)
     # Calculations will only be performed when an interval is requested
+    if (verbose) message("Checking that intervals have concentration and dose data.")
     mask_has_interval <-
       sapply(splitdata,
              FUN=function(x) {
@@ -72,10 +84,14 @@ pk.nca <- function(data) {
       for (current_idx in which(mask_missing_dose)) {
         tmp_dose_data <- unique(getGroups(splitdata[[current_idx]]$conc))
         splitdata[[current_idx]]$dose <-
-          PKNCAdose(data=tmp_dose_data,
-                    formula=as.formula(
-                      paste0(".~.|",
-                             paste(names(tmp_dose_data), collapse="+"))))
+          PKNCAdose(
+            data=tmp_dose_data,
+            formula=stats::as.formula(
+              paste0(
+                ".~.|",
+                paste(names(tmp_dose_data), collapse="+"))
+            )
+          )
         missing_groups <- append(missing_groups, tmp_dose_data)
       }
       warning("The following intervals are missing dosing data:\n",
@@ -85,11 +101,16 @@ pk.nca <- function(data) {
                 collapse="\n"))
     }
     ## Calculate the results
+    if (verbose) message("Starting NCA calculations.")
     tmp.results <- list()
     tmp.results[mask_has_interval] <-
-      parallel::mclapply(X=splitdata[mask_has_interval],
-                         FUN=pk.nca.intervals,
-                         options=data$options)
+      parallel::mclapply(
+        X=splitdata[mask_has_interval],
+        FUN=pk.nca.intervals,
+        options=data$options,
+        verbose=verbose
+      )
+    if (verbose) message("Combining completed results.")
     ## Put the group parameters with the results
     for (i in seq_len(length(tmp.results))) {
       ## If no calculations were performed, the results are NULL.
@@ -118,7 +139,7 @@ pk.nca <- function(data) {
 ## further to the calculation routines.
 ##
 ## This is simply a helper for pk.nca
-pk.nca.intervals <- function(conc.dose, intervals, options) {
+pk.nca.intervals <- function(conc.dose, intervals, options, verbose=FALSE) {
   if (is.null(conc.dose$conc)) {
     ## No data; potentially placebo data (the warning would have
     ## already been generated from making the PKNCAdata object.
@@ -298,7 +319,7 @@ pk.nca.intervals <- function(conc.dose, intervals, options) {
 #'   parameters for the \code{interval}
 #'
 #' @seealso \code{\link{check.interval.specification}}
-#' @importFrom stats setNames
+#' @importFrom stats na.omit setNames
 #' @export
 pk.nca.interval <- function(conc, time, volume, duration.conc,
                             dose, time.dose, duration.dose, route,
@@ -338,6 +359,7 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
   for (n in names(all.intervals))
     if (interval[[1,n]] & !is.na(all.intervals[[n]]$FUN)) {
       call.args <- list()
+      exclude_from_argument <- character(0)
       ## Prepare to call the function by setting up its arguments.
       ## Ignore the "..." argument if it exists.
       arglist <- setdiff(names(formals(get(all.intervals[[n]]$FUN))),
@@ -395,6 +417,8 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
           call.args[[arg_formal]] <- options
         } else if (any(mask.arg <- ret$PPTESTCD %in% arg_mapped)) {
           call.args[[arg_formal]] <- ret$PPORRES[mask.arg]
+          exclude_from_argument <-
+            c(exclude_from_argument, ret$exclude[mask.arg])
         } else {
           ## Give an error if there is not a default argument.
           ## FIXME: checking if the class is a name isn't perfect.  
@@ -424,9 +448,18 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
       }
       # Do the calculation
       tmp.result <- do.call(all.intervals[[n]]$FUN, call.args)
+      # The handling of the exclude column is documented in the
+      # "Writing-Parameter-Functions.Rmd" vignette.  Document any changes to
+      # this section of code there.
       exclude_reason <-
-        if (!is.null(attr(tmp.result, "exclude"))) {
-          attr(tmp.result, "exclude")
+        stats::na.omit(c(
+          exclude_from_argument, attr(tmp.result, "exclude")
+        ))
+      exclude_reason <-
+        if (identical(attr(tmp.result, "exclude"), "DO NOT EXCLUDE")) {
+          NA_character_
+        } else if (length(exclude_reason) > 0) {
+          paste(exclude_reason, collapse="; ")
         } else {
           NA_character_
         }

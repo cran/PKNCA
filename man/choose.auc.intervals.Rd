@@ -4,8 +4,12 @@
 \alias{choose.auc.intervals}
 \title{Choose intervals to compute AUCs from time and dosing information}
 \usage{
-choose.auc.intervals(time.conc, time.dosing, options = list(),
-  single.dose.aucs = NULL)
+choose.auc.intervals(
+  time.conc,
+  time.dosing,
+  options = list(),
+  single.dose.aucs = NULL
+)
 }
 \arguments{
 \item{time.conc}{Time of concentration measurement}
@@ -27,7 +31,7 @@ The data frame may have zero rows if no intervals could be found.
 Intervals for AUC are selected by the following metrics:
 \enumerate{
   \item If only one dose is administered, use the
-        \code{PKNCA.options("single.dose.auc")}
+        \code{PKNCA.options("single.dose.aucs")}
   \item If more than one dose is administered, estimate the AUC
         between any two doses that have PK taken at both of the
         dosing times and at least one time  between the doses.
@@ -42,13 +46,15 @@ Intervals for AUC are selected by the following metrics:
 \code{\link{pk.calc.auc}}, \code{\link{pk.calc.aumc}},
 \code{\link{pk.calc.half.life}}, \code{\link{PKNCA.options}}
 
-Other Interval specifications: \code{\link{add.interval.col}},
-  \code{\link{check.interval.deps}},
-  \code{\link{check.interval.specification}},
-  \code{\link{get.interval.cols}},
-  \code{\link{get.parameter.deps}}
+Other Interval specifications: 
+\code{\link{add.interval.col}()},
+\code{\link{check.interval.deps}()},
+\code{\link{check.interval.specification}()},
+\code{\link{get.interval.cols}()},
+\code{\link{get.parameter.deps}()}
 
-Other Interval determination: \code{\link{find.tau}}
+Other Interval determination: 
+\code{\link{find.tau}()}
 }
 \concept{Interval determination}
 \concept{Interval specifications}

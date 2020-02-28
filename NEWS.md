@@ -4,9 +4,28 @@ will continue until then.  These will be especially noticable around
 the inclusion of IV NCA parameters and additional specifications of
 the dosing including dose amount and route.
 
+# PKNCA 0.9.2 (not released)
+
+* New feature: the `time_calc()` function will help convert time values to be
+  relative to events (such as calculating time after and before doses)
+* Fix issue summarizing results when "start" and "end" are dropped and there are
+  multiple interval rows matched for a single group.
+* Enable exclusions to be prevented when the input arguments suggest exclusion,
+  but the parameter calculating function may be aware of better information about
+  exclusion.
+* Ensure that exclusions are maintained if an earlier parameter is excluded
+  during the initial parameter calculations (Fix #112).
+* Two-point half-life calculation works and adjusted r-squared gives a warning
+  instead of an error with 2 points (Fix #114).
+* Half-life calculation time was decreased by using `.lm.fit()` instead of
+  `lm()` decreasing time for a full NCA run by ~30% (and half-life by ~50%).
+* For R version 4.0, much more care was taken not to create factors from strings
+  unless required (see
+  https://developer.r-project.org/Blog/public/2020/02/16/stringsasfactors/index.html)
+
 # PKNCA 0.9.1
 
-* Correct vignette building
+* Correct vignette building.
 
 # PKNCA 0.9.0
 
@@ -17,8 +36,10 @@ the dosing including dose amount and route.
   summary functions using `PKNCA.set.summary()`, you must now use the
   `description` option to set the description of the summary.
 * Breaking Change: ptr now accurately uses ctrough instead of cmin (fix #106)
-* Issue fixed where aucint* calculations now respect BLQ and NA rules like other calculations. (#104)
-* When half.life is not calculated due to insufficient number of points (default < 3), an exclusion reason is added. (#102)
+* Issue fixed where aucint* calculations now respect BLQ and NA rules like other
+  calculations. (#104)
+* When half.life is not calculated due to insufficient number of points (default
+  < 3), an exclusion reason is added. (#102)
 * tibbles now work as the interval argument for `PKNCAdata()` (fix #72)
 * Issue fixed with summarization of data that has exclusions.
   Exclusions are now correctly handled as missing instead of never
