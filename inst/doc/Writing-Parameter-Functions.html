@@ -269,7 +269,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><code>name</code> is the name of the parameter (as a character string).</li>
 <li><code>FUN</code> is the function name (as a character string).</li>
 <li><code>values</code> are the possible values for the interval column (currently only <code>TRUE</code> and <code>FALSE</code> are supported).</li>
-<li><code>depends</code> is a character vector of columns that must exist before this column can be created. Use this to tell PKNCA about calculation dependencies (parameter X must be calculated to be able to calculate paramter Y).</li>
+<li><code>depends</code> is a character vector of columns that must exist before this column can be created. Use this to tell PKNCA about calculation dependencies (parameter X must be calculated to be able to calculate parameter Y).</li>
 <li><code>formalsmap</code> remaps the (formal) function arguments. <code>formalsmap</code> is usually used when the same function may be used for multiple different parameters, for example the function <code>pk.calc.thalf.eff</code> is used to calculate the parameters <code>thalf.eff.obs</code>, <code>thalf.eff.pred</code>, <code>thalf.eff.last</code>, <code>thalf.eff.iv.obs</code>, <code>thalf.eff.iv.pred</code>, and <code>thalf.eff.iv.last</code> with different mean residence time inputs.</li>
 <li><code>desc</code> is a text description of the parameter.</li>
 </ul>

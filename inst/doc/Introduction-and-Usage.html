@@ -331,7 +331,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb1-3"><a href="#cb1-3"></a></span>
 <span id="cb1-4"><a href="#cb1-4"></a><span class="co">## Load the PK concentration data</span></span>
 <span id="cb1-5"><a href="#cb1-5"></a>d_conc &lt;-</span>
-<span id="cb1-6"><a href="#cb1-6"></a><span class="st">  </span>datasets<span class="op">::</span>Theoph <span class="op">%&gt;%</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="st">  </span><span class="kw">as.data.frame</span>(datasets<span class="op">::</span>Theoph) <span class="op">%&gt;%</span></span>
 <span id="cb1-7"><a href="#cb1-7"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Subject=</span><span class="kw">as.numeric</span>(<span class="kw">as.character</span>(Subject)))</span>
 <span id="cb1-8"><a href="#cb1-8"></a><span class="co">## Generate the dosing data</span></span>
 <span id="cb1-9"><a href="#cb1-9"></a>d_dose &lt;-<span class="st"> </span>d_conc[d_conc<span class="op">$</span>Time <span class="op">==</span><span class="st"> </span><span class="dv">0</span>,]</span>
@@ -374,7 +374,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="data-handling" class="section level1">
 <h1>Data Handling</h1>
 <p>After loading data, it must be in the right form. The minimum requirements are that concentration, dose, and time must all be numeric (and not factors). Grouping variables have no specific requirements; they can be any mode.</p>
-<p>Values below the limit of quantificaiton are coded as zeros (<code>0</code>), and missing values are coded as <code>NA</code>.</p>
+<p>Values below the limit of quantification are coded as zeros (<code>0</code>), and missing values are coded as <code>NA</code>.</p>
 </div>
 <div id="options-make-pknca-work-your-way" class="section level1">
 <h1>Options: Make PKNCA Work Your Way</h1>
@@ -547,7 +547,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="selecting-calculation-intervals" class="section level1">
 <h1>Selecting Calculation Intervals</h1>
-<p>All NCA calculations require the inverval over which they are calculated. When the concentration and dosing information are combined to the PKNCAdata object, intervals are automatically determined. The exception to this automatic determination is if the user provides intervals.</p>
+<p>All NCA calculations require the interval over which they are calculated. When the concentration and dosing information are combined to the PKNCAdata object, intervals are automatically determined. The exception to this automatic determination is if the user provides intervals.</p>
 <p>When selected either automatically or manually, intervals define at minimum a start time, an end time, and the parameters to be calculated. The parameter list is available from the <code>get.interval.cols</code> function. The parameters requested are specified by setting the entry in a data.frame as requested.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>intervals &lt;-</span>
 <span id="cb11-2"><a href="#cb11-2"></a><span class="st">  </span><span class="kw">data.frame</span>(<span class="dt">start=</span><span class="dv">0</span>, <span class="dt">end=</span><span class="kw">c</span>(<span class="dv">24</span>, <span class="ot">Inf</span>),</span>
@@ -868,7 +868,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </tr>
 </tbody>
 </table>
-<p>For multiple-dose studies, PKNCA selects one group at a time and compares the concentration and dosing times. When there is a concentation measurement between doses, an interval row is added. The dosing interval (<span class="math inline">\(\tau\)</span>) is determined by looking for pattern repeats within the dosing data using the <code>find.tau</code> function.</p>
+<p>For multiple-dose studies, PKNCA selects one group at a time and compares the concentration and dosing times. When there is a concentration measurement between doses, an interval row is added. The dosing interval (<span class="math inline">\(\tau\)</span>) is determined by looking for pattern repeats within the dosing data using the <code>find.tau</code> function.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="co">## find.tau can work when all doses have the same interval...</span></span>
 <span id="cb12-2"><a href="#cb12-2"></a>dose_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">168</span>, <span class="dt">by=</span><span class="dv">24</span>)</span>
 <span id="cb12-3"><a href="#cb12-3"></a><span class="kw">print</span>(dose_times)</span></code></pre></div>
