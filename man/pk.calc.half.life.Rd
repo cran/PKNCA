@@ -32,12 +32,11 @@ included in the return data frame if not given)}
 quantification (will be calculated and included in the return data 
 frame if not given)}
 
-\item{manually.selected.points}{Have the points being input been 
-manually selected?  The impact of setting this to \code{TRUE} is 
-that no selection for the best points will be done.  When
-\code{TRUE}, this option causes the options of
-\code{adj.r.squared.factor}, \code{min.hl.points}, and
-\code{allow.tmax.in.half.life} to be ignored.}
+\item{manually.selected.points}{Have the input points (\code{conc} and
+\code{time}) been manually selected?  The impact of setting this to
+\code{TRUE} is that no selection for the best points will be done.  When
+\code{TRUE}, this option causes the options of \code{adj.r.squared.factor},
+\code{min.hl.points}, and \code{allow.tmax.in.half.life} to be ignored.}
 
 \item{options}{List of changes to the default 
 \code{\link{PKNCA.options}} for calculations.}
@@ -86,6 +85,9 @@ with automated selection of the points for calculation (unless
 \code{manually.selected.points} is \code{TRUE}).
 }
 \details{
+See the "Half-Life Calculation" vignette for more details on the calculation
+methods used.
+
 If \code{manually.selected.points} is \code{FALSE} (default), the
 half-life is calculated by computing the best fit line for all points at or
 after tmax (based on the value of \code{allow.tmax.in.half.life}.  The best
@@ -93,8 +95,8 @@ half-life is chosen by the following rules in order:
 
 \itemize{
  \item{At least \code{min.hl.points} points included} 
- \item{A \code{lambda.z} > 0}
- \item{The best adjusted r-squared (within \code{adj.r.squared.factor})}
+ \item{A \code{lambda.z} > 0 and at the same time the best adjusted r-squared
+ (within \code{adj.r.squared.factor})}
  \item{The one with the most points included}
 }
 

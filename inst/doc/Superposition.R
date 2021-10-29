@@ -28,7 +28,7 @@ knitr::kable(subset(datasets::Theoph, Time == 0 & conc > 0),
 
 ## ----allownonzero-------------------------------------------------------------
 ## Correct nonzero concentrations at time 0 to be BLQ.
-theoph_corrected <- datasets::Theoph
+theoph_corrected <- as.data.frame(datasets::Theoph)
 theoph_corrected$conc[theoph_corrected$Time == 0] <- 0
 conc_obj_corrected <- PKNCAconc(theoph_corrected, conc~Time|Subject)
 

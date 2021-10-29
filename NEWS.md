@@ -4,6 +4,28 @@ will continue until then.  These will be especially noticeable around
 the inclusion of IV NCA parameters and additional specifications of
 the dosing including dose amount and route.
 
+# PKNCA 0.9.5 (in development)
+
+* The internals of how PKNCA performs calculations had a significant update. The
+  only user-visible change should be that PKNCA does not perform parallel
+  computations as of this version. Parallel computation is planned to return in
+  the near future.
+  * Breaking change:  As part of this change, the split methods for PKNCAconc
+    and PKNCAdose objects were removed along with the merge.splitList function.
+* Single-subject (ungrouped) analysis works without creating a dummy group (#74)
+* PKNCAconc objects are checked earlier for valid data (#154)
+* Add time_above parameter to calculate time above a given concentration.
+* Fix numeric BLQ replacement when the value is a number and different values
+  are given for first, middle, and last (related to #145).  This only affects
+  datasets where BLQ is being replaced with a nonzero value (not a common
+  scenario).
+* Fix issue where intervals could not be tibbles (#141)
+* Fix minor issue where only the first exclusion reason would show in the
+  exclusion column and other reasons would be ignored (#113). Note that the
+  impact of this bug is minimal as the result would have been excluded from
+  summaries for the first reason found, but if there were multiple reasons for
+  exclusion the subsequent reasons would not be recorded.
+
 # PKNCA 0.9.4
 
 * Additional changes required for compatibility dplyr version 1.0 and CRAN

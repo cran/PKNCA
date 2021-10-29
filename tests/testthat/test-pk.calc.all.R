@@ -33,11 +33,12 @@ test_that("pk.nca", {
   myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
   mydose.nodose <- PKNCAdose(tmpdose, formula=~time|treatment+ID)
   mydata.nodose <- PKNCAdata(myconc, mydose.nodose)
-  expect_equal(pk.nca(mydata.nodose)$result,
-               myresult$result,
-               info="missing dose information is handled without an issue")
-  
-  
+  expect_equal(
+    pk.nca(mydata.nodose)$result,
+    myresult$result,
+    info="missing dose information is handled without an issue"
+  )
+
   ## Test each of the pieces for myresult for accuracy
 
   expect_equal(myresult$data, {
@@ -49,12 +50,12 @@ test_that("pk.nca", {
   }, info="The data is just a copy of the input data plus an instantiation of the PKNCA.options")
 
   verify.result <-
-    data.frame(
+    tibble::tibble(
+      treatment="Trt 1",
+      ID=rep(c(1, 2), each=14),
       start=0,
       end=c(24, rep(Inf, 13),
             24, rep(Inf, 13)),
-      treatment="Trt 1",
-      ID=rep(c(1, 2), each=14),
       PPTESTCD=rep(c("auclast", "cmax", "tmax", "tlast", "clast.obs",
                      "lambda.z", "r.squared", "adj.r.squared",
                      "lambda.z.time.first", "lambda.z.n.points",
@@ -68,13 +69,16 @@ test_that("pk.nca", {
                 24.00, 0.3148, 0.05689, 0.9000, 0.8944,
                 5.000, 20.00, 0.3011, 12.18,
                 1.560, 19.56),
-      exclude=NA_character_,
-      stringsAsFactors=FALSE)
-  expect_equal(myresult$result, verify.result,
-               tol=0.001,
-               info=paste("The specific order of the levels isn't important--",
-                          "the fact that they are factors and that the set",
-                          "doesn't change is important."))
+      exclude=NA_character_
+    )
+  expect_equal(
+    myresult$result,
+    verify.result,
+    tolerance=0.001,
+    info=paste("The specific order of the levels isn't important--",
+               "the fact that they are factors and that the set",
+               "doesn't change is important.")
+  )
 
   ## Specifying new intervals
   mydata.newinterval <-
@@ -105,7 +109,7 @@ test_that("pk.nca", {
   verify.result.multi$start <- verify.result.multi$start + 2
   verify.result.multi$end <- verify.result.multi$end + 2
   expect_equal(myresult.multi$result, verify.result.multi,
-               tol=0.001,
+               tolerance=0.001,
                info="Shifted dosing works the same as un-shifted where time parameters like tmax and tlast are reported relative to the start of the interval")
 
   tmpconc <- generate.conc(2, 1, 0:24)
@@ -116,14 +120,14 @@ test_that("pk.nca", {
                       intervals=data.frame(start=0, end=Inf, cmax=TRUE))
   myresult <- pk.nca(mydata)
   expect_equal(myresult$result$PPORRES,
-               c(0.99981, 0.94097), tol=0.00001,
+               c(0.99981, 0.94097), tolerance=0.00001,
                info="Calculations work with a single row of intervals and a single parameter requested")
 
   mydata <- PKNCAdata(myconc, mydose,
                       intervals=data.frame(start=0, end=Inf, cl.obs=TRUE))
   myresult <- pk.nca(mydata)
   expect_equal(subset(myresult$result, PPTESTCD %in% "cl.obs")$PPORRES,
-               c(0.04640, 0.05111), tol=0.0001,
+               c(0.04640, 0.05111), tolerance=0.0001,
                info="PK intervals work with passing in dose as a parameter")
 
   tmpconc <- generate.conc(2, 1, 0:24)
@@ -134,7 +138,7 @@ test_that("pk.nca", {
                       intervals=data.frame(start=0, end=24, cmax=TRUE, cav=TRUE))
   myresult <- pk.nca(mydata)
   expect_equal(subset(myresult$result, PPTESTCD %in% "cav")$PPORRES,
-               c(0.5642, 0.5846), tol=0.0001,
+               c(0.5642, 0.5846), tolerance=0.0001,
                info="PK intervals work with passing in start and end as parameters")
   
   ## Ensure that the correct number of doses are included in parameters that use dosing.
@@ -149,7 +153,7 @@ test_that("pk.nca", {
   myresult <- pk.nca(mydata)
   expect_equal(myresult$result$PPORRES[myresult$result$PPTESTCD %in% "cl.obs"],
                4/myresult$result$PPORRES[myresult$result$PPTESTCD %in% "aucinf.obs"],
-               tol=0.0001,
+               tolerance=0.0001,
                info="The correct number of doses is selected for an interval (>=start and <end), 4 doses and not 5")
 
   mydata <- PKNCAdata(myconc, mydose,
@@ -157,7 +161,7 @@ test_that("pk.nca", {
   myresult <- pk.nca(mydata)
   expect_equal(myresult$result$PPORRES[myresult$result$PPTESTCD %in% "cl.last"],
                1/myresult$result$PPORRES[myresult$result$PPTESTCD %in% "auclast"],
-               tol=0.0001,
+               tolerance=0.0001,
                info="The correct number of doses is selected for an interval (>=start and <end), 1 dose and not 5")
 
   mydata <- PKNCAdata(myconc, mydose,
@@ -165,7 +169,7 @@ test_that("pk.nca", {
   myresult <- pk.nca(mydata)
   expect_equal(myresult$result$PPORRES[myresult$result$PPTESTCD %in% "cl.last"],
                NA/myresult$result$PPORRES[myresult$result$PPTESTCD %in% "auclast"],
-               tol=0.0001,
+               tolerance=0.0001,
                info="The correct number of doses is selected for an interval (>=start and <end), no doses selected")
   
 })
@@ -191,19 +195,24 @@ test_that("Calculations when no dose info is given", {
   tmpconc <- generate.conc(2, 1, 0:24)
   myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
   mydata <- PKNCAdata(myconc, intervals=data.frame(start=0, end=24, cmax=TRUE, cl.last=TRUE))
-  expect_message(myresult <- pk.nca(mydata),
-                 regexp="No dose information provided, calculations requiring dose will return NA.",
-                 info="Dosing information not required.")
-  expect_equal(myresult$result,
-               data.frame(start=0,
-                          end=24,
-                          treatment="Trt 1",
-                          ID=rep(1:2, each=3),
-                          PPTESTCD=rep(c("auclast", "cmax", "cl.last"), 2),
-                          PPORRES=c(13.5417297156528, 0.999812606062292, NA,
-                                    14.0305397438242, 0.94097296083447, NA),
-                          exclude=NA_character_,
-                          stringsAsFactors=FALSE))
+  expect_message(
+    myresult <- pk.nca(mydata),
+    regexp="No dose information provided, calculations requiring dose will return NA.",
+    info="Dosing information not required."
+  )
+  expect_equal(
+    myresult$result,
+    tibble::tibble(
+      treatment="Trt 1",
+      ID=rep(1:2, each=3),
+      start=0,
+      end=24,
+      PPTESTCD=rep(c("auclast", "cmax", "cl.last"), 2),
+      PPORRES=c(13.5417297156528, 0.999812606062292, NA,
+                14.0305397438242, 0.94097296083447, NA),
+      exclude=NA_character_
+    )
+  )
 })
 
 test_that("pk.nca with exclusions", {
@@ -246,7 +255,7 @@ test_that("pk.calc.all with duration.dose required", {
   myresult <- pk.nca(mydata)
   expect_equal(myresult$result$PPORRES[myresult$result$PPTESTCD %in% "mrt.iv.last"],
                c(10.36263, 10.12515),
-               tol=1e-5,
+               tolerance=1e-5,
                info="duration.dose is used when requested")
 })
 
@@ -279,14 +288,29 @@ test_that("No interval requested (e.g. for placebo)", {
   tmpdose <- generate.dose(tmpconc)
   myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
   mydose <- PKNCAdose(tmpdose, formula=dose~time|treatment+ID)
-  mydata <-  PKNCAdata(myconc, mydose,
-                       intervals=data.frame(treatment="Trt 3", start=0, end=24, cmax=TRUE,
-                                            stringsAsFactors=FALSE))
-  expect_message(myresult <- pk.nca(mydata),
-                 regexp="2 groups have no interval calculations requested.",
-                 info="No intervals apply to a group provides a message.")
-  expect_equal(nrow(as.data.frame(myresult)), 0,
-               info="No rows were generated when no intervals applied")
+  mydata <-
+    PKNCAdata(
+      myconc, mydose,
+      intervals=
+        data.frame(
+          treatment="Trt 3", start=0, end=24, cmax=TRUE,
+          stringsAsFactors=FALSE
+        )
+    )
+  expect_warning(
+    pk.nca(mydata),
+    regexp="treatment=Trt 1; ID=1: No intervals for data"
+  )
+  expect_warning(
+    myresult <- pk.nca(mydata),
+    regexp="All results generated warnings or errors; no results generated",
+    info="No intervals apply to a group provides a message."
+  )
+  expect_equal(
+    nrow(as.data.frame(myresult)),
+    0,
+    info="No rows were generated when no intervals applied"
+  )
 })
 
 test_that("Volume-related calculations", {
@@ -353,10 +377,7 @@ test_that("Missing dose info for some subjects gives a warning, not a difficult-
   mydata <-  PKNCAdata(myconc, mydose,
                        intervals=data.frame(start=0, end=24,
                                             cl.last=TRUE))
-  expect_warning(myresult <- pk.nca(mydata),
-                 regexp="The following intervals are missing dosing data:",
-                 fixed=TRUE,
-                 info="Warning is issued when dose data are missing for an interval but provided for some data.")
+  myresult <- pk.nca(mydata)
   expect_true(all(is.na(myresult$result[["PPORRES"]]) == c(FALSE, FALSE, FALSE, TRUE)) &
                 all(myresult$result[["PPTESTCD"]] == rep(c("auclast", "cl.last"), 2)),
               info="cl.last is not calculated when dose information is missing, but only for the subject where dose info is missing.")
@@ -389,15 +410,19 @@ test_that("Ensure that options are respected during pk.nca call", {
   linlog.mydata <- PKNCA::PKNCAdata(myconc, mydose, intervals = myintervals,
                                     options = list(auc.method = "lin up/log down"))
   linlog.results <- PKNCA::pk.nca(linlog.mydata)
-  expect_true(all.equal(linear.results$result$PPORRES[linear.results$result$PPTESTCD %in% "aucinf.obs" &
-                                                         linear.results$result$ID %in% 1 &
-                                                         linear.results$result$end %in% Inf],
-                         24.54319,
-                         tolerance=0.0001) &
-              all.equal(linlog.results$result$PPORRES[linlog.results$result$PPTESTCD %in% "aucinf.obs" &
-                                                        linlog.results$result$ID %in% 1 &
-                                                        linlog.results$result$end %in% Inf],
-                        23.68317,
-                        tolerance=0.0001),
-              info="linear and loglinear effects are calculated differently.")
+  expect_true(
+    all.equal(
+      linear.results$result$PPORRES[linear.results$result$PPTESTCD %in% "aucinf.obs" &
+                                      linear.results$result$ID %in% 1 &
+                                      linear.results$result$end %in% Inf],
+      24.54319,
+      tolerance=0.0001) &
+      all.equal(
+        linlog.results$result$PPORRES[linlog.results$result$PPTESTCD %in% "aucinf.obs" &
+                                        linlog.results$result$ID %in% 1 &
+                                        linlog.results$result$end %in% Inf],
+        23.68317,
+        tolerance=0.0001),
+    info="linear and loglinear effects are calculated differently."
+  )
 })

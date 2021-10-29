@@ -13,29 +13,35 @@ test_that("PKNCAresults generation", {
   mydata <- PKNCAdata(myconc, mydose)
   myresult <- pk.nca(mydata)
   
-  expect_equal(names(myresult),
-               c("result", "data", "exclude"),
-               info="Make sure that the result has the expected names (and only the expected names) in it.")
-  expect_true(checkProvenance(myresult),
-              info="Provenance exists and can be confirmed on results")
+  expect_equal(
+    names(myresult),
+    c("result", "data", "exclude"),
+    info="Make sure that the result has the expected names (and only the expected names) in it."
+  )
+  expect_true(
+    checkProvenance(myresult),
+    info="Provenance exists and can be confirmed on results"
+  )
   
   ## Test each of the pieces for myresult for accuracy
   
-  expect_equal(myresult$data, {
-    tmp <- mydata
-    ## The options should be the default options after the
-    ## calculations are done.
-    tmp$options <- PKNCA.options()
-    tmp
-  }, info="The data is just a copy of the input data plus an instantiation of the PKNCA.options")
+  expect_equal(
+    myresult$data, {
+      tmp <- mydata
+      ## The options should be the default options after the
+      ## calculations are done.
+      tmp$options <- PKNCA.options()
+      tmp
+    }, info="The data is just a copy of the input data plus an instantiation of the PKNCA.options"
+  )
   
   verify.result <-
-    data.frame(
+    tibble::tibble(
+      treatment="Trt 1",
+      ID=as.integer(rep(c(1, 2), each=14)),
       start=0,
       end=c(24, rep(Inf, 13),
             24, rep(Inf, 13)),
-      treatment="Trt 1",
-      ID=as.integer(rep(c(1, 2), each=14)),
       PPTESTCD=rep(c("auclast", "cmax", "tmax", "tlast", "clast.obs",
                      "lambda.z", "r.squared", "adj.r.squared",
                      "lambda.z.time.first", "lambda.z.n.points",
@@ -49,21 +55,34 @@ test_that("PKNCAresults generation", {
                 24.00, 0.3148, 0.05689, 0.9000, 0.8944,
                 5.000, 20.00, 0.3011, 12.18,
                 1.560, 19.56),
-      exclude=NA_character_,
-      stringsAsFactors=FALSE)
-  expect_equal(myresult$result, verify.result,
-               tol=0.001,
-               info="The specific order of the levels isn't important-- the fact that they are factors and that the set doesn't change is important.")
+      exclude=NA_character_
+    )
+  expect_equal(
+    myresult$result,
+    verify.result,
+    tolerance=0.001,
+    info="The specific order of the levels isn't important-- the fact that they are factors and that the set doesn't change is important."
+  )
   
   ## Test conversion to a data.frame
-  expect_equal(as.data.frame(myresult), verify.result, tol=0.001,
-               info="Conversion of PKNCAresults to a data.frame in long format (default long format)")
-  expect_equal(as.data.frame(myresult, out.format="long"), verify.result, tol=0.001,
-               info="Conversion of PKNCAresults to a data.frame in long format (specifying long format)")
-  expect_equal(as.data.frame(myresult, out.format="wide"),
-               tidyr::spread_(verify.result, "PPTESTCD", "PPORRES"),
-               tol=0.001,
-               info="Conversion of PKNCAresults to a data.frame in wide format (specifying wide format)")
+  expect_equal(
+    as.data.frame(myresult),
+    verify.result,
+    tolerance=0.001,
+    info="Conversion of PKNCAresults to a data.frame in long format (default long format)"
+  )
+  expect_equal(
+    as.data.frame(myresult, out.format="long"),
+    verify.result,
+    tolerance=0.001,
+    info="Conversion of PKNCAresults to a data.frame in long format (specifying long format)"
+  )
+  expect_equal(
+    as.data.frame(myresult, out.format="wide"),
+    tidyr::spread_(verify.result, "PPTESTCD", "PPORRES"),
+    tolerance=0.001,
+    info="Conversion of PKNCAresults to a data.frame in wide format (specifying wide format)"
+  )
 
   tmpconc <- generate.conc(2, 1, 0:24)
   tmpdose <- generate.dose(tmpconc)
@@ -81,9 +100,11 @@ test_that("PKNCAresults generation", {
   myresult12 <- pk.nca(mydata12)
   comparison_orig <- as.data.frame(myresult)
   comparison_12 <- as.data.frame(myresult12)
-  expect_equal(comparison_orig$PPORRES[comparison_orig$PPTESTCD %in% "aucint.inf.obs"],
-               comparison_12$PPORRES[comparison_12$PPTESTCD %in% "aucint.inf.obs"],
-               info="Time shift does not affect aucint calculations.")
+  expect_equal(
+    comparison_orig$PPORRES[comparison_orig$PPTESTCD %in% "aucint.inf.obs"],
+    comparison_12$PPORRES[comparison_12$PPTESTCD %in% "aucint.inf.obs"],
+    info="Time shift does not affect aucint calculations."
+  )
 })
 
 test_that("PKNCAresults has exclude, when applicable", {
@@ -288,7 +309,7 @@ test_that("dropping `start` and `end` from groups is allowed with a warning.", {
   
   expect_warning(
     current_summary <- summary(myresult, drop.group=c("ID", "start")),
-    regex="drop.group including start or end may result", fixed=TRUE
+    regexp="drop.group including start or end may result", fixed=TRUE
   )
   expect_false("start" %in% names(current_summary))
 })
@@ -411,7 +432,7 @@ test_that("ptr works as a parameter", {
   expect_equal(
     ptr_result$PPORRES[ptr_result$PPTESTCD %in% "ptr"],
     c(2.9055, 2.9885),
-    tol=0.0001
+    tolerance=0.0001
   )
 })
 
@@ -462,7 +483,32 @@ test_that("ctrough is correctly calculated", {
         )
     )
   expect_equal(
-    as.data.frame(pk.nca(data_obj))$PPORRES,
+    expect_message(
+      as.data.frame(pk.nca(data_obj))$PPORRES,
+      regexp="No dose information provided",
+    ),
     c(2^-6, NA_real_)
+  )
+})
+
+test_that("single subject, ungrouped data works (#74)", {
+  my_conc <- data.frame(time=0:6, conc=2^(0:-6))
+  conc_obj <- PKNCAconc(my_conc, conc~time)
+  data_obj <-
+    PKNCAdata(
+      data.conc=conc_obj,
+      intervals=
+        data.frame(
+          start=0,
+          end=Inf,
+          cmax=TRUE
+        )
+    )
+  expect_equal(
+    expect_message(
+      as.data.frame(pk.nca(data_obj))$PPORRES,
+      regexp="No dose information provided",
+    ),
+    1
   )
 })

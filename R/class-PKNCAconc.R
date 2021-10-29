@@ -29,10 +29,12 @@
 #'   typically used for urine or feces measurements.
 #' @param duration (optional) The duration of collection as is typically
 #'   used for concentration measurements in urine or feces.
-#' @param exclude_half.life,include_half.life Points to exclude from the
-#'   half-life calculation (still using normal selection rules for the
-#'   other points) or to include for the half-life (using specifically
-#'   those points and bypassing automatic point selection).
+#' @param exclude_half.life,include_half.life A character scalar for the column
+#'   name in the dataset of the points to exclude from the half-life calculation
+#'   (still using normal curve-stripping selection rules for the other points)
+#'   or to include for the half-life (using specifically those points and
+#'   bypassing automatic curve-stripping point selection).  See the "Half-Life
+#'   Calculation" vignette for more details on the use of these arguments.
 #' @param ... Ignored.
 #' @return A PKNCAconc object that can be used for automated NCA.
 #' @family PKNCA objects
@@ -68,6 +70,14 @@ PKNCAconc.data.frame <- function(data, formula, subject,
     stop("The left hand side of the formula must have exactly one variable")
   if (length(all.vars(parsedForm$rhs)) != 1)
     stop("The right hand side of the formula (excluding groups) must have exactly one variable")
+  # Do some general checking of the concentration and time data to give an early
+  # error if the data are not correct.  Do not check monotonic.time because the
+  # data may contain information for more than one subject.
+  check.conc.time(
+    conc=data[[as.character(parsedForm$lhs)]],
+    time=data[[as.character(parsedForm$rhs)]],
+    monotonic.time=FALSE
+  )
   ## Values must be unique (one value per measurement)
   key.cols <- c(all.vars(parsedForm$rhs),
                 all.vars(parsedForm$groupFormula))
@@ -218,6 +228,15 @@ getGroups.PKNCAconc <- function(object, form=formula(object), level,
   data[, grpnames, drop=FALSE]
 }
 
+#' Get grouping variables for a PKNCA object
+#'
+#' @param x The PKNCA object
+#' @return A character vector (possibly empty) of the grouping variables
+#' @exportS3Method dplyr::group_vars
+group_vars.PKNCAconc <- function(x) {
+  all.vars(parseFormula(as.formula(x))$groups)
+}
+
 #' Extract all the original data from a PKNCAconc or PKNCAdose object
 #' @param object R object to extract the data from.
 #' @export
@@ -265,7 +284,7 @@ setDuration.PKNCAconc <- function(object, duration, ...) {
 print.PKNCAconc <- function(x, n=6, summarize=FALSE, ...) {
   cat(sprintf("Formula for concentration:\n "))
   print(stats::formula(x), ...)
-  if (is.na(x$subject)) {
+  if (is.na(x$subject) || (length(x$subject) == 0)) {
     cat("As a single-subject dataset.\n")
   } else {
     cat(sprintf("With %d subjects defined in the '%s' column.\n",
@@ -308,74 +327,6 @@ print.PKNCAconc <- function(x, n=6, summarize=FALSE, ...) {
 
 #' @rdname print.PKNCAconc
 #' @export
-summary.PKNCAconc <- function(object, n=0, summarize=TRUE, ...)
+summary.PKNCAconc <- function(object, n=0, summarize=TRUE, ...) {
   print.PKNCAconc(object, n=n, summarize=summarize)
-
-#' Divide into groups
-#' 
-#' \code{split.PKNCAconc} divides data into individual groups defined by
-#' \code{\link{getGroups.PKNCAconc}}.
-#' 
-#' @param x the object to split
-#' @param f the groups to use for splitting the object
-#' @param drop logical indicating if levels that do not occur should be 
-#'   dropped.
-#' @param ... Ignored.
-#' @details If \code{x} is \code{NA} then a list with NA as the only
-#'   element and a "groupid" attribute of an empty data.frame is
-#'   returned.
-#' @return A list of objects with an attribute of groupid consisting of 
-#'   a data.frame with columns for each group.
-#' @export
-split.PKNCAconc <- function(x, f=getGroups(x), drop=TRUE, ...) {
-  if (!drop)
-    stop("drop must be TRUE")
-  if (identical(x, NA)) {
-    ret <- list(NA)
-    groupid <- data.frame(NA)[,c()]
-  } else {
-    ## Do the initial separation and extract the groupid information
-    f_new <-
-      as.character(
-        do.call(
-          paste,
-          append(as.list(f), list(sep="\n"))
-        )
-      )
-    ret <- split(x=x$data, f=f_new, drop=drop, sep="\n")
-    groupid <- unique(f)
-    ## reorder the output to align with the input grouping order
-    ret.idx <-
-      factor(
-        names(ret),
-        levels=do.call(paste, append(as.list(groupid), list(sep="\n"))),
-        ordered=TRUE
-      )
-    ret <- ret[order(ret.idx)]
-    ## Reset the data in each split to a "data" element within a list.
-    ret <-
-      lapply(
-        ret,
-        function(y, newclass) {
-          ret <- list(data=y)
-          class(ret) <- newclass
-          ret
-        },
-        newclass=class(x)
-      )
-    ## Add the other features back into the data
-    for (n in setdiff(names(x), "data")) {
-      ret <-
-        lapply(
-          ret,
-          function(x, name, value) {
-            x[[name]] <- value
-            x
-          },
-          name=n, value=x[[n]]
-        )
-    }
-  }
-  attr(ret, "groupid") <- groupid
-  ret
 }
