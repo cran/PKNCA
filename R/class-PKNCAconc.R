@@ -35,41 +35,48 @@
 #'   or to include for the half-life (using specifically those points and
 #'   bypassing automatic curve-stripping point selection).  See the "Half-Life
 #'   Calculation" vignette for more details on the use of these arguments.
+#' @param sparse Are the concentration-time data sparse PK (commonly used in
+#'   small nonclinical species or with terminal or difficult sampling) or dense
+#'   PK (commonly used in clinical studies or larger nonclinical species)?
 #' @param ... Ignored.
 #' @return A PKNCAconc object that can be used for automated NCA.
 #' @family PKNCA objects
 #' @export
-PKNCAconc <- function(data, ...)
+PKNCAconc <- function(data, ...) {
   UseMethod("PKNCAconc")
+}
 
 #' @rdname PKNCAconc
 #' @export
-PKNCAconc.default <- function(data, ...)
+PKNCAconc.default <- function(data, ...) {
   PKNCAconc.data.frame(as.data.frame(data), ...)
+}
 #' @rdname PKNCAconc
 #' @export
-PKNCAconc.tbl_df <- function(data, ...)
+PKNCAconc.tbl_df <- function(data, ...) {
   PKNCAconc.data.frame(as.data.frame(data), ...)
+}
 
 #' @rdname PKNCAconc
 #' @export
 PKNCAconc.data.frame <- function(data, formula, subject,
                                  time.nominal, exclude, duration, volume,
-                                 exclude_half.life, include_half.life, ...) {
-  ## The data must have... data
+                                 exclude_half.life, include_half.life, sparse=FALSE, ...) {
+  # The data must have... data
   if (nrow(data) == 0) {
     stop("data must have at least one row.")
   }
-  ## Verify that all the variables in the formula are columns in the
-  ## data.
+  # Verify that all the variables in the formula are columns in the data.
   if (!all(all.vars(formula) %in% names(data))) {
     stop("All of the variables in the formula must be in the data")
   }
   parsedForm <- parseFormula(formula, require.two.sided=TRUE)
-  if (length(all.vars(parsedForm$lhs)) != 1)
+  if (length(all.vars(parsedForm$lhs)) != 1) {
     stop("The left hand side of the formula must have exactly one variable")
-  if (length(all.vars(parsedForm$rhs)) != 1)
+  }
+  if (length(all.vars(parsedForm$rhs)) != 1) {
     stop("The right hand side of the formula (excluding groups) must have exactly one variable")
+  }
   # Do some general checking of the concentration and time data to give an early
   # error if the data are not correct.  Do not check monotonic.time because the
   # data may contain information for more than one subject.
@@ -78,15 +85,17 @@ PKNCAconc.data.frame <- function(data, formula, subject,
     time=data[[as.character(parsedForm$rhs)]],
     monotonic.time=FALSE
   )
-  ## Values must be unique (one value per measurement)
-  key.cols <- c(all.vars(parsedForm$rhs),
+  # Values must be unique (one value per measurement)
+  key_cols <- c(all.vars(parsedForm$rhs),
                 all.vars(parsedForm$groupFormula))
-  if (any(mask.dup <- duplicated(data[,key.cols])))
+  mask_dup <- duplicated(data[,key_cols])
+  if (any(mask_dup)) {
     stop("Rows that are not unique per group and time (column names: ",
-         paste(key.cols, collapse=", "),
+         paste(key_cols, collapse=", "),
          ") found within concentration data.  Row numbers: ",
-         paste(seq_along(mask.dup)[mask.dup], collapse=", "))
-  ## Assign the subject
+         paste(seq_along(mask_dup)[mask_dup], collapse=", "))
+  }
+  # Assign the subject
   if (missing(subject)) {
     tmp.groups <- all.vars(parsedForm$groupFormula)
     if (length(tmp.groups) == 1) {
@@ -96,17 +105,17 @@ PKNCAconc.data.frame <- function(data, formula, subject,
                                        "/",
                                        side="left"))
       if (length(subject) == 0) {
-        ## There is no / in the group formula, use the last element
+        # There is no / in the group formula, use the last element
         subject <- tmp.groups[length(tmp.groups)]
       } else if (length(subject) == 1) {
-        ## There is a subject given; use it as is.
+        # There is a subject given; use it as is.
       } else {
         stop("Unknown how to handle subject definition from the formula") # nocov
       }
     }
   } else {
-    ## Ensure that the subject is part of the data definition and a
-    ## scalar character string.
+    # Ensure that the subject is part of the data definition and a scalar
+    # character string.
     if (!is.character(subject))
       stop("subject must be a character string")
     if (!(length(subject) == 1))
@@ -114,14 +123,26 @@ PKNCAconc.data.frame <- function(data, formula, subject,
     if (!(subject %in% names(data)))
       stop("The subject parameter must map to a name in the data")
   }
-  ret <- list(data=data,
-              formula=formula,
-              subject=subject)
+  if (sparse) {
+    ret <-
+      list(
+        data_sparse=data,
+        formula=formula,
+        subject=subject
+      )
+  } else {
+    ret <-
+      list(
+        data=data,
+        formula=formula,
+        subject=subject
+      )
+  }
   class(ret) <- c("PKNCAconc", class(ret))
   if (missing(exclude)) {
-    ret <- setExcludeColumn(ret)
+    ret <- setExcludeColumn(ret, dataname=getDataName.PKNCAconc(ret))
   } else {
-    ret <- setExcludeColumn(ret, exclude=exclude)
+    ret <- setExcludeColumn(ret, exclude=exclude, dataname=getDataName.PKNCAconc(ret))
   }
   if (missing(volume)) {
     ret <- setAttributeColumn(ret, attr_name="volume", default_value=NA_real_)
@@ -164,8 +185,9 @@ PKNCAconc.data.frame <- function(data, formula, subject,
 #' @return A formula object
 #' @export
 #' @importFrom stats formula
-formula.PKNCAconc <- function(x, ...)
+formula.PKNCAconc <- function(x, ...) {
   x$formula
+}
 
 #' Extract the columns used in the formula (in order) from a PKNCAconc
 #' or PKNCAdose object.
@@ -177,8 +199,9 @@ formula.PKNCAconc <- function(x, ...)
 #' order.
 #' @export
 #' @importFrom stats model.frame
-model.frame.PKNCAconc <- function(formula, ...)
+model.frame.PKNCAconc <- function(formula, ...) {
   formula$data[, all.vars(formula$formula), drop=FALSE]
+}
 
 #' @export
 getDepVar.PKNCAconc <- function(x, ...) {
@@ -190,16 +213,16 @@ getIndepVar.PKNCAconc <- function(x, ...) {
   x$data[, all.vars(parseFormula(x)$rhs)]
 }
 
-#' Get the groups (right hand side after the \code{|} from a PKNCA 
+#' Get the groups (right hand side after the \code{|} from a PKNCA
 #' object).
-#' 
+#'
 #' @param object The object to extract the data from
-#' @param form The formula to extract the data from (defaults to the 
+#' @param form The formula to extract the data from (defaults to the
 #'   formula from \code{object})
-#' @param level optional.  If included, this specifies the level(s) of 
-#'   the groups to include.  If a numeric scalar, include the first 
-#'   \code{level} number of groups.  If a numeric vector, include each 
-#'   of the groups specified by the number.  If a character vector, 
+#' @param level optional.  If included, this specifies the level(s) of
+#'   the groups to include.  If a numeric scalar, include the first
+#'   \code{level} number of groups.  If a numeric vector, include each
+#'   of the groups specified by the number.  If a character vector,
 #'   include the named group levels.
 #' @param data The data to extract the groups from (defaults to the data
 #'   from \code{object})
@@ -207,8 +230,8 @@ getIndepVar.PKNCAconc <- function(x, ...) {
 #' @param ... Arguments passed to other getGroups functions
 #' @return A data frame with the (selected) group columns.
 #' @export
-getGroups.PKNCAconc <- function(object, form=formula(object), level,
-                                data=getData(object), sep) {
+getGroups.PKNCAconc <- function(object, form=stats::formula(object), level,
+                                data=as.data.frame(object), sep) {
   grpnames <- all.vars(parseFormula(form)$groups)
   if (!missing(level))
     if (is.factor(level) | is.character(level)) {
@@ -234,25 +257,27 @@ getGroups.PKNCAconc <- function(object, form=formula(object), level,
 #' @return A character vector (possibly empty) of the grouping variables
 #' @exportS3Method dplyr::group_vars
 group_vars.PKNCAconc <- function(x) {
-  all.vars(parseFormula(as.formula(x))$groups)
+  all.vars(parseFormula(stats::as.formula(x))$groups)
 }
 
-#' Extract all the original data from a PKNCAconc or PKNCAdose object
-#' @param object R object to extract the data from.
-#' @export
-#' @importFrom nlme getData
-getData.PKNCAconc <- function(object)
-  object$data
-
 #' @rdname getDataName
-getDataName.PKNCAconc <- function(object)
-  "data"
+getDataName.PKNCAconc <- function(object) {
+  if (is_sparse_pk(object)) {
+    "data_sparse"
+  } else {
+    "data"
+  }
+}
 
 setDuration.PKNCAconc <- function(object, duration, ...) {
   if (missing(duration)) {
     object <-
-      setAttributeColumn(object=object, attr_name="duration", default_value=0,
-                         message_if_default="Assuming point rather than interval concentration measurement")
+      setAttributeColumn(
+        object=object,
+        attr_name="duration",
+        default_value=0,
+        message_if_default="Assuming point rather than interval concentration measurement"
+      )
   } else {
     object <-
       setAttributeColumn(object=object, attr_name="duration", col_or_value=duration)
@@ -279,20 +304,28 @@ setDuration.PKNCAconc <- function(object, duration, ...) {
 #' @param \dots Arguments passed to \code{print.formula} and
 #' \code{print.data.frame}
 #' @export
-#' @importFrom stats formula
-#' @importFrom utils head
 print.PKNCAconc <- function(x, n=6, summarize=FALSE, ...) {
   cat(sprintf("Formula for concentration:\n "))
   print(stats::formula(x), ...)
-  if (is.na(x$subject) || (length(x$subject) == 0)) {
+  if (is_sparse_pk(x)) {
+    data_current <- x$data_sparse
+    is_sparse <- TRUE
+    cat("Data are sparse PK.\n")
+  } else {
+    data_current <- x$data
+    is_sparse <- FALSE
+    cat("Data are dense PK.\n")
+  }
+  single_subject <- is.na(x$subject) || (length(x$subject) == 0)
+  if (single_subject) {
     cat("As a single-subject dataset.\n")
   } else {
     cat(sprintf("With %d subjects defined in the '%s' column.\n",
-                length(unique(x$data[,x$subject])),
+                length(unique(data_current[,x$subject])),
                 x$subject))
   }
-  if ("time.nominal" %in% names(x)) {
-    cat("Nominal time column is: ", x$time.nominal, "\n", sep="")
+  if ("time.nominal" %in% names(x$columns)) {
+    cat("Nominal time column is: ", x$columns$time.nominal, "\n", sep="")
   } else {
     cat("Nominal time column is not specified.\n")
   }
@@ -300,33 +333,48 @@ print.PKNCAconc <- function(x, n=6, summarize=FALSE, ...) {
     cat("\n")
     grp <- getGroups(x)
     if (ncol(grp) > 0) {
-      tmp.summary <- data.frame(Group.Name=names(grp),
+      tmp_summary <- data.frame(Group.Name=names(grp),
                                 Count=0)
-      for (i in 1:ncol(grp))
-        tmp.summary$Count[i] <- nrow(unique(grp[,1:i,drop=FALSE]))
+      for (i in seq_len(ncol(grp))) {
+        tmp_summary$Count[i] <- nrow(unique(grp[,1:i,drop=FALSE]))
+      }
       cat("Group summary:\n")
-      names(tmp.summary) <- gsub("\\.", " ", names(tmp.summary))
-      print.data.frame(tmp.summary, row.names=FALSE)
+      names(tmp_summary) <- gsub("\\.", " ", names(tmp_summary))
+      print.data.frame(tmp_summary, row.names=FALSE)
     } else {
       cat("No groups.\n")
     }
   }
   if (n != 0) {
-    if (n >= nrow(x$data)) {
+    if (n >= nrow(data_current)) {
       cat("\nData for concentration:\n")
     } else if (n < 0) {
       cat(sprintf("\nFirst %d rows of concentration data:\n",
-                  nrow(x$data)+n))
+                  nrow(data_current)+n))
     } else {
       cat(sprintf("\nFirst %d rows of concentration data:\n",
                   n))
     }
-    print.data.frame(utils::head(x$data, n=n), ..., row.names=FALSE)
+    print.data.frame(utils::head(data_current, n=n), ..., row.names=FALSE)
   }
+}
+
+#' @rdname is_sparse_pk
+is_sparse_pk.PKNCAconc <- function(object) {
+  "data_sparse" %in% names(object)
 }
 
 #' @rdname print.PKNCAconc
 #' @export
 summary.PKNCAconc <- function(object, n=0, summarize=TRUE, ...) {
   print.PKNCAconc(object, n=n, summarize=summarize)
+}
+
+#' @export
+as.data.frame.PKNCAconc <- function(x, ...) {
+  if (is_sparse_pk(x)) {
+    x$data_sparse
+  } else {
+    x$data
+  }
 }

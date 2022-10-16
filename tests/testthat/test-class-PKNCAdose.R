@@ -1,6 +1,3 @@
-context("Class generation-PKNCAdose")
-
-library(dplyr)
 source("generate.data.R")
 
 test_that("PKNCAdose", {
@@ -17,12 +14,12 @@ test_that("PKNCAdose", {
   tmp.dose.study <- generate.dose(tmp.conc.study)
   tmp.dose.analyte.study <- generate.dose(tmp.conc.analyte.study)
   
-  ## Data exists
+  # Data exists
   expect_error(PKNCAdose(data.frame()),
                regexp="data must have at least one row.",
                info="PKNCAconc requires data")
 
-  ## Variables present
+  # Variables present
   expect_error(PKNCAdose(tmp.dose, formula=dosea~time|treatment+ID),
                regexp="The left side formula must be a variable in the data, empty, or '.'.",
                info="All formula parameters must be in the data (LHS)")
@@ -33,7 +30,7 @@ test_that("PKNCAdose", {
                regexp="All of the variables in the groups must be in the data",
                info="All formula parameters must be in the data (groups)")
   
-  ## Number of variables
+  # Number of variables
   expect_error(PKNCAdose(tmp.dose, formula=dose+ID~time|treatment+ID),
                regexp="The left side of the formula must have zero or one variable",
                info="The right number of parameters in the formula (LHS)")
@@ -44,7 +41,7 @@ test_that("PKNCAdose", {
                regexp="The right side of the formula \\(excluding groups\\) must have exactly one variable",
                info="The right number of parameters in the formula (RHS)")
   
-  ## Accept "." on either side of the ~
+  # Accept "." on either side of the ~
   expect_equal(PKNCAdose(tmp.dose, formula=.~time|treatment+ID),
                structure(list(
                  data=cbind(tmp.dose,
@@ -77,7 +74,7 @@ test_that("PKNCAdose", {
   expect_error(PKNCAdose(tmp.dose.na, formula=dose~time|treatment+ID),
                regexp="Some but not all values are missing for the independent variable",
                info="Dose time must either all or none be NA.")
-  ## Keys must be unique
+  # Keys must be unique
   bad.dose.analyte <- unique(tmp.conc.analyte[,c("treatment", "ID", "analyte")])
   bad.dose.analyte$dose <- 1
   bad.dose.analyte$time <- 0
@@ -132,7 +129,7 @@ test_that("PKNCAdose model.frame", {
                           treatment=rep(c("Trt 1", "Trt 2"), each=5),
                           ID=rep(1:5, 2),
                           stringsAsFactors=FALSE),
-               check.attributes=FALSE,
+               ignore_attr=TRUE,
                info="model.frame.PKNCAdose works with two-sided formula")
   
   mydose2 <- PKNCAdose(formula=~time|treatment+ID, data=tmp.dose)
@@ -148,7 +145,7 @@ test_that("PKNCAdose model.frame", {
                           treatment=rep(c("Trt 1", "Trt 2"), each=5),
                           ID=rep(1:5, 2),
                           stringsAsFactors=FALSE),
-               check.attributes=FALSE,
+               ignore_attr=TRUE,
                info="model.frame.PKNCAdose works with one-sided formula")
 
   mydose3 <- PKNCAdose(formula=.~time|treatment+ID, data=tmp.dose)
@@ -164,7 +161,7 @@ test_that("PKNCAdose model.frame", {
                           treatment=rep(c("Trt 1", "Trt 2"), each=5),
                           ID=rep(1:5, 2),
                           stringsAsFactors=FALSE),
-               check.attributes=FALSE,
+               ignore_attr=TRUE,
                info="model.frame.PKNCAdose works with one-sided formula ('.' on LHS)")
   
   mydose4 <- PKNCAdose(formula=dose~.|treatment+ID, data=tmp.dose)
@@ -180,10 +177,10 @@ test_that("PKNCAdose model.frame", {
                           treatment=rep(c("Trt 1", "Trt 2"), each=5),
                           ID=rep(1:5, 2),
                           stringsAsFactors=FALSE),
-               check.attributes=FALSE,
+               ignore_attr=TRUE,
                info="model.frame.PKNCAdose works with one-sided formula ('.' on RHS)")
   
-  ## You can't give multiple rows per group if you don't give time.
+  # You can't give multiple rows per group if you don't give time.
   expect_error(PKNCAdose(formula=dose~.|treatment+ID, data=rbind(tmp.dose, tmp.dose)),
                regexp="Rows that are not unique per group and time.*found within dosing data",
                info="Dosing must have unique values with time and group")
@@ -207,7 +204,6 @@ test_that("print.PKNCAdose", {
   tmp.dose.nogroup <- generate.dose(tmp.conc.nogroup)
   mydose.nogroup <- PKNCAdose(tmp.dose.nogroup, formula=dose~time)
   
-
   expect_output(print(mydose),
                 regexp="Formula for dosing:
  dose ~ time | treatment + ID
@@ -259,6 +255,11 @@ Number unique entries in each group:
          2  5",
                 fixed=TRUE,
                 info="Summary print.PKNCAdose works")
+  
+  expect_output(
+    print(mydose.nogroup, summarize=TRUE),
+    regexp="No groups"
+  )
 })
 
 test_that("PKNCAdose with exclusions", {
@@ -307,7 +308,7 @@ test_that("PKNCAdose route and duration", {
   tmp.dose.iv$route <- "intravascular"
   # Note that the column names are in a different order when specified
   # in the input data.frame or not.
-  expect_equivalent(
+  expect_equal(
     {
       tmp <- PKNCAdose(tmp.dose, formula=dose~time|treatment+ID, duration=0, route="intravascular")
       tmp$data <- tmp$data[,sort(names(tmp$data))]
@@ -317,7 +318,9 @@ test_that("PKNCAdose route and duration", {
       tmp <- PKNCAdose(tmp.dose.iv, formula=dose~time|treatment+ID, duration=0, route="route")
       tmp$data <- tmp$data[,sort(names(tmp$data))]
       tmp
-    })
+    },
+    ignore_attr=TRUE
+  )
 
 })
 
@@ -371,15 +374,31 @@ test_that("setDuration", {
   tmp.dose$nom_time <- tmp.dose$time
   rownames(tmp.dose) <- NULL
   mydose <- PKNCAdose(tmp.dose, formula=dose~time|treatment+ID)
-  expect_equal(setDuration(mydose),
-               mydose,
-               info="No changes with no arguments")
+  expect_message(
+    expect_equal(
+      setDuration(mydose),
+      mydose,
+      info="No changes with no arguments"
+    ),
+    class = "pknca_foundcolumn_duration"
+  )
   expect_error(setDuration(mydose, duration="foo", rate="bar"),
                regexp="Both duration and rate cannot be given at the same time",
                fixed=TRUE,
                info="Cannot give both duration and rate")
-  expect_error(setDuration(mydose, duration="foobar"),
-               regexp="duration must be numeric without missing (NA) or infinite values, and all values must be >= 0",
-               fixed=TRUE,
-               info="Cannot give both duration as non-numeric")
+  expect_warning(expect_error(
+    setDuration(mydose, duration="foobar"),
+    regexp="duration must be numeric without missing (NA) or infinite values, and all values must be >= 0",
+    fixed=TRUE,
+    info="Cannot give both duration as non-numeric"),
+    class = "pknca_foundcolumn_duration"
+  )
+  
+  duration_example <- suppressMessages(setDuration(mydose, rate=2))
+  expect_true(all(mydose$data$duration == 0))
+  expect_equal(
+    duration_example$data$duration,
+    duration_example$data$dose/2
+  )
+  expect_equal(duration_example$columns$duration, "duration")
 })

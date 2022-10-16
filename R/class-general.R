@@ -10,8 +10,9 @@ nlme::getGroups
 #' @return The vector of the dependent variable from the object.
 #' @family PKNCA object extractors
 #' @export
-getDepVar <- function(x, ...)
+getDepVar <- function(x, ...) {
   UseMethod("getDepVar", x)
+}
 
 #' Get the independent variable (right hand side of the formula) from
 #' a PKNCA object.
@@ -21,27 +22,28 @@ getDepVar <- function(x, ...)
 #' @return The vector of the independent variable from the object.
 #' @family PKNCA object extractors
 #' @export
-getIndepVar <- function(x, ...)
+getIndepVar <- function(x, ...) {
   UseMethod("getIndepVar", x)
+}
 
-#' Get the value from a column in a data frame if the value is a column 
-#' there, otherwise, the value should be a scalar or the length of the 
+#' Get the value from a column in a data frame if the value is a column
+#' there, otherwise, the value should be a scalar or the length of the
 #' data.
-#' 
+#'
 #' @param data A data.frame or similar object
-#' @param value A character string giving the name of a column in the 
-#'   \code{data}, a scalar, or a vector the same length as the 
+#' @param value A character string giving the name of a column in the
+#'   \code{data}, a scalar, or a vector the same length as the
 #'   \code{data}
 #' @param prefix The prefix to use if a column must be added (it will be
 #'   used as the full column name if it is not already in the dataset or
 #'   it will be prepended to the maximum column name if not.)
-#' @return A list with elements named "data", "name" giving the 
-#'   \code{data} with a column named "name" with the value in that 
+#' @return A list with elements named "data", "name" giving the
+#'   \code{data} with a column named "name" with the value in that
 #'   column.
 getColumnValueOrNot <- function(data, value, prefix="X") {
   col.name <- setdiff(c(prefix, paste(prefix, max(names(data)), sep=".")), names(data))[1]
   if (is.character(value) && length(value) == 1 && (value %in% names(data))) {
-    ## It was a column from the data.frame
+    # It was a column from the data.frame
     ret <- list(data=data, name=value)
   } else if (length(value) %in% c(1, nrow(data))) {
     data[[col.name]] <- value
@@ -59,17 +61,19 @@ getColumnValueOrNot <- function(data, value, prefix="X") {
 #' @family PKNCA object extractors
 #' @return A character scalar with the name of the data object (or NULL
 #'   if the method does not apply).
-getDataName <- function(object)
+#' @keywords Internal
+getDataName <- function(object) {
   UseMethod("getDataName")
+}
 
 #' @describeIn getDataName If no data name exists, returns NULL.
 getDataName.default <- function(object) {
   NULL
 }
 
-#' Add an attribute to an object where the attribute is added as a name 
+#' Add an attribute to an object where the attribute is added as a name
 #' to the names of the object.
-#' 
+#'
 #' @param object The object to set the attribute column on.
 #' @param attr_name The attribute name to set
 #' @param col_or_value If this exists as a column in the data, it is used as the
@@ -108,7 +112,10 @@ setAttributeColumn <- function(object, attr_name, col_or_value, col_name, defaul
   if (missing(col_name)) {
     col_name <- attr_name
     if (attr_name %in% names(object[[dataname]])) {
-      message("Found column named ", attr_name, ", using it for the attribute of the same name.")
+      rlang::inform(
+        message = paste0("Found column named ", attr_name, ", using it for the attribute of the same name."),
+        class = paste0("pknca_foundcolumn_", attr_name)
+      )
     }
   } else if (!is.character(col_name) | (length(col_name) != 1)) {
     stop("col_name must be a character scalar.")
@@ -143,13 +150,13 @@ setAttributeColumn <- function(object, attr_name, col_or_value, col_name, defaul
 }
 
 #' Retrieve the value of an attribute column.
-#' 
+#'
 #' @param object The object to extract the attribute value from.
 #' @param attr_name The name of the attribute to extract
 #' @param warn_missing Give a warning if the "attr"ibute or "column" is
 #'   missing.  Character vector with zero, one, or both of "attr" and
 #'   "column".
-#' @return The value of the attribute (or \code{NULL} if the attribute 
+#' @return The value of the attribute (or \code{NULL} if the attribute
 #'   is not set or the column does not exist)
 getAttributeColumn <- function(object, attr_name, warn_missing=c("attr", "column")) {
   if (length(setdiff(warn_missing, c("attr", "column")))) {

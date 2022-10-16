@@ -1,7 +1,18 @@
-context("Class generation-PKNCAconc")
-
-library(dplyr)
 source("generate.data.R")
+
+test_that("PKNCAconc expected errors", {
+  tmp.conc <- generate.conc(nsub=1, ntreat=1, time.points=0:24)
+  tmp.conc$foo <- "A"
+  expect_error(
+    PKNCAconc(conc~time, volume="foo", data=tmp.conc),
+    regexp="Volume must be numeric"
+  )
+  expect_error(
+    PKNCAconc(conc~time, duration="foo", data=tmp.conc),
+    regexp="duration must be numeric without missing (NA) or infinite values, and all values must be >= 0",
+    fixed=TRUE
+  )
+})
 
 test_that("PKNCAconc", {
   tmp.conc <- generate.conc(nsub=5, ntreat=2, time.points=0:24)
@@ -11,12 +22,12 @@ test_that("PKNCAconc", {
                                   nstudies=2)
   tmp.conc.analyte.study <- generate.conc(nsub=5, ntreat=2, time.points=0:24,
                                           nanalytes=2, nstudies=2)
-  ## Data exists
+  # Data exists
   expect_error(PKNCAconc(data.frame()),
                regexp="data must have at least one row.",
                info="PKNCAconc requires data")
   
-  ## Variables present
+  # Variables present
   expect_error(PKNCAconc(tmp.conc, formula=XXX~time|treatment+ID),
                regexp="All of the variables in the formula must be in the data",
                info="All formula parameters must be in the data (LHS)")
@@ -27,7 +38,7 @@ test_that("PKNCAconc", {
                regexp="All of the variables in the formula must be in the data",
                info="All formula parameters must be in the data (groups)")
 
-  ## Number of variables
+  # Number of variables
   expect_error(PKNCAconc(tmp.conc, formula=conc+ID~time|treatment+ID),
                regexp="The left hand side of the formula must have exactly one variable",
                info="The right number of parameters in the formula (LHS)")
@@ -35,7 +46,7 @@ test_that("PKNCAconc", {
                regexp="The right hand side of the formula \\(excluding groups\\) must have exactly one variable",
                info="The right number of parameters in the formula (RHS)")
 
-  ## Subject assignment
+  # Subject assignment
   expect_equal(PKNCAconc(tmp.conc.analyte, formula=conc~time|treatment+ID/analyte),
                PKNCAconc(tmp.conc.analyte, formula=conc~time|treatment+ID/analyte, subject="ID"))
   expect_error(PKNCAconc(tmp.conc.analyte, formula=conc~time|treatment+ID/analyte, subject=5),
@@ -45,7 +56,7 @@ test_that("PKNCAconc", {
   expect_error(PKNCAconc(tmp.conc.analyte, formula=conc~time|treatment+ID/analyte, subject="foo"),
                regexp="The subject parameter must map to a name in the data")
   
-  ## Keys must be unique
+  # Keys must be unique
   expect_error(PKNCAconc(tmp.conc.analyte, formula=conc~time|treatment+ID),
                regexp="Rows that are not unique per group and time",
                info="Duplicated key rows")
@@ -164,6 +175,27 @@ Nominal time column is not specified.",
                 Trt 1  1    0 0.0000000
                 Trt 1  1    1 0.7052248",
                 info="print.PKNCAconc accurately uses negative n argument.")
+  
+  tmp.conc <- generate.conc(nsub=1, ntreat=1, time.points=0:24)
+  myconc <- PKNCAconc(tmp.conc, formula=conc~time)
+  expect_output(
+    print(myconc),
+    regexp="As a single-subject dataset"
+  )
+  expect_output(
+    print(myconc, summarize=TRUE),
+    regexp="No groups\\."
+  )
+  expect_output(
+    print(myconc, n=1e6),
+    regexp="Data for concentration"
+  )
+  
+  myconc <- PKNCAconc(tmp.conc, formula=conc~time|treatment+ID, time.nominal="time")
+  expect_output(
+    print(myconc),
+    regexp = "Nominal time column is: time"
+  )
 })
 
 test_that("summary.PKNCAconc", {
@@ -257,7 +289,7 @@ test_that("PKNCAconc with nominal time added", {
 
 test_that("PKNCAconc with volume added", {
   tmp.conc <- generate.conc(nsub=2, ntreat=2, time.points=0:24)
-  tmp.conc$vol <- 1:nrow(tmp.conc)
+  tmp.conc$vol <- seq_len(nrow(tmp.conc))
   myconc <- PKNCAconc(tmp.conc, formula=conc~time|treatment+ID, volume="vol")
   expect_equal(myconc,
                structure(
@@ -285,12 +317,12 @@ test_that("PKNCAconc with volume added", {
                       columns=list(volume="volume",
                                    duration="duration")),
                  class=c("PKNCAconc", "list")))
-  myconc_manual_vol_vector <- PKNCAconc(tmp.conc, formula=conc~time|treatment+ID, volume=1:nrow(tmp.conc))
+  myconc_manual_vol_vector <- PKNCAconc(tmp.conc, formula=conc~time|treatment+ID, volume=seq_len(nrow(tmp.conc)))
   expect_equal(myconc_manual_vol_vector,
                structure(
                  list(data=cbind(tmp.conc,
                                  data.frame(exclude=NA_character_,
-                                            volume=1:nrow(tmp.conc),
+                                            volume=seq_len(nrow(tmp.conc)),
                                             duration=0,
                                             stringsAsFactors=FALSE)),
                       formula=conc~time|treatment+ID,
@@ -299,4 +331,65 @@ test_that("PKNCAconc with volume added", {
                       columns=list(volume="volume",
                                    duration="duration")),
                  class=c("PKNCAconc", "list")))
+})
+
+test_that("as.data.frame.PKNCAconc", {
+  tmp_conc <- generate.conc(nsub=1, ntreat=1, time.points=0:24)
+  result_conc <- tmp_conc
+  result_conc$exclude <- NA_character_
+  result_conc$volume <- NA_real_
+  result_conc$duration <- 0
+  expect_equal(
+    as.data.frame(PKNCAconc(conc~time, data=tmp_conc)),
+    result_conc
+  )
+})
+
+test_that("PKNCAconc with sparse data", {
+  d_sparse <-
+    data.frame(
+      id = c(1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L, 4L, 5L, 6L, 4L, 5L, 6L, 7L, 8L, 9L, 7L, 8L, 9L),
+      conc = c(0, 0, 0,  1.75, 2.2, 1.58, 4.63, 2.99, 1.52, 3.03, 1.98, 2.22, 3.34, 1.3, 1.22, 3.54, 2.84, 2.55, 0.3, 0.0421, 0.231),
+      time = c(0, 0, 0, 1, 1, 1, 6, 6, 6, 2, 2, 2, 10, 10, 10, 4, 4, 4, 24, 24, 24),
+      dose = c(100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100)
+    )
+  o_conc_sparse <- PKNCAconc(d_sparse, conc~time|id, sparse=TRUE)
+  expect_true("data_sparse" %in% names(o_conc_sparse))
+  expect_false("data" %in% names(o_conc_sparse))
+  
+  d_sparse_aug <- d_sparse
+  d_sparse_aug$exclude <- NA_character_
+  d_sparse_aug$volume <- NA_real_
+  d_sparse_aug$duration <- 0
+  expect_equal(
+    o_conc_sparse$data_sparse,
+    d_sparse_aug
+  )
+})
+
+test_that("print.PKNCAconc with sparse data", {
+  d_sparse <-
+    data.frame(
+      id = c(1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L, 4L, 5L, 6L, 4L, 5L, 6L, 7L, 8L, 9L, 7L, 8L, 9L),
+      conc = c(0, 0, 0,  1.75, 2.2, 1.58, 4.63, 2.99, 1.52, 3.03, 1.98, 2.22, 3.34, 1.3, 1.22, 3.54, 2.84, 2.55, 0.3, 0.0421, 0.231),
+      time = c(0, 0, 0, 1, 1, 1, 6, 6, 6, 2, 2, 2, 10, 10, 10, 4, 4, 4, 24, 24, 24),
+      dose = c(100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100)
+    )
+  o_conc_sparse <- PKNCAconc(d_sparse, conc~time|id, sparse=TRUE)
+  expect_output(print.PKNCAconc(o_conc_sparse),
+                regexp="Formula for concentration:
+ conc ~ time | id
+Data are sparse PK.
+With 9 subjects defined in the 'id' column.
+Nominal time column is not specified.
+
+First 6 rows of concentration data:
+ id conc time dose exclude volume duration
+  1 0.00    0  100    <NA>     NA        0
+  2 0.00    0  100    <NA>     NA        0
+  3 0.00    0  100    <NA>     NA        0
+  1 1.75    1  100    <NA>     NA        0
+  2 2.20    1  100    <NA>     NA        0
+  3 1.58    1  100    <NA>     NA        0"
+  )
 })

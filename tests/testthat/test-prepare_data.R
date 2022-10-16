@@ -1,5 +1,6 @@
-library(dplyr)
 source("generate.data.R")
+
+# prepare_* ####
 
 test_that("prepare_*", {
   tmp_conc <- generate.conc(nsub=5, ntreat=2, time.points=0:24)
@@ -19,7 +20,7 @@ test_that("prepare_*", {
     )
   )
   expect_equal(
-    prepare_PKNCAdose(o_dose),
+    prepare_PKNCAdose(o_dose, sparse=FALSE, subject_col=""),
     tidyr::nest(
       dplyr::mutate(
         tmp_dose,
@@ -32,8 +33,8 @@ test_that("prepare_*", {
   # No groups
   expect_equal(
     prepare_PKNCAintervals(.dat=PKNCA.options("single.dose.aucs")),
-    tibble(
-      data_intervals=list(as_tibble(PKNCA.options("single.dose.aucs")))
+    tibble::tibble(
+      data_intervals=list(tibble::as_tibble(PKNCA.options("single.dose.aucs")))
     )
   )
   # With groups
@@ -48,6 +49,8 @@ test_that("prepare_*", {
   )
 })
 
+# full_join for PKNCAconc, PKNCAdose, and PKNCAdata ####
+
 test_that("full_join for PKNCAconc, PKNCAdose, and PKNCAdata", {
   tmp_conc <- generate.conc(nsub=5, ntreat=2, time.points=0:24)
   tmp_dose <- generate.dose(tmp_conc)
@@ -59,7 +62,7 @@ test_that("full_join for PKNCAconc, PKNCAdose, and PKNCAdata", {
     full_join_PKNCAconc_PKNCAdose(o_conc, o_dose),
     dplyr::full_join(
       prepare_PKNCAconc(o_conc),
-      prepare_PKNCAdose(o_dose),
+      prepare_PKNCAdose(o_dose, sparse=FALSE, subject_col=""),
       by=c("treatment", "ID")
     )
   )
@@ -68,10 +71,10 @@ test_that("full_join for PKNCAconc, PKNCAdose, and PKNCAdata", {
     tidyr::crossing(
       dplyr::full_join(
         prepare_PKNCAconc(o_conc),
-        prepare_PKNCAdose(o_dose),
+        prepare_PKNCAdose(o_dose, sparse=FALSE, subject_col=""),
         by=c("treatment", "ID")
       ),
-      data_intervals=list(as_tibble(PKNCA.options("single.dose.aucs")))
+      data_intervals=list(tibble::as_tibble(PKNCA.options("single.dose.aucs")))
     )
   )
   # When intervals have no groups
@@ -86,20 +89,22 @@ test_that("full_join for PKNCAconc, PKNCAdose, and PKNCAdata", {
     tidyr::crossing(
       dplyr::full_join(
         prepare_PKNCAconc(o_conc),
-        prepare_PKNCAdose(o_dose),
+        prepare_PKNCAdose(o_dose, sparse=FALSE, subject_col=""),
         by=c("treatment", "ID")
       ),
-      data_intervals=list(as_tibble(PKNCA.options("single.dose.aucs")[1,]))
+      data_intervals=list(tibble::as_tibble(PKNCA.options("single.dose.aucs")[1,]))
     )
   )
   # When dosing is not provided
   o_data_no_dose <- PKNCAdata(o_conc, intervals=PKNCA.options("single.dose.aucs")[1,])
-  expect_equal(
-    full_join_PKNCAdata(o_data_no_dose),
-    tidyr::crossing(
-      prepare_PKNCAconc(o_conc),
-      tibble(data_dose=list(NA)),
-      data_intervals=list(as_tibble(PKNCA.options("single.dose.aucs")[1,]))
+  suppressMessages(
+    expect_equal(
+      full_join_PKNCAdata(o_data_no_dose),
+      tidyr::crossing(
+        prepare_PKNCAconc(o_conc),
+        tibble::tibble(data_dose=list(NA)),
+        data_intervals=list(tibble::as_tibble(PKNCA.options("single.dose.aucs")[1,]))
+      )
     )
   )
 })
@@ -120,6 +125,8 @@ test_that("check_reserved_column_names", {
   )
 })
 
+# standardize_column_names ####
+
 test_that("standardize_column_names", {
   # One column works
   expect_equal(
@@ -134,12 +141,12 @@ test_that("standardize_column_names", {
   # group_cols overlap with cols values fails
   expect_error(
     standardize_column_names(data.frame(a=1, b=2), cols=list(c="a", d="b"), group_cols="b"),
-    regexp="group_cols must not overlap with other column names"
+    regexp="group_cols must not overlap with other column names.  Change the name of the following groups: b"
   )
   # group_cols overlap with cols names fails
   expect_error(
     standardize_column_names(data.frame(a=1, b=2), cols=list(c="a", d="b"), group_cols="c"),
-    regexp="group_cols must not overlap with standardized column names"
+    regexp="group_cols must not overlap with standardized column names.  Change the name of the following groups: c"
   )
   # group_cols works
   expect_equal(
@@ -168,6 +175,8 @@ test_that("standardize_column_names", {
     data.frame(group1=1, d=2, dose=3)
   )
 })
+
+# restore_group_col_names ####
 
 test_that("restore_group_col_names", {
   d <- data.frame(a=1, group1=2)

@@ -1,26 +1,37 @@
 #' Determine time at or above a set value
-#' 
+#'
 #' Interpolation is performed aligning with \code{PKNCA.options("auc.method")}.
-#' Extrapolation outside of the measured times is not yet implemented.
+#' Extrapolation outside of the measured times is not yet implemented.  The
+#' \code{method} may be changed by giving a named \code{method} argument, as
+#' well.
+#'
+#' For \code{'lin up/log down'}, if \code{clast} is above \code{conc_above} and
+#' there are concentrations BLQ after that, linear down is used to extrapolate
+#' to the BLQ concentration (equivalent to AUCall).
 #'
 #' @inheritParams pk.calc.auxc
-#' @param conc_above The concentration to be above (if missing will use
-#'   \code{PKNCA.choose.option(name="conc_above", value=conc_above, options=options)})
+#' @param conc_above The concentration to be above
+#' @param ... Extra arguments.  Currently, the only extra argument that is used
+#'   is \code{method} as described in the details section.
 #' @return the time above the given concentration
 #' @export
 pk.calc.time_above <- function(conc, time,
                                conc_above,
-                               method,
+                               #method=NULL,
+                               ...,
                                options=list(),
                                check=TRUE) {
-  method <- PKNCA.choose.option(name="auc.method", value=method, options=options)
-  conc_above <- PKNCA.choose.option(name="conc_above", value=conc_above, options=options)
+  arglist <- list(...)
+  method <- PKNCA.choose.option(name="auc.method", value=arglist$method, options=options)
   if (missing(conc)) {
     stop("conc must be given")
   }
   if (missing(time)) {
     stop("time must be given")
   }
+  stopifnot("conc_above must be a scalar"=length(conc_above) == 1)
+  stopifnot("conc_above must not be NA"=!is.na(conc_above))
+  stopifnot("conc_above must be numeric"=is.numeric(conc_above))
   if (check) {
     check.conc.time(conc, time)
   }
@@ -40,13 +51,31 @@ pk.calc.time_above <- function(conc, time,
   if (nrow(data) < 2) {
     ret <- structure(NA_real_, exclude="Too few measured concentrations to assess time_above")
   } else if (method %in% 'lin up/log down') {
-    stop("'lin up/log down' is not yet implemented")
+    linear_up <- conc2 > conc1 | conc2 == conc1
+    linear_down <- conc2 == 0
+    log_down <- !linear_down & conc2 > 0
+    ret <-
+      sum((time2 - time1)[mask_both]) +
+      # log down
+      sum(
+        ((log(conc_above) - log(conc1))/(log(conc2) - log(conc1))*(time2 - time1))[mask_first & log_down]
+      ) +
+      # linear down
+      sum(
+        ((conc_above - conc1)/(conc2 - conc1)*(time2 - time1))[mask_first & linear_down]
+      ) +
+      # linear up
+      sum(
+        ((conc2 - conc_above)/(conc2 - conc1)*(time2 - time1))[mask_second & linear_up]
+      )
   } else if (method %in% 'linear') {
     ret <-
       sum((time2 - time1)[mask_both]) +
+      # linear down
       sum(
         ((conc_above - conc1)/(conc2 - conc1)*(time2 - time1))[mask_first]
       ) +
+      # linear up
       sum(
         ((conc2 - conc_above)/(conc2 - conc1)*(time2 - time1))[mask_second]
       )
@@ -56,12 +85,13 @@ pk.calc.time_above <- function(conc, time,
   }
   ret
 }
-## Add the column to the interval specification
+# Add the column to the interval specification
 add.interval.col("time_above",
                  FUN="pk.calc.time_above",
                  values=c(FALSE, TRUE),
-                 desc="Time above a given concentration",
-                 depends=c())
+                 unit_type="time",
+                 pretty_name="Time above Concentration",
+                 desc="Time above a given concentration")
 PKNCA.set.summary(
   name="time_above",
   description="arithmetic mean and standard deviation",

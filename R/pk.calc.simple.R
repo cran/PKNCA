@@ -1,4 +1,4 @@
-## Calculate the simple parameters for PK.
+# Calculate the simple parameters for PK.
 
 #' Calculate the adjusted r-squared value
 #'
@@ -8,7 +8,10 @@
 #' @export
 adj.r.squared <- function(r.sq, n) {
   if (n <= 2) {
-    warning("n must be > 2 for adj.r.squared")
+    rlang::warn(
+      message = "n must be > 2 for adj.r.squared",
+      class = "pknca_adjr2_2points"
+    )
     structure(NA_real_, exclude="n must be > 2")
   } else {
     1-(1-r.sq)*(n-1)/(n-2)
@@ -31,12 +34,14 @@ pk.calc.cmax <- function(conc, check=TRUE) {
     max(conc, na.rm=TRUE)
   }
 }
-## Add the column to the interval specification
+# Add the column to the interval specification
 add.interval.col("cmax",
                  FUN="pk.calc.cmax",
                  values=c(FALSE, TRUE),
+                 unit_type="conc",
+                 pretty_name="Cmax",
                  desc="Maximum observed concentration",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="cmax",
   description="geometric mean and geometric coefficient of variation",
@@ -56,12 +61,14 @@ pk.calc.cmin <- function(conc, check=TRUE) {
     min(conc, na.rm=TRUE)
   }
 }
-## Add the column to the interval specification
+# Add the column to the interval specification
 add.interval.col("cmin",
                  FUN="pk.calc.cmin",
                  values=c(FALSE, TRUE),
+                 unit_type="conc",
+                 pretty_name="Cmin",
                  desc="Minimum observed concentration",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="cmin",
   description="geometric mean and geometric coefficient of variation",
@@ -81,7 +88,7 @@ PKNCA.set.summary(
 #'   \item the length of \code{conc} and \code{time} is 0
 #'   \item all \code{conc} is 0 or \code{NA}
 #' }
-#' 
+#'
 #' @param conc Concentration measured
 #' @param time Time of concentration measurement
 #' @param options List of changes to the default
@@ -114,12 +121,14 @@ pk.calc.tmax <- function(conc, time,
     }
   }
 }
-## Add the column to the interval specification
+# Add the column to the interval specification
 add.interval.col("tmax",
                  FUN="pk.calc.tmax",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Tmax",
                  desc="Time of the maximum observed concentration",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="tmax",
   description="median and range",
@@ -150,12 +159,14 @@ pk.calc.tlast <- function(conc, time, check=TRUE) {
     max(time[!(conc %in% c(NA, 0))])
   }
 }
-## Add the column to the interval specification
+# Add the column to the interval specification
 add.interval.col("tlast",
                  FUN="pk.calc.tlast",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Tlast",
                  desc="Time of the last concentration observed above the limit of quantification",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="tlast",
   description="median and range",
@@ -179,12 +190,14 @@ pk.calc.tfirst <- function(conc, time, check=TRUE) {
     min(time[!(conc %in% c(NA, 0))])
   }
 }
-## Add the column to the interval specification
+# Add the column to the interval specification
 add.interval.col("tfirst",
                  FUN="pk.calc.tfirst",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Tfirst",
                  desc="Time of the first concentration above the limit of quantification",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="tfirst",
   description="median and range",
@@ -203,21 +216,24 @@ PKNCA.set.summary(
 #' @return The last observed concentration above the LOQ
 #' @export
 pk.calc.clast.obs <- function(conc, time, check=TRUE) {
-  if (check)
+  if (check) {
     check.conc.time(conc, time)
-  tlast <- pk.calc.tlast(conc, time)
+  }
+  tlast <- pk.calc.tlast(conc, time, check = FALSE)
   if (!is.na(tlast)) {
     conc[time %in% tlast]
   } else {
     NA
   }
 }
-## Add the column to the interval specification
+# Add the column to the interval specification
 add.interval.col("clast.obs",
                  FUN="pk.calc.clast.obs",
                  values=c(FALSE, TRUE),
+                 unit_type="conc",
+                 pretty_name="Clast",
                  desc="The last concentration observed above the limit of quantification",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="clast.obs",
   description="geometric mean and geometric coefficient of variation",
@@ -226,7 +242,7 @@ PKNCA.set.summary(
 )
 
 #' Calculate the effective half-life
-#' 
+#'
 #' @details thalf.eff is \code{log(2)*mrt}.
 #'
 #' @param mrt the mean residence time to infinity
@@ -234,13 +250,15 @@ PKNCA.set.summary(
 #' @export
 pk.calc.thalf.eff <- function(mrt)
   log(2)*mrt
-## Add the columns to the interval specification
+# Add the columns to the interval specification
 add.interval.col("thalf.eff.obs",
                  FUN="pk.calc.thalf.eff",
                  values=c(FALSE, TRUE),
                  desc="The effective half-life (as determined from the MRTobs)",
+                 unit_type="time",
+                 pretty_name="Effective half-life (based on MRT,obs)",
                  formalsmap=list(mrt="mrt.obs"),
-                 depends=c("mrt.obs"))
+                 depends="mrt.obs")
 PKNCA.set.summary(
   name="thalf.eff.obs",
   description="geometric mean and geometric coefficient of variation",
@@ -250,9 +268,11 @@ PKNCA.set.summary(
 add.interval.col("thalf.eff.pred",
                  FUN="pk.calc.thalf.eff",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Effective half-life (based on MRT,pred)",
                  desc="The effective half-life (as determined from the MRTpred)",
                  formalsmap=list(mrt="mrt.pred"),
-                 depends=c("mrt.pred"))
+                 depends="mrt.pred")
 PKNCA.set.summary(
   name="thalf.eff.pred",
   description="geometric mean and geometric coefficient of variation",
@@ -262,9 +282,11 @@ PKNCA.set.summary(
 add.interval.col("thalf.eff.last",
                  FUN="pk.calc.thalf.eff",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Effective half-life (based on MRT,last)",
                  desc="The effective half-life (as determined from the MRTlast)",
                  formalsmap=list(mrt="mrt.last"),
-                 depends=c("mrt.last"))
+                 depends="mrt.last")
 PKNCA.set.summary(
   name="thalf.eff.last",
   description="geometric mean and geometric coefficient of variation",
@@ -274,9 +296,11 @@ PKNCA.set.summary(
 add.interval.col("thalf.eff.iv.obs",
                  FUN="pk.calc.thalf.eff",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Effective half-life (for IV dosing, based on MRT,obs)",
                  desc="The effective half-life (as determined from the intravenous MRTobs)",
                  formalsmap=list(mrt="mrt.iv.obs"),
-                 depends=c("mrt.iv.obs"))
+                 depends="mrt.iv.obs")
 PKNCA.set.summary(
   name="thalf.eff.iv.obs",
   description="geometric mean and geometric coefficient of variation",
@@ -286,9 +310,11 @@ PKNCA.set.summary(
 add.interval.col("thalf.eff.iv.pred",
                  FUN="pk.calc.thalf.eff",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Effective half-life (for IV dosing, based on MRT,pred)",
                  desc="The effective half-life (as determined from the intravenous MRTpred)",
                  formalsmap=list(mrt="mrt.iv.pred"),
-                 depends=c("mrt.iv.pred"))
+                 depends="mrt.iv.pred")
 PKNCA.set.summary(
   name="thalf.eff.iv.pred",
   description="geometric mean and geometric coefficient of variation",
@@ -298,9 +324,11 @@ PKNCA.set.summary(
 add.interval.col("thalf.eff.iv.last",
                  FUN="pk.calc.thalf.eff",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Effective half-life (for IV dosing, based on MRTlast)",
                  desc="The effective half-life (as determined from the intravenous MRTlast)",
                  formalsmap=list(mrt="mrt.iv.last"),
-                 depends=c("mrt.iv.last"))
+                 depends="mrt.iv.last")
 PKNCA.set.summary(
   name="thalf.eff.iv.last",
   description="geometric mean and geometric coefficient of variation",
@@ -309,14 +337,14 @@ PKNCA.set.summary(
 )
 
 #' Calculate the AUC percent extrapolated
-#' 
+#'
 #' @details aucpext is \code{100*(1-auclast/aucinf)}.
-#' 
-#' @param auclast the area under the curve from time 0 to the last 
+#'
+#' @param auclast the area under the curve from time 0 to the last
 #'   measurement above the limit of quantification
 #' @param aucinf the area under the curve from time 0 to infinity
-#' @return The numeric value of the AUC percent extrapolated or 
-#'   \code{NA_real_} if any of the following are true 
+#' @return The numeric value of the AUC percent extrapolated or
+#'   \code{NA_real_} if any of the following are true
 #'   \code{is.na(aucinf)}, \code{is.na(auclast)}, \code{aucinf <= 0},
 #'   or \code{auclast <= 0}.
 #' @export
@@ -342,18 +370,26 @@ pk.calc.aucpext <- function(auclast, aucinf) {
     (auclast >= aucinf)
   mask_calc <- !mask_na
   if (any(mask_greater))
-    warning("aucpext is typically only calculated when aucinf is greater than auclast.")
+    rlang::warn(
+      message = "aucpext is typically only calculated when aucinf is greater than auclast.",
+      class = "pknca_aucpext_aucinf_le_auclast"
+    )
   if (any(mask_negative))
-    warning("aucpext is typically only calculated when both aucinf and auclast are positive.")
+    rlang::warn(
+      message = "aucpext is typically only calculated when both aucinf and auclast are positive.",
+      class = "pknca_aucpext_aucinf_auclast_positive"
+    )
   ret[mask_calc] <-
     100*(1-auclast[mask_calc]/aucinf[mask_calc])
   ret
 }
 
-## Add the columns to the interval specification
+# Add the columns to the interval specification
 add.interval.col("aucpext.obs",
                  FUN="pk.calc.aucpext",
                  values=c(FALSE, TRUE),
+                 unit_type="%",
+                 pretty_name="AUCpext (based on AUCinf,obs)",
                  desc="Percent of the AUCinf that is extrapolated after Tlast calculated from the observed Clast",
                  formalsmap=list(aucinf="aucinf.obs"),
                  depends=c("auclast", "aucinf.obs"))
@@ -366,6 +402,8 @@ PKNCA.set.summary(
 add.interval.col("aucpext.pred",
                  FUN="pk.calc.aucpext",
                  values=c(FALSE, TRUE),
+                 unit_type="%",
+                 pretty_name="AUCpext (based on AUCinf,pred)",
                  desc="Percent of the AUCinf that is extrapolated after Tlast calculated from the predicted Clast",
                  formalsmap=list(aucinf="aucinf.pred"),
                  depends=c("auclast", "aucinf.pred"))
@@ -385,13 +423,15 @@ PKNCA.set.summary(
 #' @export
 pk.calc.kel <- function(mrt)
   1/mrt
-## Add the columns to the interval specification
+# Add the columns to the interval specification
 add.interval.col("kel.obs",
                  FUN="pk.calc.kel",
                  values=c(FALSE, TRUE),
+                 unit_type="inverse_time",
+                 pretty_name="Kel (based on AUCinf,obs)",
                  desc="Elimination rate (as calculated from the MRT with observed Clast)",
                  formalsmap=list(mrt="mrt.obs"),
-                 depends=c("mrt.obs"))
+                 depends="mrt.obs")
 PKNCA.set.summary(
   name="kel.obs",
   description="geometric mean and geometric coefficient of variation",
@@ -401,9 +441,11 @@ PKNCA.set.summary(
 add.interval.col("kel.pred",
                  FUN="pk.calc.kel",
                  values=c(FALSE, TRUE),
+                 unit_type="inverse_time",
+                 pretty_name="Kel (based on AUCinf,pred)",
                  desc="Elimination rate (as calculated from the MRT with predicted Clast)",
                  formalsmap=list(mrt="mrt.pred"),
-                 depends=c("mrt.pred"))
+                 depends="mrt.pred")
 PKNCA.set.summary(
   name="kel.pred",
   description="geometric mean and geometric coefficient of variation",
@@ -413,9 +455,11 @@ PKNCA.set.summary(
 add.interval.col("kel.last",
                  FUN="pk.calc.kel",
                  values=c(FALSE, TRUE),
+                 unit_type="inverse_time",
+                 pretty_name="Kel (based on AUClast)",
                  desc="Elimination rate (as calculated from the MRT using AUClast)",
                  formalsmap=list(mrt="mrt.last"),
-                 depends=c("mrt.last"))
+                 depends="mrt.last")
 PKNCA.set.summary(
   name="kel.last",
   description="geometric mean and geometric coefficient of variation",
@@ -425,9 +469,11 @@ PKNCA.set.summary(
 add.interval.col("kel.iv.obs",
                  FUN="pk.calc.kel",
                  values=c(FALSE, TRUE),
+                 unit_type="inverse_time",
+                 pretty_name="Kel (for IV dosing, based on AUCinf,obs)",
                  desc="Elimination rate (as calculated from the intravenous MRTobs)",
                  formalsmap=list(mrt="mrt.iv.obs"),
-                 depends=c("mrt.iv.obs"))
+                 depends="mrt.iv.obs")
 PKNCA.set.summary(
   name="kel.iv.obs",
   description="geometric mean and geometric coefficient of variation",
@@ -437,9 +483,11 @@ PKNCA.set.summary(
 add.interval.col("kel.iv.pred",
                  FUN="pk.calc.kel",
                  values=c(FALSE, TRUE),
+                 unit_type="inverse_time",
+                 pretty_name="Kel (for IV dosing, based on AUCinf,pred)",
                  desc="Elimination rate (as calculated from the intravenous MRTpred)",
                  formalsmap=list(mrt="mrt.iv.pred"),
-                 depends=c("mrt.iv.pred"))
+                 depends="mrt.iv.pred")
 PKNCA.set.summary(
   name="kel.iv.pred",
   description="geometric mean and geometric coefficient of variation",
@@ -449,9 +497,11 @@ PKNCA.set.summary(
 add.interval.col("kel.iv.last",
                  FUN="pk.calc.kel",
                  values=c(FALSE, TRUE),
+                 unit_type="inverse_time",
+                 pretty_name="Kel (for IV dosing, based on AUClast)",
                  desc="Elimination rate (as calculated from the intravenous MRTlast)",
                  formalsmap=list(mrt="mrt.iv.last"),
-                 depends=c("mrt.iv.last"))
+                 depends="mrt.iv.last")
 PKNCA.set.summary(
   name="kel.iv.last",
   description="geometric mean and geometric coefficient of variation",
@@ -460,17 +510,17 @@ PKNCA.set.summary(
 )
 
 #' Calculate the (observed oral) clearance
-#' 
+#'
 #' @details cl is \code{dose/auc}.
-#' 
+#'
 #' @param dose the dose administered
 #' @param auc The area under the concentration-time curve.
 #' @return the numeric value of the total (CL) or observed oral clearance (CL/F)
-#' @details If \code{dose} is the same length as the other inputs, then the 
-#'   output will be the same length as all of the inputs; the function assumes 
-#'   that you are calculating for multiple intervals simultaneously.  If the 
+#' @details If \code{dose} is the same length as the other inputs, then the
+#'   output will be the same length as all of the inputs; the function assumes
+#'   that you are calculating for multiple intervals simultaneously.  If the
 #'   inputs other than \code{dose} are scalars and \code{dose} is a vector, then
-#'   the function assumes multiple doses were given in a single interval, and 
+#'   the function assumes multiple doses were given in a single interval, and
 #'   the sum of the \code{dose}s will be used for the calculation.
 #' @references Gabrielsson J, Weiner D. "Section 2.5.1 Derivation of clearance."
 #'   Pharmacokinetic & Pharmacodynamic Data Analysis: Concepts and Applications,
@@ -488,13 +538,15 @@ pk.calc.cl <- function(dose, auc) {
   ret
 }
 
-## Add the columns to the interval specification
+# Add the columns to the interval specification
 add.interval.col("cl.last",
                  FUN="pk.calc.cl",
                  values=c(FALSE, TRUE),
+                 unit_type="clearance",
+                 pretty_name="CL (based on AUClast)",
                  desc="Clearance or observed oral clearance calculated to Clast",
                  formalsmap=list(auc="auclast"),
-                 depends=c("auclast"))
+                 depends="auclast")
 PKNCA.set.summary(
   name="cl.last",
   description="geometric mean and geometric coefficient of variation",
@@ -504,9 +556,11 @@ PKNCA.set.summary(
 add.interval.col("cl.all",
                  FUN="pk.calc.cl",
                  values=c(FALSE, TRUE),
+                 unit_type="clearance",
+                 pretty_name="CL (based on AUCall)",
                  desc="Clearance or observed oral clearance calculated with AUCall",
                  formalsmap=list(auc="aucall"),
-                 depends=c("aucall"))
+                 depends="aucall")
 PKNCA.set.summary(
   name="cl.all",
   description="geometric mean and geometric coefficient of variation",
@@ -516,9 +570,11 @@ PKNCA.set.summary(
 add.interval.col("cl.obs",
                  FUN="pk.calc.cl",
                  values=c(FALSE, TRUE),
+                 unit_type="clearance",
+                 pretty_name="CL (based on AUCinf,obs)",
                  desc="Clearance or observed oral clearance calculated with observed Clast",
                  formalsmap=list(auc="aucinf.obs"),
-                 depends=c("aucinf.obs"))
+                 depends="aucinf.obs")
 PKNCA.set.summary(
   name="cl.obs",
   description="geometric mean and geometric coefficient of variation",
@@ -528,9 +584,11 @@ PKNCA.set.summary(
 add.interval.col("cl.pred",
                  FUN="pk.calc.cl",
                  values=c(FALSE, TRUE),
+                 unit_type="clearance",
+                 pretty_name="CL (based on AUCinf,pred)",
                  desc="Clearance or observed oral clearance calculated with predicted Clast",
                  formalsmap=list(auc="aucinf.pred"),
-                 depends=list("aucinf.pred"))
+                 depends="aucinf.pred")
 PKNCA.set.summary(
   name="cl.pred",
   description="geometric mean and geometric coefficient of variation",
@@ -539,7 +597,7 @@ PKNCA.set.summary(
 )
 
 #' Calculate the absolute (or relative) bioavailability
-#' 
+#'
 #' @details f is \code{(auc2/dose2)/(auc1/dose1)}.
 #'
 #' @param dose1 The dose administered in route or method 1
@@ -563,8 +621,10 @@ pk.calc.f <- function(dose1, auc1, dose2, auc2) {
 add.interval.col("f",
                  FUN="pk.calc.f",
                  values=c(FALSE, TRUE),
+                 unit_type="fraction",
+                 pretty_name="Bioavailability",
                  desc="Bioavailability or relative bioavailability",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="f",
   description="geometric mean and geometric coefficient of variation",
@@ -577,7 +637,7 @@ PKNCA.set.summary(
 #'
 #' @details mrt is \code{aumc/auc - duration.dose/2} where \code{duration.dose =
 #'   0} for oral administration.
-#' 
+#'
 #' @param auc the AUC from 0 to infinity or 0 to tau
 #' @param aumc the AUMC from 0 to infinity or 0 to tau
 #' @param duration.dose The duration of the dose (usually an infusion
@@ -588,10 +648,12 @@ PKNCA.set.summary(
 pk.calc.mrt <- function(auc, aumc) {
   pk.calc.mrt.iv(auc, aumc, duration.dose=0)
 }
-## Add the columns to the interval specification
+# Add the columns to the interval specification
 add.interval.col("mrt.obs",
                  FUN="pk.calc.mrt",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="MRT (based on AUCinf,obs)",
                  desc="The mean residence time to infinity using observed Clast",
                  formalsmap=list(auc="aucinf.obs", aumc="aumcinf.obs"),
                  depends=c("aucinf.obs", "aumcinf.obs"))
@@ -604,6 +666,8 @@ PKNCA.set.summary(
 add.interval.col("mrt.pred",
                  FUN="pk.calc.mrt",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="MRT (based on AUCinf,pred)",
                  desc="The mean residence time to infinity using predicted Clast",
                  formalsmap=list(auc="aucinf.pred", aumc="aumcinf.pred"),
                  depends=c("aucinf.pred", "aumcinf.pred"))
@@ -616,6 +680,8 @@ PKNCA.set.summary(
 add.interval.col("mrt.last",
                  FUN="pk.calc.mrt",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="MRT (based on AUClast)",
                  desc="The mean residence time to the last observed concentration above the LOQ",
                  formalsmap=list(auc="auclast", aumc="aumclast"),
                  depends=list("auclast", "aumclast"))
@@ -636,10 +702,12 @@ pk.calc.mrt.iv <- function(auc, aumc, duration.dose) {
   }
   ret
 }
-## Add the columns to the interval specification
+# Add the columns to the interval specification
 add.interval.col("mrt.iv.obs",
                  FUN="pk.calc.mrt.iv",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="MRT (for IV dosing, based on AUCinf,obs)",
                  desc="The mean residence time to infinity using observed Clast correcting for dosing duration",
                  formalsmap=list(auc="aucinf.obs", aumc="aumcinf.obs"),
                  depends=c("aucinf.obs", "aumcinf.obs"))
@@ -652,6 +720,8 @@ PKNCA.set.summary(
 add.interval.col("mrt.iv.pred",
                  FUN="pk.calc.mrt.iv",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="MRT (for IV dosing, based on AUCinf,pred)",
                  desc="The mean residence time to infinity using predicted Clast correcting for dosing duration",
                  formalsmap=list(auc="aucinf.pred", aumc="aumcinf.pred"),
                  depends=c("aucinf.pred", "aumcinf.pred"))
@@ -664,6 +734,8 @@ PKNCA.set.summary(
 add.interval.col("mrt.iv.last",
                  FUN="pk.calc.mrt.iv",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="MRT (for IV dosing, based on AUClast)",
                  desc="The mean residence time to the last observed concentration above the LOQ correcting for dosing duration",
                  formalsmap=list(auc="auclast", aumc="aumclast"),
                  depends=list("auclast", "aumclast"))
@@ -679,16 +751,16 @@ PKNCA.set.summary(
 #'
 #' @details mrt.md is \code{aumctau/auctau + tau*(aucinf-auctau)/auctau} and
 #' should only be used for multiple dosing with equal intervals between doses.
-#' 
-#' @param auctau the AUC from time 0 to the end of the dosing interval 
+#'
+#' @param auctau the AUC from time 0 to the end of the dosing interval
 #'   (tau).
 #' @param aumctau the AUMC from time 0 to the end of the dosing interval
 #'   (tau).
-#' @param aucinf the AUC from time 0 to infinity (typically using 
+#' @param aucinf the AUC from time 0 to infinity (typically using
 #'   single-dose data)
 #' @param tau the dosing interval
-#' @details Note that if \code{aucinf == auctau} (as would be the 
-#'   assumption with linear kinetics), the equation becomes the same as 
+#' @details Note that if \code{aucinf == auctau} (as would be the
+#'   assumption with linear kinetics), the equation becomes the same as
 #'   the single-dose MRT.
 #' @seealso \code{\link{pk.calc.mrt}}
 #' @export
@@ -703,6 +775,8 @@ pk.calc.mrt.md <- function(auctau, aumctau, aucinf, tau) {
 add.interval.col("mrt.md.obs",
                  FUN="pk.calc.mrt.md",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="MRT (for multiple dosing, based on AUCinf,obs)",
                  desc="The mean residence time with multiple dosing and nonlinear kinetics using observed Clast",
                  formalsmap=list(auctau="auclast", aumctau="aumclast", aucinf="aucinf.obs"),
                  depends=c("auclast", "aumclast", "aucinf.obs"))
@@ -715,6 +789,8 @@ PKNCA.set.summary(
 add.interval.col("mrt.md.pred",
                  FUN="pk.calc.mrt.md",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="MRT (for multiple dosing, based on AUCinf,pred)",
                  desc="The mean residence time with multiple dosing and nonlinear kinetics using predicted Clast",
                  formalsmap=list(auctau="auclast", aumctau="aumclast", aucinf="aucinf.pred"),
                  depends=c("auclast", "aumclast", "aucinf.pred"))
@@ -733,18 +809,20 @@ PKNCA.set.summary(
 #' @param lambda.z the elimination rate
 #' @export
 pk.calc.vz <- function(cl, lambda.z) {
-  ## Ensure that cl is either a scalar or the same length as AUC
-  ## (more complex repeating patterns while valid for general R are
-  ## likely errors here).
+  # Ensure that cl is either a scalar or the same length as AUC
+  # (more complex repeating patterns while valid for general R are
+  # likely errors here).
   if (!(length(cl) %in% c(1, length(lambda.z))) |
       !(length(lambda.z) %in% c(1, length(cl))))
     stop("'cl' and 'lambda.z' must be the same length")
   cl/lambda.z
 }
-## Add the columns to the interval specification
+# Add the columns to the interval specification
 add.interval.col("vz.obs",
                  FUN="pk.calc.vz",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vz (based on AUCinf,obs)",
                  desc="The terminal volume of distribution using observed Clast",
                  formalsmap=list(cl="cl.obs"),
                  depends=c("cl.obs", "lambda.z"))
@@ -757,6 +835,8 @@ PKNCA.set.summary(
 add.interval.col("vz.pred",
                  FUN="pk.calc.vz",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vz (based on AUCinf,pred)",
                  desc="The terminal volume of distribution using predicted Clast",
                  formalsmap=list(cl="cl.pred"),
                  depends=c("cl.pred", "lambda.z"))
@@ -780,6 +860,8 @@ pk.calc.vss <- function(cl, mrt)
 add.interval.col("vss.obs",
                  FUN="pk.calc.vss",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vss (based on AUCinf,obs)",
                  desc="The steady-state volume of distribution using observed Clast",
                  formalsmap=list(cl="cl.obs", mrt="mrt.obs"),
                  depends=c("cl.obs", "mrt.obs"))
@@ -792,6 +874,8 @@ PKNCA.set.summary(
 add.interval.col("vss.pred",
                  FUN="pk.calc.vss",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vss (based on AUCinf,pred)",
                  desc="The steady-state volume of distribution using predicted Clast",
                  formalsmap=list(cl="cl.pred", mrt="mrt.pred"),
                  depends=c("cl.pred", "mrt.pred"))
@@ -804,6 +888,8 @@ PKNCA.set.summary(
 add.interval.col("vss.last",
                  FUN="pk.calc.vss",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vss (based on AUClast)",
                  desc="The steady-state volume of distribution calculating through Tlast",
                  formalsmap=list(cl="cl.last", mrt="mrt.last"),
                  depends=c("cl.last", "mrt.last"))
@@ -816,6 +902,8 @@ PKNCA.set.summary(
 add.interval.col("vss.iv.obs",
                  FUN="pk.calc.vss",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vss (for IV dosing, based on AUCinf,obs)",
                  desc="The steady-state volume of distribution with intravenous infusion using observed Clast",
                  formalsmap=list(cl="cl.obs", mrt="mrt.iv.obs"),
                  depends=c("cl.obs", "mrt.iv.obs"))
@@ -828,6 +916,8 @@ PKNCA.set.summary(
 add.interval.col("vss.iv.pred",
                  FUN="pk.calc.vss",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vss (for IV dosing, based on AUCinf,pred)",
                  desc="The steady-state volume of distribution with intravenous infusion using predicted Clast",
                  formalsmap=list(cl="cl.pred", mrt="mrt.iv.pred"),
                  depends=c("cl.pred", "mrt.iv.pred"))
@@ -840,6 +930,8 @@ PKNCA.set.summary(
 add.interval.col("vss.iv.last",
                  FUN="pk.calc.vss",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vss (for IV dosing, based on AUClast)",
                  desc="The steady-state volume of distribution with intravenous infusion calculating through Tlast",
                  formalsmap=list(cl="cl.last", mrt="mrt.iv.last"),
                  depends=c("cl.last", "mrt.iv.last"))
@@ -853,6 +945,8 @@ PKNCA.set.summary(
 add.interval.col("vss.md.obs",
                  FUN="pk.calc.vss",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vss (for multiple-dose, based on Clast,obs)",
                  desc="The steady-state volume of distribution for nonlinear multiple-dose data using observed Clast",
                  formalsmap=list(cl="cl.last", mrt="mrt.md.obs"),
                  depends=c("cl.last", "mrt.md.obs"))
@@ -865,6 +959,8 @@ PKNCA.set.summary(
 add.interval.col("vss.md.pred",
                  FUN="pk.calc.vss",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vss (for multiple-dose, based on Clast,pred)",
                  desc="The steady-state volume of distribution for nonlinear multiple-dose data using predicted Clast",
                  formalsmap=list(cl="cl.last", mrt="mrt.md.pred"),
                  depends=c("cl.last", "mrt.md.pred"))
@@ -877,19 +973,19 @@ PKNCA.set.summary(
 
 #' Calculate the volume of distribution (Vd) or observed volume of
 #' distribution (Vd/F)
-#' 
+#'
 #' @details vd is \code{dose/(aucinf * lambda.z)}.
-#' 
+#'
 #' @param dose One or more doses given during an interval
 #' @param aucinf Area under the curve to infinity (either predicted or
 #'   observed).
 #' @param lambda.z Elimination rate constant
 #' @details If \code{dose} is the same length as the other inputs, then
-#'   the output will be the same length as all of the inputs; the 
-#'   function assumes that you are calculating for multiple intervals 
-#'   simultaneously.  If the inputs other than \code{dose} are scalars 
-#'   and \code{dose} is a vector, then the function assumes multiple 
-#'   doses were given in a single interval, and the sum of the 
+#'   the output will be the same length as all of the inputs; the
+#'   function assumes that you are calculating for multiple intervals
+#'   simultaneously.  If the inputs other than \code{dose} are scalars
+#'   and \code{dose} is a vector, then the function assumes multiple
+#'   doses were given in a single interval, and the sum of the
 #'   \code{dose}s will be used for the calculation.
 #' @return The observed volume of distribution
 #' @export
@@ -907,10 +1003,12 @@ pk.calc.vd <- function(dose, aucinf, lambda.z) {
   }
   ret
 }
-## Add the columns to the interval specification
+# Add the columns to the interval specification
 add.interval.col("vd.obs",
                  FUN="pk.calc.vd",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vd (based on Clast,obs)",
                  desc="Apparent observed volume of distribution calculated with observed Clast",
                  formalsmap=list(aucinf="aucinf.obs"),
                  depends=c("aucinf.obs", "lambda.z"))
@@ -923,6 +1021,8 @@ PKNCA.set.summary(
 add.interval.col("vd.pred",
                  FUN="pk.calc.vd",
                  values=c(FALSE, TRUE),
+                 unit_type="volume",
+                 pretty_name="Vd (based on Clast,pred)",
                  desc="Apparent observed volume of distribution calculated with predicted Clast",
                  formalsmap=list(aucinf="aucinf.pred"),
                  depends=c("aucinf.pred", "lambda.z"))
@@ -934,7 +1034,7 @@ PKNCA.set.summary(
 )
 
 #' Calculate the average concentration during an interval.
-#' 
+#'
 #' @details cav is \code{auclast/(end-start)}.
 #'
 #' @param auclast The area under the curve during the interval
@@ -953,6 +1053,8 @@ pk.calc.cav <- function(auclast, start, end) {
 add.interval.col("cav",
                  FUN="pk.calc.cav",
                  values=c(FALSE, TRUE),
+                 unit_type="conc",
+                 pretty_name="Cav",
                  desc="The average concentration during an interval",
                  depends="auclast")
 PKNCA.set.summary(
@@ -986,8 +1088,10 @@ pk.calc.ctrough <- function(conc, time, end) {
 add.interval.col("ctrough",
                  FUN="pk.calc.ctrough",
                  values=c(FALSE, TRUE),
+                 unit_type="conc",
+                 pretty_name="Ctrough",
                  desc="The trough (predose) concentration",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="ctrough",
   description="geometric mean and geometric coefficient of variation",
@@ -1011,6 +1115,8 @@ pk.calc.ptr <- function(cmax, ctrough) {
 add.interval.col("ptr",
                  FUN="pk.calc.ptr",
                  values=c(FALSE, TRUE),
+                 unit_type="fraction",
+                 pretty_name="Peak-to-trough ratio",
                  desc="Peak-to-Trough ratio (fraction)",
                  depends=c("cmax", "ctrough"))
 PKNCA.set.summary(
@@ -1040,8 +1146,10 @@ pk.calc.tlag <- function(conc, time) {
 add.interval.col("tlag",
                  FUN="pk.calc.tlag",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Tlag",
                  desc="Lag time",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="tlag",
   description="median and range",
@@ -1050,7 +1158,7 @@ PKNCA.set.summary(
 )
 
 #' Determine the degree of fluctuation
-#' 
+#'
 #' @details deg.fluc is \code{100*(cmax - cmin)/cav}.
 #'
 #' @param cmax The maximum observed concentration
@@ -1068,6 +1176,8 @@ pk.calc.deg.fluc <- function(cmax, cmin, cav) {
 }
 add.interval.col("deg.fluc",
                  FUN="pk.calc.deg.fluc",
+                 unit_type="%",
+                 pretty_name="Degree of fluctuation",
                  desc="Degree of fluctuation",
                  depends=c("cmax", "cmin", "cav"))
 PKNCA.set.summary(
@@ -1078,9 +1188,9 @@ PKNCA.set.summary(
 )
 
 #' Determine the PK swing
-#' 
+#'
 #' @details swing is \code{100*(cmax - cmin)/cmin}.
-#' 
+#'
 #' @param cmax The maximum observed concentration
 #' @param cmin The minimum observed concentration
 #' @return The swing above the minimum concentration.  If \code{cmin} is zero,
@@ -1095,6 +1205,8 @@ pk.calc.swing <- function(cmax, cmin) {
 }
 add.interval.col("swing",
                  FUN="pk.calc.swing",
+                 unit_type="%",
+                 pretty_name="Swing",
                  desc="Swing relative to Cmin",
                  depends=c("cmax", "cmin"))
 PKNCA.set.summary(
@@ -1105,10 +1217,10 @@ PKNCA.set.summary(
 )
 
 #' Determine the concentration at the end of infusion
-#' 
+#'
 #' @param conc Concentration measured
 #' @param time Time of concentration measurement
-#' @param duration.dose The duration for the dosing administration 
+#' @param duration.dose The duration for the dosing administration
 #'   (typically from IV infusion)
 #' @param check Run \code{\link{check.conc.time}}?
 #' @return The concentration at the end of the infusion, \code{NA} if
@@ -1127,8 +1239,10 @@ pk.calc.ceoi <- function(conc, time, duration.dose=NA, check=TRUE) {
 }
 add.interval.col("ceoi",
                  FUN="pk.calc.ceoi",
+                 unit_type="conc",
+                 pretty_name="Ceoi",
                  desc="Concentration at the end of infusion",
-                 depends=c())
+                 depends=NULL)
 PKNCA.set.summary(
   name="ceoi",
   description="geometric mean and geometric coefficient of variation",

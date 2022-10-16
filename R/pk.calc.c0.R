@@ -9,7 +9,7 @@
 #'
 #' @details Methods available for interpolation are below, and each
 #' has its own specific function.
-#' 
+#'
 #' \describe{
 #'   \item{\code{c0}}{If the observed \code{conc} at \code{time.dose} is nonzero, return that.  This method should usually be used first for single-dose IV bolus data in case nominal time zero is measured.}
 #'   \item{\code{logslope}}{Compute the semilog line between the first two measured times, and use that line to extrapolate backward to \code{time.dose}}
@@ -21,7 +21,7 @@
 pk.calc.c0 <- function(conc, time, time.dose=0,
                        method=c("c0", "logslope", "c1", "cmin", "set0"),
                        check=TRUE) {
-  ## Check the inputs
+  # Check the inputs
   if (check)
     check.conc.time(conc, time)
   if (length(time.dose) != 1)
@@ -33,7 +33,7 @@ pk.calc.c0 <- function(conc, time, time.dose=0,
     return(NA)
   }
   method <- match.arg(method, several.ok=TRUE)
-  ## Find the value
+  # Find the value
   ret <- NA
   while (is.na(ret) &
          length(method) > 0) {
@@ -64,7 +64,7 @@ pk.calc.c0.method.logslope <- function(conc, time, time.dose=0,
   positive.time <- time[mask.positive.time]
   if (length(positive.time) < 2)
     return(NA)
-  ## If there is enough data, proceed to calculate
+  # If there is enough data, proceed to calculate
   mask.1 <- time %in% positive.time[1]
   mask.2 <- time %in% positive.time[2]
   c1 <- conc[mask.1]
@@ -84,8 +84,8 @@ pk.calc.c0.method.logslope <- function(conc, time, time.dose=0,
 pk.calc.c0.method.c0 <- function(conc, time, time.dose=0, check=TRUE) {
   if (check)
     check.conc.time(conc, time)
-  ## If there is a non-missing and nonzero concentration measurement
-  ## at time.dose, that's our answer.
+  # If there is a non-missing and nonzero concentration measurement
+  # at time.dose, that's our answer.
   mask.dose <- (time %in% time.dose &
                 !(conc %in% c(NA, 0)))
   if (any(mask.dose)) {
@@ -110,10 +110,27 @@ pk.calc.c0.method.c1 <- function(conc, time, time.dose=0, check=TRUE) {
 
 #' @describeIn pk.calc.c0 Use \code{C0} = 0 (typically used for single
 #' dose oral and IV infusion)
-pk.calc.c0.method.set0 <- function(conc, time, time.dose=0, check=TRUE)
+pk.calc.c0.method.set0 <- function(conc, time, time.dose=0, check=TRUE) {
   0
+}
 
 #' @describeIn pk.calc.c0 Use \code{C0} = Cmin (typically used for
 #' multiple dose oral and IV infusion but not IV bolus)
-pk.calc.c0.method.cmin <- function(conc, time, time.dose=0, check=TRUE)
+pk.calc.c0.method.cmin <- function(conc, time, time.dose=0, check=TRUE) {
   pk.calc.cmin(conc, check=check)
+}
+
+# Add the column to the interval specification
+add.interval.col("c0",
+                 FUN="pk.calc.c0",
+                 values=c(FALSE, TRUE),
+                 unit_type="conc",
+                 pretty_name="C0",
+                 desc="Initial concentration after an IV bolus",
+                 depends=NULL)
+PKNCA.set.summary(
+  name="c0",
+  description="geometric mean and geometric coefficient of variation",
+  point=business.geomean,
+  spread=business.geocv
+)

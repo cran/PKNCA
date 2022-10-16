@@ -1,5 +1,3 @@
-context("Class generation-general")
-
 getDataName.list <- function(object) "data"
 
 test_that("getColumnValueorNot", {
@@ -39,7 +37,7 @@ test_that("setAttributeColumn", {
                regexp="col_name must be a character scalar")
   expect_error(setAttributeColumn(object=obj1,
                                   attr_name="B",
-                                  default_value=c(1:2)),
+                                  default_value=1:2),
                regexp="default_value must be a scalar or the same length as the rows in the data")
   # Settings
   expect_message(val1 <- setAttributeColumn(object=obj1,
@@ -177,9 +175,9 @@ test_that("getAttributeColumn", {
   # when warnings aren't requested, they should not be given
   expect_silent(getAttributeColumn(object=obj1, attr_name="bar", warn_missing="column"))
   expect_silent(getAttributeColumn(object=obj3, attr_name="foo", warn_missing="attr"))
-  expect_silent(getAttributeColumn(object=obj3, attr_name="foo", warn_missing=c()))
-  expect_silent(getAttributeColumn(object=obj3, attr_name="bar", warn_missing=c()))
-  expect_error(getAttributeColumn(object=obj3, attr_name="foo", warn_missing=c("foo")),
+  expect_silent(getAttributeColumn(object=obj3, attr_name="foo", warn_missing=character()))
+  expect_silent(getAttributeColumn(object=obj3, attr_name="bar", warn_missing=character()))
+  expect_error(getAttributeColumn(object=obj3, attr_name="foo", warn_missing="foo"),
                info="warn_missing must have a valid value")
 })
 

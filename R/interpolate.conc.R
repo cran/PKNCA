@@ -1,6 +1,6 @@
 #' Interpolate concentrations between measurements or extrapolate concentrations
 #' after the last measurement.
-#' 
+#'
 #' \code{interpolate.conc()} and \code{extrapolate.conc()} returns an
 #' interpolated (or extrapolated) concentration. \code{interp.extrap.conc()}
 #' will choose whether interpolation or extrapolation is required and will also
@@ -8,7 +8,7 @@
 #' concentration between two measured concentrations or after the last measured
 #' concentration. Of note, these functions will not extrapolate prior to the
 #' first point.
-#' 
+#'
 #' @param conc Measured concentrations
 #' @param time Time of the concentration measurement
 #' @param time.dose Time of the dose
@@ -58,7 +58,7 @@
 #'     }
 #'   }
 #' }
-#' 
+#'
 #' \code{duration.dose} and \code{direction.out} are ignored if \code{route.dose
 #' == "extravascular"}.  \code{direction.out} is ignored if \code{duration.dose
 #' > 0}.
@@ -76,7 +76,7 @@
 #' interpolation occurs only with data before the dose (as is the case for
 #' \code{route.dose == "extravascular"}), but if \code{direction.out == "after"}
 #' interpolation occurs from the data after dosing.
-#' 
+#'
 #' @seealso \code{\link{pk.calc.clast.obs}()},
 #'   \code{\link{pk.calc.half.life}()}, \code{\link{pk.calc.c0}()}
 #' @export
@@ -99,40 +99,50 @@ interp.extrap.conc <- function(conc, time, time.out,
     data <-
       clean.conc.blq(
         conc, time,
-        conc.blq=conc.blq, conc.na=conc.na,
+        conc.blq=conc.blq,
+        conc.na=conc.na,
         check=FALSE
       )
   } else {
     data <- data.frame(conc, time)
   }
-  tlast <- pk.calc.tlast(data$conc, data$time, check=FALSE)
-  if (length(time.out) < 1)
+  if (length(time.out) < 1) {
     stop("time.out must be a vector with at least one element")
-  ret <- rep(NA, length(time.out))
-  for (i in seq_len(length(time.out)))
-    if (is.na(time.out[i])) {
-      warning("An interpolation/extrapolation time is NA")
-    } else if (time.out[i] <= tlast) {
-      ret[i] <-
-        interpolate.conc(
-          conc=data$conc, time=data$time,
-          time.out=time.out[i],
-          interp.method=interp.method,
-          conc.blq=conc.blq,
-          conc.na=conc.na,
-          check=FALSE
-        )
-    } else {
-      ret[i] <-
-        extrapolate.conc(
-          conc=data$conc, time=data$time,
-          time.out=time.out[i],
-          lambda.z=lambda.z,
-          clast=clast,
-          extrap.method=extrap.method,
-          check=FALSE
-        )
-    }
+  }
+  if (all(data$conc %in% 0)) {
+    # tlast would be NA in this case, but if everything input is zero, then all
+    # interpolated and extrapolated times will be zero, too.
+    ret <- rep(0, length(time.out))
+  } else {
+    tlast <- pk.calc.tlast(data$conc, data$time, check=FALSE)
+    ret <- rep(NA, length(time.out))
+    for (i in seq_len(length(time.out)))
+      if (is.na(tlast)) {
+        stop("Please report a bug:  tlast is NA; cannot interpolate/extrapolate") # nocov
+      } else if (is.na(time.out[i])) {
+        warning("An interpolation/extrapolation time is NA")
+      } else if (time.out[i] <= tlast) {
+        ret[i] <-
+          interpolate.conc(
+            conc=data$conc, time=data$time,
+            time.out=time.out[i],
+            interp.method=interp.method,
+            conc.blq=conc.blq,
+            conc.na=conc.na,
+            check=FALSE
+          )
+      } else {
+        ret[i] <-
+          extrapolate.conc(
+            conc=data$conc, time=data$time,
+            time.out=time.out[i],
+            lambda.z=lambda.z,
+            clast=clast,
+            extrap.method=extrap.method,
+            check=FALSE
+          )
+      }
+  }
   ret
 }
 
@@ -146,8 +156,11 @@ interpolate.conc <- function(conc, time, time.out,
                              conc.origin=0,
                              ...,
                              check=TRUE) {
-  ## Check the inputs
-  interp.method <- PKNCA.choose.option(name="auc.method", value=interp.method, options=options)
+  # Check the inputs
+  interp.method <-
+    tolower(PKNCA.choose.option(
+      name="auc.method", value=interp.method, options=options
+    ))
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
   if (check) {
@@ -155,62 +168,63 @@ interpolate.conc <- function(conc, time, time.out,
     data <-
       clean.conc.blq(
         conc=conc, time=time,
-        conc.blq=conc.blq, conc.na=conc.na,
+        conc.blq=conc.blq,
+        conc.na=conc.na,
         check=FALSE
       )
   } else {
     data <- data.frame(conc, time)
   }
-  # Ensure that conc.origin is valid
-  if (length(conc.origin) != 1) {
-    stop("conc.origin must be a scalar")
+  checkmate::assert_number(x=conc.origin, na.ok=TRUE)
+  checkmate::assert_number(x=time.out, na.ok=FALSE)
+  if (time.out > max(data$time)) {
+    stop("`interpolate.conc()` does not extrapolate, use `interp.extrap.conc()`")
   }
-  if (!(is.na(conc.origin) | (is.numeric(conc.origin) & !is.factor(conc.origin)))) {
-    stop("conc.origin must be NA or a number (and not a factor)")
-  }
-  ## Verify that we are interpolating between the first concentration
-  ## and the last above LOQ concentration
-  if (length(time.out) != 1) {
-    stop("Can only interpolate for one time point per function call")
-  }
+  # Verify that we are interpolating between the first concentration
+  # and the last above LOQ concentration
   tlast <- pk.calc.tlast(conc=data$conc, time=data$time, check=FALSE)
   if (time.out < min(data$time)) {
     ret <- conc.origin
+  } else if (all(data$conc == 0)) {
+    ret <- 0
   } else if (time.out > tlast) {
     stop("`interpolate.conc()` can only works through Tlast, please use `interp.extrap.conc()` to combine both interpolation and extrapolation.")
   } else if (time.out %in% data$time) {
-    ## See if there is an exact time match and return that if it
-    ## exists.
-    ret <- conc[time.out == data$time]
+    # See if there is an exact time match and return that if it
+    # exists.
+    ret <- data$conc[time.out == data$time]
   } else {
-    ## Find the last time before and the first time after the output
-    ## time.
-    time_1 <- max(data$time[data$time <= time.out])
-    time_2 <- min(data$time[time.out <= data$time])
-    conc_1 <- data$conc[data$time == time_1]
-    conc_2 <- data$conc[data$time == time_2]
-    interp.method <- tolower(interp.method)
-    if (is.na(conc_1) | is.na(conc_2)) {
-      ret <- NA_real_
-    } else if ((interp.method == "linear") |
-        (interp.method == "lin up/log down" &
-         ((conc_1 <= 0 | conc_2 <= 0) |
-          (conc_1 <= conc_2)))) {
-      ## Do linear interpolation if:
-      ##   linear interpolation is selected or
-      ##   lin up/log down interpolation is selected and
-      ##     one concentration is 0 or
-      ##     the concentrations are equal
-      ret <- conc_1+(time.out-time_1)/(time_2-time_1)*(conc_2-conc_1)
-    } else if (interp.method == "lin up/log down") {
-      ret <-
-        exp(
-          log(conc_1)+
-            (time.out-time_1)/(time_2-time_1)*(log(conc_2)-log(conc_1))
-        )
-    } else {
-      stop("You should never see this error.  Please report this as a bug with a reproducible example.") # nocov
-    }
+    interp_methods_all <-
+      choose_interp_extrap_method(
+        conc=data$conc,
+        time=data$time,
+        interp_method=interp.method,
+        # auclast because it doesn't affect the output for interpolation
+        extrap_method="auclast"
+      )
+    # Find the last time before and the first time after the output
+    # time, then interpolate.
+    idx_before <- rev(which(data$time <= time.out))[1]
+    idx_after <- which(time.out <= data$time)[1]
+    time_1 <- data$time[idx_before]
+    time_2 <- data$time[idx_after]
+    conc_1 <- data$conc[idx_before]
+    conc_2 <- data$conc[idx_after]
+    interp_method <- interp_methods_all[idx_before]
+    ret <-
+      if (interp_method == "linear") {
+        interpolate_conc_linear(conc_1=conc_1, conc_2=conc_2, time_1=time_1, time_2=time_2, time_out=time.out)
+      } else if (interp_method == "log") {
+        interpolate_conc_log(conc_1=conc_1, conc_2=conc_2, time_1=time_1, time_2=time_2, time_out=time.out)
+      } else if (interp_method == "zero") {
+        # interp_method == "zero" would not happen in practice because
+        # interpolation does not occur after tlast and linear interpolation
+        # would be used.  But, the rationale is sound in case that changes.
+        stop("The zero method of interpolation should not be used, please report a bug") # nocov
+        0 # nocov
+      } else {
+        stop("Please report a bug: invalid interp_method") # nocov
+      }
   }
   ret
 }
@@ -245,40 +259,40 @@ extrapolate.conc <- function(conc, time, time.out,
     stop("Only one time.out value may be estimated at once.")
   tlast <- pk.calc.tlast(conc=data$conc, time=data$time, check=FALSE)
   if (is.na(tlast)) {
-    ## If there are no observed concentrations, return NA
+    # If there are no observed concentrations, return NA
     ret <- NA
   } else if (time.out <= tlast) {
     stop("extrapolate.conc can only work beyond Tlast, please use interp.extrap.conc to combine both interpolation and extrapolation.")
   } else {
-    ## Start the interpolation
+    # Start the interpolation
     if (extrap.method %in% "aucinf") {
-      ## If AUCinf is requested, extrapolate using the half-life
-      ret <- clast*exp(-lambda.z*(time.out - tlast))
+      # If AUCinf is requested, extrapolate using the half-life
+      ret <- extrapolate_conc_lambdaz(clast=clast, lambda.z=lambda.z, tlast=tlast, time_out=time.out)
     } else if (extrap.method %in% "auclast" |
                  (extrap.method %in% "aucall" &
                     tlast == max(data$time))) {
-      ## If AUClast is requested or AUCall is requested and there are
-      ## no BLQ at the end, we are already certain that we are after
-      ## Tlast, so the answer is 0.
+      # If AUClast is requested or AUCall is requested and there are
+      # no BLQ at the end, we are already certain that we are after
+      # Tlast, so the answer is 0.
       ret <- 0
     } else if (extrap.method %in% "aucall") {
-      ## If the last non-missing concentration is below the limit of
-      ## quantification, extrapolate with the triangle method of
-      ## AUCall.
+      # If the last non-missing concentration is below the limit of
+      # quantification, extrapolate with the triangle method of
+      # AUCall.
       time_prev <- max(data$time[data$time <= time.out])
       conc_prev <- data$conc[data$time %in% time_prev]
       if (conc_prev %in% 0) {
-        ## If we are already BLQ, then we have confirmed that there
-        ## are no more ALQ measurements (because we are beyond
-        ## Tlast) and therefore we can extrapolate as 0.
+        # If we are already BLQ, then we have confirmed that there
+        # are no more ALQ measurements (because we are beyond
+        # Tlast) and therefore we can extrapolate as 0.
         ret <- 0
       } else {
         if (time_prev != max(data$time)) {
           time_next <- min(data$time[data$time >= time.out])
         }
-        ## If we are not already BLQ, then we have confirmed that we
-        ## are in the triangle extrapolation region and need to draw
-        ## a line.
+        # If we are not already BLQ, then we have confirmed that we
+        # are in the triangle extrapolation region and need to draw
+        # a line.
         ret <- (time.out - time_prev)/(time_next - time_prev)*conc_prev
       }
     } else {
@@ -298,8 +312,7 @@ event_choices_interp.extrap.conc.dose <-
        output_only="output_only",
        none="none")
 
-#' @importFrom dplyr case_when
-#' @describeIn interp.extrap.conc Interpolate and extrapolate 
+#' @describeIn interp.extrap.conc Interpolate and extrapolate
 #'   concentrations without interpolating or extrapolating beyond doses.
 #' @export
 interp.extrap.conc.dose <- function(conc, time,
@@ -340,7 +353,7 @@ interp.extrap.conc.dose <- function(conc, time,
   }
 
   # Generate a single timeline
-  
+
   # Concentrations are assumed to occur before dosing
   data_conc$out_after <- FALSE
   data_dose <-
@@ -358,7 +371,7 @@ interp.extrap.conc.dose <- function(conc, time,
   data_out <-
     data.frame(out=TRUE,
                out_after=out.after,
-               out_order=1:length(time.out),
+               out_order=seq_along(time.out),
                time=time.out)
   data_all <-
     merge(merge(data_conc,
@@ -382,9 +395,12 @@ interp.extrap.conc.dose <- function(conc, time,
     data_all$out~event_choices_interp.extrap.conc.dose$output_only, # interpolation/extrapolation-only row
     TRUE~"unknown") # should never happen
   if (any(mask_unknown <- data_all$event %in% "unknown")) {
-    # All events should be accounted for
-    stop("Unknown event in interp.extrap.conc.dose at time(s): ",
-         paste(unique(data_all$time[mask_unknown]), collapse=", ")) # nocov
+    # All events should be accounted for already
+    stop( # nocov
+      "Unknown event in interp.extrap.conc.dose at time(s): ", # nocov
+      paste(unique(data_all$time[mask_unknown]), collapse=", "), # nocov
+      " (Please report this as a bug)" # nocov
+    ) # nocov
   }
   # Remove "output_only" from event_before and event_after
   simple_locf <- function(x, missing_val) {
@@ -424,7 +440,7 @@ interp.extrap.conc.dose <- function(conc, time,
   }
   if (any(mask_no_method <- is.na(data_all$method))) {
     # This should never happen, all eventualities should be covered
-    stop("No method for imputing concentration at time(s): ",
+    stop("No method for imputing concentration at time(s): ", # nocov
          paste(unique(data_all$time[mask_no_method]), collapse=", ")) # nocov
   }
   # Filter to the requested time points and output
@@ -453,14 +469,13 @@ iecd_impossible_select <- function(x) {
        x$event_after %in% c("conc_dose_iv_bolus_after", "dose_iv_bolus_after"))
 }
 iecd_impossible_value <- function(data_all, current_idx, ...) {
-  stop(
-    sprintf(
-      "Impossible combination requested for interp.extrap.conc.dose.  event_before: %s, event: %s, event_after: %s",
-      data_all$event_before[current_idx],
-      data_all$event[current_idx],
-      data_all$event_after[current_idx])) # nocov
+  stop(sprintf( # nocov
+    "Impossible combination requested for interp.extrap.conc.dose (please report this as a bug).  event_before: %s, event: %s, event_after: %s", # nocov
+    data_all$event_before[current_idx], # nocov
+    data_all$event[current_idx], # nocov
+    data_all$event_after[current_idx] # nocov
+  )) # nocov
 }
-
 
 # Observed concentration ####
 iecd_observed_select <- function(x) {
@@ -486,7 +501,7 @@ iecd_before_value <- function(data_all, current_idx, conc.origin=0, ...) {
 # Interpolation ####
 iecd_interp_select <- function(x) {
   x$event_before %in% c("conc_dose_iv_bolus_after", "conc_dose", "conc") &
-    x$event %in% c("output_only") &
+    x$event %in% "output_only" &
     x$event_after %in% c("conc_dose", "conc") &
     !(x$event_before %in% "conc_dose" &
         x$event_after %in% "conc_dose")
@@ -543,7 +558,7 @@ iecd_iv_conc_value <- function(data_all, current_idx, ...) {
   tmp_conc <- data_all[data_all$conc_event &
                          (data_all$dose_count %in% data_all$dose_count[current_idx] |
                             data_all$dose_count_prev %in%  data_all$dose_count[current_idx]),]
-  tmp_dose <- data_all[data_all$dose_event & 
+  tmp_dose <- data_all[data_all$dose_event &
                          data_all$dose_count %in% data_all$dose_count[current_idx],]
   pk.calc.c0(conc=tmp_conc$conc, time=tmp_conc$time,
              time.dose=tmp_dose$time,
@@ -565,8 +580,8 @@ iecd_iv_noconc_select <- function(x) {
 
 # After an IV bolus with a concentration next ####
 iecd_afteriv_conc_select <- function(x) {
-  x$event_before %in% c("dose_iv_bolus_after") &
-    x$event %in% c("output_only") &
+  x$event_before %in% "dose_iv_bolus_after" &
+    x$event %in% "output_only" &
     x$event_after %in% c("conc_dose", "conc")
 }
 iecd_afteriv_conc_value <- function(data_all, current_idx, ...) {
@@ -574,7 +589,7 @@ iecd_afteriv_conc_value <- function(data_all, current_idx, ...) {
                          (data_all$dose_count %in% data_all$dose_count[current_idx] |
                             data_all$dose_count_prev %in%  data_all$dose_count[current_idx]),
                        c("conc", "time")]
-  tmp_dose <- data_all[data_all$dose_event & 
+  tmp_dose <- data_all[data_all$dose_event &
                          data_all$dose_count %in% data_all$dose_count[current_idx],]
   tmp_conc <- rbind(
     data.frame(
@@ -592,7 +607,7 @@ iecd_afteriv_conc_value <- function(data_all, current_idx, ...) {
 
 # After an IV bolus without a concentration next ####
 iecd_afteriv_noconc_select <- function(x) {
-  x$event_before %in% c("dose_iv_bolus_after") &
+  x$event_before %in% "dose_iv_bolus_after" &
     x$event %in% "output_only" &
     x$event_after %in% c("dose", "none")
 }
@@ -629,7 +644,7 @@ iecd_dose_conc_value <- function(data_all, current_idx, ...) {
                    time.out=data_all$time[current_idx], ...,
                    check=FALSE)
 }
-  
+
 interp.extrap.conc.dose.select <-
   list(
     "Impossible combinations"=

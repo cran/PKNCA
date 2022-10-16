@@ -1,9 +1,7 @@
-context("exclude")
-
 source("generate.data.R")
 
 test_that("setExcludeColumn", {
-  ## exclude argument not given
+  # exclude argument not given
   expect_equal(
     setExcludeColumn(list(data=data.frame(a=1),
                           exclude="fake")),
@@ -24,7 +22,7 @@ test_that("setExcludeColumn", {
                     exclude="exclude"),
                info="setExcludeColumn works with an alternate dataname")
   
-  ## exclude argument given
+  # exclude argument given
   expect_equal(setExcludeColumn(list(data=data.frame(a=1, exclude=2),
                                      exclude="exclude"),
                                 exclude="exclude"),
@@ -60,10 +58,12 @@ test_that("setExcludeColumn", {
                info="setExcludeColumn gives error on non-character value")
 
   # Zero-row data works
-  expect_equal(
-    expect_warning(setExcludeColumn(list(data=data.frame()))),
-    list(data=data.frame(exclude=NA_character_, stringsAsFactors=FALSE)[-1,,drop=FALSE],
-         exclude="exclude"),
+  expect_warning(
+    expect_equal(
+      setExcludeColumn(list(data=data.frame())),
+      list(data=data.frame(exclude=NA_character_, stringsAsFactors=FALSE)[-1,,drop=FALSE],
+         exclude="exclude")
+    ),
     info="setExcludeColumn works with zero-row data"
   )
   expect_equal(
@@ -75,7 +75,7 @@ test_that("setExcludeColumn", {
 })
 
 test_that("exclude.default", {
-  ## Check inputs
+  # Check inputs
   my_conc <- generate.conc(nsub=5, ntreat=2, time.points=0:24)
   obj1 <- PKNCAconc(my_conc, formula=conc~time|treatment+ID)
 
@@ -124,7 +124,7 @@ test_that("exclude.default", {
                regexp="reason must be a character string.",
                info="Interpretation of a non-character reason is unclear")
   
-  ## Check operation
+  # Check operation
   obj4 <- obj1
   obj4$data$exclude <- c(NA_character_, rep("Just because", nrow(obj4$data)-1))
 
@@ -144,7 +144,7 @@ test_that("exclude.default", {
                info="A function returning a vector works")
 
   obj7 <- obj1
-  obj7$data <- obj7$data[nrow(obj7$data):1,]
+  obj7$data <- obj7$data[rev(seq_len(nrow(obj7$data))),]
   exclude_1 <- function(x, ...) {
     ifelse(x$ID == 1,
            "Drop 1",
@@ -230,15 +230,17 @@ test_that("normalize_exclude makes blanks into NA_character_", {
 test_that("multiple exclusions for the same row provide all the reasons (fix #113)", {
   my_conc <- generate.conc(nsub=5, ntreat=2, time.points=0:24)
   my_conc$exclude <- c("", rep(NA_character_, nrow(my_conc) - 1))
-  result_obj <-
-    pk.nca(PKNCAdata(
-      PKNCAconc(
-        my_conc,
-        formula=conc~time|treatment+ID,
-        exclude="exclude"
-      ),
-      intervals=data.frame(start=0, end=Inf, cmax=TRUE)
-    ))
+  suppressMessages(
+    result_obj <-
+      pk.nca(PKNCAdata(
+        PKNCAconc(
+          my_conc,
+          formula=conc~time|treatment+ID,
+          exclude="exclude"
+        ),
+        intervals=data.frame(start=0, end=Inf, cmax=TRUE)
+      ))
+  )
   result_excl1 <-
     exclude(
       result_obj,

@@ -10,7 +10,8 @@
   drop.group = object$data$conc$subject,
   summarize.n.per.group = TRUE,
   not.requested.string = ".",
-  not.calculated.string = "NC"
+  not.calculated.string = "NC",
+  pretty_names = NULL
 )
 }
 \arguments{
@@ -20,20 +21,24 @@
 
 \item{drop.group}{Which group(s) should be dropped from the formula?}
 
-\item{summarize.n.per.group}{Should a column for \code{N} be added 
-(\code{TRUE} or \code{FALSE})?  Note that \code{N} is maximum number of 
+\item{summarize.n.per.group}{Should a column for \code{N} be added
+(\code{TRUE} or \code{FALSE})?  Note that \code{N} is maximum number of
 parameter results for any parameter; if no parameters are requested for a
 group, then \code{N} will be \code{NA}.}
 
-\item{not.requested.string}{A character string to use when a parameter 
+\item{not.requested.string}{A character string to use when a parameter
 summary was not requested for a parameter within an interval.}
 
-\item{not.calculated.string}{A character string to use when a parameter 
-summary was requested, but the point estimate AND spread calculations (if 
+\item{not.calculated.string}{A character string to use when a parameter
+summary was requested, but the point estimate AND spread calculations (if
 applicable) returned \code{NA}.}
+
+\item{pretty_names}{Should pretty names (easier to understand in a report) be
+used?  \code{TRUE} is yes, \code{FALSE} is no, and \code{NULL} is yes if
+units are used an no if units are not used.}
 }
 \value{
-A data frame of NCA parameter results summarized according to the 
+A data frame of NCA parameter results summarized according to the
   summarization settings.
 }
 \description{

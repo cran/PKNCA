@@ -1,7 +1,5 @@
-context("C0 Calculations")
-
 test_that("pk.calc.c0", {
-  ## Input checks
+  # Input checks
   expect_error(pk.calc.c0(5:1, 4:0),
                regexp="Time must be monotonically increasing",
                info="conc, time inputs are checked")
@@ -15,12 +13,12 @@ test_that("pk.calc.c0", {
   expect_warning(pk.calc.c0(5:1, 0:4, time.dose=30),
                  regexp="time.dose is after all available data")
 
-  ## Simple calculations
+  # Simple calculations
   expect_equal(pk.calc.c0(1:5, 0:4), 1,
                info="When there is a nonzero concentration at the default time of dosing")
   expect_equal(pk.calc.c0(1:5, 0:4, time.dose=1), 2,
                info="When there is a nonzero concentration at the nondefault time of dosing")
-  ## It will fall through to subsequent methods if applicable
+  # It will fall through to subsequent methods if applicable
   expect_equal(pk.calc.c0(c(0, 2, 1, 0.5), 0:3),
                pk.calc.c0.method.logslope(c(0, 2, 1, 0.5), 0:3),
                info="Falls through to second method")
@@ -59,8 +57,10 @@ test_that("pk.calc.c0.method.c1", {
                info="works when time.dose matches a nonzero conc and skips over NA")
   expect_equal(pk.calc.c0.method.c1(c(2, NA, 0.5), 3:5, time.dose=30), NA,
                info="returns NA when time.dose is after the last measurement")
-  expect_warning(v1 <- pk.calc.c0.method.c1(rep(NA, 3), 3:5, time.dose=1),
-                 regexp="All concentration data is missing")
+  expect_warning(
+    v1 <- pk.calc.c0.method.c1(rep(NA, 3), 3:5, time.dose=1),
+    regexp="All concentration data are missing"
+  )
   expect_equal(v1, NA,
                info="returns NA when all inputs are NA")
 })

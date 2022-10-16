@@ -21,8 +21,11 @@ pk.nca.interval(
   time.dose.group = NULL,
   duration.dose.group = NULL,
   route.group = NULL,
+  impute_method = NA_character_,
   include_half.life = NULL,
   exclude_half.life = NULL,
+  subject,
+  sparse,
   interval,
   options = list()
 )
@@ -57,6 +60,8 @@ nonzero for intravascular infusion)}
 \item{route, route.group}{The route of dosing for the current interval
 or all data for the group}
 
+\item{impute_method}{The method to use for imputation as a character string}
+
 \item{include_half.life}{An optional boolean vector of the
 concentration measurements to include in the half-life calculation.
 If given, no half-life point selection will occur.}
@@ -64,6 +69,11 @@ If given, no half-life point selection will occur.}
 \item{exclude_half.life}{An optional boolean vector of the
 concentration measurements to exclude from the half-life
 calculation.}
+
+\item{subject}{Subject identifiers (used for sparse calculations)}
+
+\item{sparse}{Should only sparse calculations be performed (TRUE) or only
+dense calculations (FALSE)?}
 
 \item{interval}{One row of an interval definition (see
 \code{\link{check.interval.specification}} for how to define the

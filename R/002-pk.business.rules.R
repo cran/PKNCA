@@ -3,7 +3,7 @@
 #' \code{PKNCA.options("max.missing")}.
 #'
 #' Note that all missing values are removed prior to calling the function.
-#' 
+#'
 #' @param FUN function to run.  The function is called as \code{FUN(x, ...)}
 #'   with missing values removed.
 #' @param zero.missing Are zeros counted as missing?  If \code{TRUE} then
@@ -26,8 +26,8 @@ pk.business <- function(FUN,
                         zero.missing=FALSE,
                         max.missing)
   function(x, ...) {
-    ## Allow max.missing to be specified at either function initiation
-    ## or for it to use PKNCA.Options("max.missing")
+    # Allow max.missing to be specified at either function initiation or for it
+    # to use PKNCA.Options("max.missing")
     max.missing <- PKNCA.options("max.missing")
     mask.missing <- is.na(x) | (zero.missing & (x %in% 0))
     if (sum(mask.missing)/length(x) > max.missing)
@@ -36,7 +36,7 @@ pk.business <- function(FUN,
   }
 
 #' Compute the geometric mean, sd, and CV
-#' 
+#'
 #' @param x A vector to compute the geometric mean of
 #' @param na.rm Should missing values be removed?
 #' @return The scalar value of the geometric mean, geometric standard deviation,
@@ -46,7 +46,6 @@ pk.business <- function(FUN,
 #' @examples
 #' geomean(1:3)
 #' @export
-#' @importFrom stats na.omit
 geomean <- function(x, na.rm=FALSE) {
   if (na.rm)
     x <- stats::na.omit(x)
@@ -55,7 +54,7 @@ geomean <- function(x, na.rm=FALSE) {
   } else if (any(x == 0)) {
     0
   } else if (any(x < 0)) {
-    ## Protect from overflows by using the logarithm
+    # Protect from overflows by using the logarithm
     prod(sign(x))*exp(sum(log(abs(x)))/length(x))
   } else {
     exp(sum(log(x))/length(x))
@@ -67,7 +66,6 @@ geomean <- function(x, na.rm=FALSE) {
 #' @examples
 #' geosd(1:3)
 #' @export
-#' @importFrom stats sd
 geosd <- function(x, na.rm=FALSE)
   exp(stats::sd(log(x), na.rm=na.rm))
 
@@ -77,7 +75,6 @@ geosd <- function(x, na.rm=FALSE)
 #' @examples
 #' geocv(1:3)
 #' @export
-#' @importFrom stats sd
 geocv <- function(x, na.rm=FALSE)
   sqrt(exp(stats::sd(log(x), na.rm=na.rm)^2)-1)*100
 
@@ -91,54 +88,57 @@ geocv <- function(x, na.rm=FALSE)
 #' are missing
 #' @seealso \code{\link{pk.business}()}
 #' @export
-business.mean <- pk.business(mean, max.missing=~PKNCA::PKNCA.Options('max.missing'))
+business.mean <- pk.business(mean, max.missing=~PKNCA::PKNCA.Options("max.missing"))
 
 #' @describeIn business.mean
 #' Compute the standard deviation with business rules.
 #' @export
-#' @importFrom stats sd
-business.sd <- pk.business(stats::sd, max.missing=~PKNCA::PKNCA.Options('max.missing'))
+business.sd <- pk.business(stats::sd, max.missing=~PKNCA::PKNCA.Options("max.missing"))
 
 #' @describeIn business.mean
 #' Compute the coefficient of variation with business rules.
 #' @export
-#' @importFrom stats sd
 business.cv <-
-  pk.business(function(x, ...) {100*stats::sd(x, ...)/mean(x, ...)},
-              max.missing=~PKNCA::PKNCA.Options('max.missing'))
+  pk.business(
+    function(x, ...) {
+      100*stats::sd(x, ...)/mean(x, ...)
+    },
+    max.missing=~PKNCA::PKNCA.Options("max.missing")
+  )
 
 #' @describeIn business.mean
 #' Compute the geometric mean with business rules.
 #' @export
 business.geomean <-
-  pk.business(geomean, zero.missing=TRUE,
-              max.missing=~PKNCA::PKNCA.Options('max.missing'))
+  pk.business(
+    geomean, zero.missing=TRUE,
+    max.missing=~PKNCA::PKNCA.Options("max.missing")
+  )
 #' @describeIn business.mean
 #' Compute the geometric coefficient of variation with business rules.
 #' @export
 business.geocv <-
   pk.business(
     geocv, zero.missing=TRUE,
-    max.missing=~PKNCA::PKNCA.Options('max.missing')
+    max.missing=~PKNCA::PKNCA.Options("max.missing")
   )
 #' @describeIn business.mean
 #' Compute the minimum with business rules.
 #' @export
 business.min <-
-  pk.business(min, max.missing=~PKNCA::PKNCA.Options('max.missing'))
+  pk.business(min, max.missing=~PKNCA::PKNCA.Options("max.missing"))
 #' @describeIn business.mean
 #' Compute the maximum with business rules.
 #' @export
 business.max <-
-  pk.business(max, max.missing=~PKNCA::PKNCA.Options('max.missing'))
+  pk.business(max, max.missing=~PKNCA::PKNCA.Options("max.missing"))
 #' @describeIn business.mean
 #' Compute the median with business rules.
 #' @export
-#' @importFrom stats median
 business.median <-
-  pk.business(stats::median, max.missing=~PKNCA::PKNCA.Options('max.missing'))
+  pk.business(stats::median, max.missing=~PKNCA::PKNCA.Options("max.missing"))
 #' @describeIn business.mean
 #' Compute the range with business rules.
 #' @export
 business.range <-
-  pk.business(range, max.missing=~PKNCA::PKNCA.Options('max.missing'))
+  pk.business(range, max.missing=~PKNCA::PKNCA.Options("max.missing"))

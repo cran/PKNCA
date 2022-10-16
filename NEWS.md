@@ -4,7 +4,60 @@ will continue until then.  These will be especially noticeable around
 the inclusion of IV NCA parameters and additional specifications of
 the dosing including dose amount and route.
 
-# PKNCA 0.9.5 (in development)
+# PKNCA 0.10.0
+
+## Bugs Fixed
+
+* When calculating AUC with only a single concentration measurement, NA is now
+  returned instead of 0. (fix #176)
+
+## New Features
+
+* Initial support for unit assignment and conversion has been added.  See the
+  `units` argument to the `PKNCAdata()` function and the function
+  `pknca_units_table()`.
+* Initial support for imputation has been added.  See the `impute` argument to
+  the `PKNCAdata()` function and the Data Imputation vignette.
+* With the addition of units, several outputs now will differ, if units are
+  used:
+    * `summary()` on a PKNCAresults object shows the units in the column
+      heading.
+    * When running `as.data.frame()` on a PKNCAresults object with the argument
+      `out.format="wide"`, if standardized units values are available, they will
+      be used.  And if any unit are available, they will be in the column names.
+* Summary tables with units use the "pretty_name" for a parameter which is
+  intended for clearer representation in reports.  "pretty_name" use can be
+  controlled with the "pretty_names" argument to `summary()`.
+    * Note that the pretty names themselves may be modified to help clarify and/or
+      shorten the names to make the table heading more useful.  If you intend to
+      modify column headers programmatically, set `pretty_names=FALSE` when
+      calling the `summary()` function.
+* New, IV AUC calculation methods have been added.
+* `pk.calc.time_above()` now uses the default AUC calculation method for
+  interpolation of time above.  And, it can use 'lin up/log down' interpolation.
+* PKNCA can now calculate parameters that require extra information by adding
+  the extra information to the intervals data.frame.  For example, add
+  `conc_above` as a column to the intervals to allow calculation of
+  `time_above`.  With this change, the "conc_above" `PKNCA.options()` value has
+  been removed.
+* Added dplyr joins, filter, mutate, group_by, and ungroup to allow modification
+  of PKNCA objects after creation.  (Note that these functions will make the
+  provenance no longer match for PKNCAresults objects.)
+
+## Breaking Changes
+
+* Some functions that were intended to be internal were removed:
+    * All `getData()` functions were removed.
+    * The `getDataName()` function for PKNCAdata objects was removed.
+* `interpolate.conc()` and `interp.extrap.conc()` now give more errors with
+  missing (NA) input.  This should not affect typical NCA (where NA values are
+  dropped), but it may affect direct calls to the functions themselves.
+
+## Internal Breaking Changes (these should not affect PKNCA users)
+
+* print.parseFormula() was removed from the package.
+
+# PKNCA 0.9.5
 
 * The internals of how PKNCA performs calculations had a significant update. The
   only user-visible change should be that PKNCA does not perform parallel

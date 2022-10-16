@@ -1,5 +1,5 @@
 #' Times relative to an event (typically dosing)
-#' 
+#'
 #' @param time_event A vector of times for events
 #' @param time_obs A vector of times for observations
 #' @param units Passed to `base::as.numeric.difftime()`
@@ -16,10 +16,11 @@
 #' a dose, they equal zero, and otherwise, they are calculated relative to the
 #' dose number in the `event_number_*` columns.
 #' @export
-time_calc <- function(time_event, time_obs, units=NULL)
+time_calc <- function(time_event, time_obs, units=NULL) {
   UseMethod("time_calc")
+}
 
-#' @importFrom stats na.omit
+#' @export
 time_calc.numeric <- function(time_event, time_obs, units=NULL) {
   if (length(time_event) == 0) {
     warning("No events provided")
@@ -33,22 +34,24 @@ time_calc.numeric <- function(time_event, time_obs, units=NULL) {
   ret <-
     data.frame(
       event_number_before=
-        sapply(
-          X=time_obs,
-          FUN=function(x)
+        vapply(
+          X = time_obs,
+          FUN = function(x)
             max_zero_len(
               which(time_event <= x),
               zero_length=NA_integer_
-            )
+            ),
+          FUN.VALUE = 1L
         ),
       event_number_after=
-        sapply(
-          X=time_obs,
-          FUN=function(x)
+        vapply(
+          X = time_obs,
+          FUN = function(x)
             min_zero_len(
               which(time_event >= x),
-              zero_length=NA_integer_
-            )
+              zero_length = NA_integer_
+            ),
+          FUN.VALUE = 1L
         )
     )
   ret$time_after_event <-
@@ -64,6 +67,7 @@ time_calc.numeric <- function(time_event, time_obs, units=NULL) {
   ret
 }
 
+#' @export
 time_calc.POSIXt <- function(time_event, time_obs, units=NULL) {
   if (is.null(units)) {
     stop("`units` must be provided.")
@@ -79,6 +83,7 @@ time_calc.POSIXt <- function(time_event, time_obs, units=NULL) {
   )
 }
 
+#' @export
 time_calc.difftime <- function(time_event, time_obs, units=NULL) {
   if (is.null(units)) {
     stop("`units` must be provided.")

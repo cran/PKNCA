@@ -4,7 +4,7 @@
 #' concentration-time curve using semi-log regression (\code{log(conc)~time})
 #' with automated selection of the points for calculation (unless
 #' \code{manually.selected.points} is \code{TRUE}).
-#' 
+#'
 #' See the "Half-Life Calculation" vignette for more details on the calculation
 #' methods used.
 #'
@@ -12,51 +12,51 @@
 #' half-life is calculated by computing the best fit line for all points at or
 #' after tmax (based on the value of \code{allow.tmax.in.half.life}.  The best
 #' half-life is chosen by the following rules in order:
-#' 
+#'
 #' \itemize{
-#'  \item{At least \code{min.hl.points} points included} 
+#'  \item{At least \code{min.hl.points} points included}
 #'  \item{A \code{lambda.z} > 0 and at the same time the best adjusted r-squared
 #'  (within \code{adj.r.squared.factor})}
 #'  \item{The one with the most points included}
 #' }
-#' 
+#'
 #' If \code{manually.selected.points} is \code{TRUE}, the \code{conc}
 #' and \code{time} data are used as-is without any form of selection for
 #' the best-fit half-life.
-#' 
+#'
 #' @param conc Concentration measured
 #' @param time Time of concentration measurement
-#' @param tmax Time of maximum concentration (will be calculated and 
+#' @param tmax Time of maximum concentration (will be calculated and
 #'   included in the return data frame if not given)
-#' @param tlast Time of last concentration above the limit of 
-#'   quantification (will be calculated and included in the return data 
+#' @param tlast Time of last concentration above the limit of
+#'   quantification (will be calculated and included in the return data
 #'   frame if not given)
 #' @param manually.selected.points Have the input points (\code{conc} and
 #'   \code{time}) been manually selected?  The impact of setting this to
 #'   \code{TRUE} is that no selection for the best points will be done.  When
 #'   \code{TRUE}, this option causes the options of \code{adj.r.squared.factor},
 #'   \code{min.hl.points}, and \code{allow.tmax.in.half.life} to be ignored.
-#' @param options List of changes to the default 
+#' @param options List of changes to the default
 #'   \code{\link{PKNCA.options}} for calculations.
-#' @param min.hl.points The minimum number of points that must be 
+#' @param min.hl.points The minimum number of points that must be
 #'   included to calculate the half-life
-#' @param adj.r.squared.factor The allowance in adjusted r-squared for 
+#' @param adj.r.squared.factor The allowance in adjusted r-squared for
 #'   adding another point.
 #' @param conc.blq See \code{\link{clean.conc.blq}}
 #' @param conc.na See \code{\link{clean.conc.na}}
-#' @param check Run \code{\link{check.conc.time}}, 
+#' @param check Run \code{\link{check.conc.time}},
 #'   \code{\link{clean.conc.blq}}, and \code{\link{clean.conc.na}}?
 #' @param first.tmax See \code{\link{pk.calc.tmax}}.
 #' @param allow.tmax.in.half.life Allow the concentration point for tmax
 #'   to be included in the half-life slope calculation.
 #' @return A data frame with one row and columns for
-#'  \describe{ 
+#'  \describe{
 #'   \item{tmax}{Time of maximum observed concentration (only included
 #'     if not given as an input)}
 #'   \item{tlast}{Time of last observed concentration above the LOQ (only
 #'     included if not given as an input)}
-#'   \item{r.squared}{coefficient of determination} 
-#'   \item{adj.r.squared}{adjusted coefficient of determination} 
+#'   \item{r.squared}{coefficient of determination}
+#'   \item{adj.r.squared}{adjusted coefficient of determination}
 #'   \item{lambda.z}{elimination rate}
 #'   \item{lambda.z.time.first}{first time for half-life calculation}
 #'   \item{lambda.z.n.points}{number of points in half-life calculation}
@@ -67,10 +67,10 @@
 #'     half-life calculation}
 #'  }
 #' @references
-#' 
+#'
 #' Gabrielsson J, Weiner D.  "Section 2.8.4 Strategies for estimation of
 #' lambda-z."  Pharmacokinetic & Pharmacodynamic Data Analysis: Concepts
-#' and Applications, 4th Edition.  Stockholm, Sweden: Swedish 
+#' and Applications, 4th Edition.  Stockholm, Sweden: Swedish
 #' Pharmaceutical Press, 2000.  167-9.
 #' @family NCA parameter calculations
 #' @export
@@ -84,7 +84,7 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
                               first.tmax=NULL,
                               allow.tmax.in.half.life=NULL,
                               check=TRUE) {
-  ## Check inputs
+  # Check inputs
   min.hl.points <-
     PKNCA.choose.option(
       name="min.hl.points", value=min.hl.points, options=options
@@ -115,8 +115,14 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
   } else {
     data <- data.frame(conc, time)
   }
+  # if (inherits(data$conc, "units")) {
+  #   conc_units <- units(data$conc)
+  # } else {
+    conc_units <- NULL
+  #}
   data$log_conc <- log(data$conc)
-  data <- data[data$conc > 0,]
+  # as.numeric() to handle units objects
+  data <- data[as.numeric(data$conc) > 0,]
   # Prepare the return values
   ret <- data.frame(
     # Terminal elimination slope
@@ -151,15 +157,17 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
   } else {
     ret$tlast <- tlast
   }
-  ## Data frame to use for computation of half-life
+  # Data frame to use for computation of half-life
   if (allow.tmax.in.half.life) {
-    dfK <- data[data$time >= ret$tmax, ]
+    # as.numeric is for units handling
+    dfK <- data[as.numeric(data$time) >= as.numeric(ret$tmax), ]
   } else {
-    dfK <- data[data$time > ret$tmax, ]
+    # as.numeric is for units handling
+    dfK <- data[as.numeric(data$time) > as.numeric(ret$tmax), ]
   }
   if (manually.selected.points) {
     if (nrow(data) > 0) {
-      fit <- fit_half_life(data=data, tlast=ret$tlast)
+      fit <- fit_half_life(data=data, tlast=ret$tlast, conc_units=conc_units)
       ret[,ret_replacements] <- fit[,ret_replacements]
     } else {
       warning("No data to manually fit for half-life (all concentrations may be 0 or excluded)")
@@ -170,7 +178,7 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
         )
     }
   } else if (nrow(dfK) >= min.hl.points) {
-    ## If we have enough data to estimate a slope, then
+    # If we have enough data to estimate a slope, then
     half_lives_for_selection <-
       data.frame(
         r.squared=-Inf,
@@ -186,41 +194,46 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
     half_lives_for_selection <-
       half_lives_for_selection[order(-half_lives_for_selection$lambda.z.time.first), ]
     for(i in min.hl.points:nrow(half_lives_for_selection)) {
-      ## Fit the terminal slopes until the adjusted r-squared value
-      ## is not improving (or it only gets worse by a small factor).
+      # Fit the terminal slopes until the adjusted r-squared value
+      # is not improving (or it only gets worse by a small factor).
       fit <-
         fit_half_life(
           data=
             data.frame(
+              # pass in the conc so that we can use its units, if applicable
               log_conc=half_lives_for_selection$log_conc[1:i],
               time=half_lives_for_selection$lambda.z.time.first[1:i]
             ),
-          tlast=ret$tlast
+          tlast=ret$tlast,
+          conc_units=conc_units
         )
       half_lives_for_selection[i,names(fit)] <- fit
     }
-    ## Find the best model
+    # Find the best model
     mask_best <-
       half_lives_for_selection$lambda.z > 0 &
       if (min.hl.points == 2 & nrow(half_lives_for_selection) == 2) {
-        warning("2 points used for half-life calculation")
+        rlang::warn(
+          message = "2 points used for half-life calculation",
+          class = "pknca_halflife_2points"
+        )
         TRUE
       } else {
         half_lives_for_selection$adj.r.squared >
           (max(half_lives_for_selection$adj.r.squared, na.rm=TRUE) - adj.r.squared.factor)
       }
-    ## Missing values are not the best
+    # Missing values are not the best
     mask_best[is.na(mask_best)] <- FALSE
     if (sum(mask_best) > 1) {
-      ## If more than one models qualify, choose the one with the
-      ## most points used.
+      # If more than one models qualify, choose the one with the
+      # most points used.
       mask_best <-
         (mask_best &
            half_lives_for_selection$lambda.z.n.points == max(half_lives_for_selection$lambda.z.n.points[mask_best]))
     }
-    ## If the half-life fit, set all associated parameters
+    # If the half-life fit, set all associated parameters
     if (any(mask_best)) {
-      ## Put in all the computed values
+      # Put in all the computed values
       ret[,ret_replacements] <- half_lives_for_selection[mask_best, ret_replacements]
     }
   } else {
@@ -229,9 +242,12 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
         "Too few points for half-life calculation (min.hl.points=%g with only %g points)",
         min.hl.points, nrow(dfK)
       )
-    warning(attr(ret, "exclude"))
+    rlang::warn(
+      message = attr(ret, "exclude"),
+      class = "pknca_halflife_too_few_points"
+    )
   }
-  ## Drop the inputs of tmax and tlast, if given.
+  # Drop the inputs of tmax and tlast, if given.
   if (!missing(tmax))
     ret$tmax <- NULL
   if (!missing(tlast))
@@ -239,28 +255,53 @@ pk.calc.half.life <- function(conc, time, tmax, tlast,
   ret
 }
 
-#' Perform the half-life fit given the data.  The function simply fits 
+#' Perform the half-life fit given the data.  The function simply fits
 #' the data without any validation.  No selection of points or any other
 #' components are done.
-#' 
-#' @param data The data to fit.  Must have two columns named "log_conc" 
+#'
+#' @param data The data to fit.  Must have two columns named "log_conc"
 #'   and "time"
 #' @param tlast The time of last observed concentration above the limit
 #'   of quantification.
-#' @return A data.frame with one row and columns named "r.squared", 
-#'   "adj.r.squared", "PROB", "lambda.z", "clast.pred", 
+#' @param conc_units NULL or the units to set for concentration measures
+#' @return A data.frame with one row and columns named "r.squared",
+#'   "adj.r.squared", "PROB", "lambda.z", "clast.pred",
 #'   "lambda.z.n.points", "half.life", "span.ratio"
 #' @seealso \code{\link{pk.calc.half.life}}
-#' @importFrom stats .lm.fit
-fit_half_life <- function(data, tlast) {
+fit_half_life <- function(data, tlast, conc_units) {
   fit <- stats::.lm.fit(x=cbind(1, data$time), y=data$log_conc)
-  r_squared <- 1 - sum(fit$residuals^2)/sum((data$log_conc - mean(data$log_conc))^2)
+  # unit handling
+  # if (inherits(tlast, "units")) {
+  #   time_units <- units(tlast)
+  # } else if (inherits(tlast, "mixed_units")) {
+  #   time_units <- units(units::as_units(tlast))
+  # } else {
+    time_units <- NULL
+  # }
+  # if (!is.null(time_units)) {
+  #   inverse_time_units <- time_units
+  #   inverse_time_units$numerator <- time_units$denominator
+  #   inverse_time_units$denominator <- time_units$numerator
+  # } else {
+    inverse_time_units <- NULL
+  # }
+
+  # as.numeric is so that it works for units objects
+  r_squared <- 1 - as.numeric(sum(fit$residuals^2))/as.numeric(sum((data$log_conc - mean(data$log_conc))^2))
+  clast_pred <- exp(sum(fit$coefficients*c(1, as.numeric(tlast))))
+  # if (!is.null(conc_units)) {
+  #   clast_pred <- units::set_units(clast_pred, conc_units, mode="standard")
+  # }
+  lambda_z <- -fit$coefficients[2]
+  # if (!is.null(inverse_time_units)) {
+  #   lambda_z <- units::set_units(lambda_z, inverse_time_units, mode="standard")
+  # }
   ret <-
     data.frame(
       r.squared=r_squared,
       adj.r.squared=adj.r.squared(r_squared, nrow(data)),
-      lambda.z=-fit$coefficients[2],
-      clast.pred=exp(sum(fit$coefficients*c(1, tlast))),
+      lambda.z=lambda_z,
+      clast.pred=clast_pred,
       lambda.z.time.first=min(data$time, na.rm=TRUE),
       lambda.z.n.points=nrow(data)
     )
@@ -269,10 +310,12 @@ fit_half_life <- function(data, tlast) {
   ret
 }
 
-## Add the column to the interval specification
+# Add the column to the interval specification
 add.interval.col("half.life",
                  FUN="pk.calc.half.life",
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="Half-life",
                  desc="The (terminal) half-life",
                  depends=c("tmax", "tlast"))
 PKNCA.set.summary(
@@ -284,8 +327,10 @@ PKNCA.set.summary(
 add.interval.col("r.squared",
                  FUN=NA,
                  values=c(FALSE, TRUE),
+                 unit_type="unitless",
+                 pretty_name="$r^2$",
                  desc="The r^2 value of the half-life calculation",
-                 depends=c("half.life"))
+                 depends="half.life")
 PKNCA.set.summary(
   name="r.squared",
   description="arithmetic mean and standard deviation",
@@ -295,8 +340,10 @@ PKNCA.set.summary(
 add.interval.col("adj.r.squared",
                  FUN=NA,
                  values=c(FALSE, TRUE),
+                 unit_type="unitless",
+                 pretty_name="$r^2_{adj}$",
                  desc="The adjusted r^2 value of the half-life calculation",
-                 depends=c("half.life"))
+                 depends="half.life")
 PKNCA.set.summary(
   name="adj.r.squared",
   description="arithmetic mean and standard deviation",
@@ -306,8 +353,10 @@ PKNCA.set.summary(
 add.interval.col("lambda.z",
                  FUN=NA,
                  values=c(FALSE, TRUE),
+                 unit_type="inverse_time",
+                 pretty_name="$\\lambda_z$",
                  desc="The elimination rate of the terminal half-life",
-                 depends=c("half.life"))
+                 depends="half.life")
 PKNCA.set.summary(
   name="lambda.z",
   description="geometric mean and geometric coefficient of variation",
@@ -317,8 +366,10 @@ PKNCA.set.summary(
 add.interval.col("lambda.z.time.first",
                  FUN=NA,
                  values=c(FALSE, TRUE),
+                 unit_type="time",
+                 pretty_name="First time for $\\lambda_z$",
                  desc="The first time point used for the calculation of half-life",
-                 depends=c("half.life"))
+                 depends="half.life")
 PKNCA.set.summary(
   name="lambda.z.time.first",
   description="median and range",
@@ -328,8 +379,10 @@ PKNCA.set.summary(
 add.interval.col("lambda.z.n.points",
                  FUN=NA,
                  values=c(FALSE, TRUE),
+                 unit_type="count",
+                 pretty_name="Number of points used for lambda_z",
                  desc="The number of points used for the calculation of half-life",
-                 depends=c("half.life"))
+                 depends="half.life")
 PKNCA.set.summary(
   name="lambda.z.n.points",
   description="median and range",
@@ -339,8 +392,10 @@ PKNCA.set.summary(
 add.interval.col("clast.pred",
                  FUN=NA,
                  values=c(FALSE, TRUE),
+                 unit_type="conc",
+                 pretty_name="Clast,pred",
                  desc="The concentration at Tlast as predicted by the half-life",
-                 depends=c("half.life"))
+                 depends="half.life")
 PKNCA.set.summary(
   name="clast.pred",
   description="geometric mean and geometric coefficient of variation",
@@ -350,8 +405,10 @@ PKNCA.set.summary(
 add.interval.col("span.ratio",
                  FUN=NA,
                  values=c(FALSE, TRUE),
+                 unit_type="fraction",
+                 pretty_name="Span ratio",
                  desc="The ratio of the half-life to the duration used for half-life calculation",
-                 depends=c("half.life"))
+                 depends="half.life")
 PKNCA.set.summary(
   name="span.ratio",
   description="geometric mean and geometric coefficient of variation",

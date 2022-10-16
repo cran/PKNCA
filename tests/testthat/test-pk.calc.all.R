@@ -1,11 +1,8 @@
-context("All NCA calculations")
-
-library(dplyr)
 source("generate.data.R")
 
 test_that("pk.nca", {
-  ## Note that generate.conc sets the random seed, so it doesn't have
-  ## to happen here.
+  # Note that generate.conc sets the random seed, so it doesn't have to happen
+  # here.
   tmpconc <- generate.conc(2, 1, 0:24)
   tmpdose <- generate.dose(tmpconc)
   myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
@@ -20,9 +17,9 @@ test_that("pk.nca", {
               info="Provenance works on results")
 
   mydata.failure <- mydata
-  ## There's no way to automatically make a PKNCAdata object with no
-  ## intervals, but we want to ensure that users cannot cause this error
-  ## by playing in the internals.
+  # There's no way to automatically make a PKNCAdata object with no intervals,
+  # but we want to ensure that users cannot cause this error by playing in the
+  # internals.
   mydata.failure$intervals <- data.frame()
   expect_warning(myresult.failure <- pk.nca(mydata.failure),
                  regexp="No intervals given; no calculations done.",
@@ -39,12 +36,11 @@ test_that("pk.nca", {
     info="missing dose information is handled without an issue"
   )
 
-  ## Test each of the pieces for myresult for accuracy
+  # Test each of the pieces for myresult for accuracy
 
   expect_equal(myresult$data, {
     tmp <- mydata
-    ## The options should be the default options after the
-    ## calculations are done.
+    # The options should be the default options after the calculations are done.
     tmp$options <- PKNCA.options()
     tmp
   }, info="The data is just a copy of the input data plus an instantiation of the PKNCA.options")
@@ -80,7 +76,7 @@ test_that("pk.nca", {
                "doesn't change is important.")
   )
 
-  ## Specifying new intervals
+  # Specifying new intervals
   mydata.newinterval <-
       PKNCAdata(myconc, mydose,
                 intervals=data.frame(start=0, end=c(24, Inf),
@@ -95,7 +91,7 @@ test_that("pk.nca", {
                info="Intervals can be specified manually, and will apply across appropriate parts of the grouping variables.")
   
   
-  ## Dosing not at time 0
+  # Dosing not at time 0
   tmpconc.multi <- generate.conc(2, 1, 0:24)
   tmpdose.multi <- generate.dose(tmpconc.multi)
   tmpconc.multi$time <- tmpconc.multi$time + 2
@@ -141,7 +137,7 @@ test_that("pk.nca", {
                c(0.5642, 0.5846), tolerance=0.0001,
                info="PK intervals work with passing in start and end as parameters")
   
-  ## Ensure that the correct number of doses are included in parameters that use dosing.
+  # Ensure that the correct number of doses are included in parameters that use dosing.
   tmpconc <- generate.conc(2, 1, 0:24)
   tmpdose <- generate.dose(tmpconc)
   tmpdose$time <- NULL
@@ -174,8 +170,49 @@ test_that("pk.nca", {
   
 })
 
+test_that("verbose pk.nca", {
+  tmpconc <- generate.conc(nsub=1, ntreat=1, 0:4)
+  tmpdose <- generate.dose(tmpconc)
+  myconc <- PKNCAconc(tmpconc, formula=conc~time)
+  mydose <- PKNCAdose(tmpdose, formula=dose~time)
+  mydata <- PKNCAdata(myconc, mydose)
+  expect_message(expect_message(expect_message(
+    suppressWarnings(pk.nca(mydata, verbose=TRUE)),
+    regexp = "Setting up options"),
+    regexp = "Starting dense PK NCA calculations"),
+    regexp = "Combining completed dense PK calculation results"
+  )
+  expect_message(
+    suppressWarnings(pk.nca(mydata, verbose=FALSE)),
+    NA
+  )
+})
+
+test_that("pk.nca warnings", {
+  tmpconc <- generate.conc(nsub=1, ntreat=1, 0:4)
+  tmpdose <- generate.dose(tmpconc)
+  myconc <- PKNCAconc(tmpconc, formula=conc~time)
+  mydose <- PKNCAdose(tmpdose, formula=dose~time)
+  mydata <- PKNCAdata(myconc, mydose, intervals=data.frame(start=24, end=48, cmax=TRUE))
+  expect_warning(
+    pk.nca(mydata),
+    regexp="No data for interval"
+  )
+})
+
+test_that("pk.nca.interval errors", {
+  expect_error(
+    pk.nca.interval(interval="A"),
+    regexp="Interval must be a data.frame"
+  )
+  expect_error(
+    pk.nca.interval(interval=data.frame()),
+    regexp="Interval must be a one-row data.frame"
+  )
+})
+
 test_that("Calculations when dose time is missing", {
-  ## Ensure that the correct number of doses are included in parameters that use dosing.
+  # Ensure that the correct number of doses are included in parameters that use dosing.
   tmpconc <- generate.conc(2, 1, 0:24)
   tmpdose <- generate.dose(tmpconc)
   myconc <- PKNCAconc(tmpconc, conc~time|treatment+ID)
@@ -216,8 +253,8 @@ test_that("Calculations when no dose info is given", {
 })
 
 test_that("pk.nca with exclusions", {
-  ## Note that generate.conc sets the random seed, so it doesn't have
-  ## to happen here.
+  # Note that generate.conc sets the random seed, so it doesn't have to happen
+  # here.
   tmpconc <- generate.conc(2, 1, 0:24)
   tmpdose <- generate.dose(tmpconc)
   myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
@@ -297,14 +334,12 @@ test_that("No interval requested (e.g. for placebo)", {
           stringsAsFactors=FALSE
         )
     )
-  expect_warning(
-    pk.nca(mydata),
-    regexp="treatment=Trt 1; ID=1: No intervals for data"
-  )
-  expect_warning(
+  expect_warning(expect_warning(expect_warning(expect_warning(
     myresult <- pk.nca(mydata),
-    regexp="All results generated warnings or errors; no results generated",
-    info="No intervals apply to a group provides a message."
+    class = "pknca_no_intervals"),
+    class = "pknca_no_intervals"),
+    class = "pknca_no_conc_data"),
+    class = "pknca_all_warnings_no_results"
   )
   expect_equal(
     nrow(as.data.frame(myresult)),
@@ -315,7 +350,7 @@ test_that("No interval requested (e.g. for placebo)", {
 
 test_that("Volume-related calculations", {
   tmpconc <- generate.conc(2, 1, c(4, 12, 24))
-  tmpconc$conc <- 1:nrow(tmpconc)
+  tmpconc$conc <- seq_len(nrow(tmpconc))
   tmpconc$vol <- 2
   tmpdose <- generate.dose(tmpconc)
   myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID, volume="vol")
@@ -389,7 +424,7 @@ test_that("Ensure that options are respected during pk.nca call", {
   
   conc.data <- c(0, 1, 2, 1.3, 0.4, 0.35, 0.125)
   time.data <- c(0, 1, 2, 4,   8,   24,   48)
-  concs <- merge(doses[c("ID")], data.frame(Conc=conc.data, Time=time.data))
+  concs <- merge(doses["ID"], data.frame(Conc=conc.data, Time=time.data))
   
   myconc <- PKNCA::PKNCAconc(concs, formula=Conc~Time|ID)
   mydose <- PKNCA::PKNCAdose(doses, formula=Dose~Time|ID)
@@ -425,4 +460,131 @@ test_that("Ensure that options are respected during pk.nca call", {
         tolerance=0.0001),
     info="linear and loglinear effects are calculated differently."
   )
+})
+
+test_that("Can calculate parameters requiring extra arguments", {
+  o_conc <- PKNCAconc(conc~time, data=data.frame(conc=c(1:3, 2:1), time=0:4))
+  d_intervals <- data.frame(start=0, end=4, time_above=TRUE, conc_above=2)
+  o_data <- PKNCAdata(o_conc, intervals=d_intervals, options=list(auc.method="linear"))
+  o_nca <- suppressMessages(pk.nca(o_data))
+  expect_equal(as.data.frame(o_nca)$PPORRES, 2)
+})
+
+test_that("calculate with sparse data", {
+  d_sparse <-
+    data.frame(
+      id = c(1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L, 4L, 5L, 6L, 4L, 5L, 6L, 7L, 8L, 9L, 7L, 8L, 9L),
+      conc = c(0, 0, 0,  1.75, 2.2, 1.58, 4.63, 2.99, 1.52, 3.03, 1.98, 2.22, 3.34, 1.3, 1.22, 3.54, 2.84, 2.55, 0.3, 0.0421, 0.231),
+      time = c(0, 0, 0, 1, 1, 1, 6, 6, 6, 2, 2, 2, 10, 10, 10, 4, 4, 4, 24, 24, 24),
+      dose = c(100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100)
+    )
+  o_conc_sparse <- PKNCAconc(d_sparse, conc~time|id, sparse=TRUE)
+  
+  d_intervals <-
+    data.frame(
+      start=0,
+      end=24,
+      aucinf.obs=TRUE,
+      cmax=TRUE,
+      sparse_auclast=TRUE
+    )
+  o_data_sparse <- PKNCAdata(o_conc_sparse, intervals=d_intervals)
+  suppressMessages(
+    expect_warning(expect_warning(
+      o_nca <- pk.nca(o_data_sparse),
+      class = "pknca_sparse_df_multi"),
+      class = "pknca_halflife_too_few_points"
+    )
+  )
+  df_result <- as.data.frame(o_nca)
+  expect_true("sparse_auclast" %in% df_result$PPTESTCD)
+  expect_equal(df_result$PPORRES[df_result$PPTESTCD %in% "sparse_auclast"], 39.4689)
+  expect_s3_class(summary(o_nca), "summary_PKNCAresults")
+
+  # Mixed sparse and dense calculations when only one type is requested in an
+  # interval works The example below has dense-only; sparse and dense; and and
+  # sparse-only.
+  d_intervals_mixed <-
+    data.frame(
+      start=0,
+      end=c(23, 24, 25),
+      cmax=c(TRUE, TRUE, FALSE),
+      sparse_auclast=c(FALSE, TRUE, TRUE)
+    )
+  o_data_sparse_mixed <- PKNCAdata(o_conc_sparse, intervals=d_intervals_mixed)
+  suppressMessages(
+    expect_warning(expect_warning(
+      o_nca_sparse_mixed <- pk.nca(o_data_sparse_mixed),
+      class = "pknca_sparse_df_multi"),
+      class = "pknca_sparse_df_multi"
+    )
+  )
+  df_result_sparse_mixed <- as.data.frame(o_nca_sparse_mixed)
+  expect_true("sparse_auclast" %in% df_result_sparse_mixed$PPTESTCD)
+  expect_equal(df_result_sparse_mixed$PPORRES[df_result_sparse_mixed$PPTESTCD %in% "sparse_auclast"], rep(39.4689, 2))
+  suppressMessages(
+    expect_message(
+      expect_warning(expect_warning(
+        o_nca_sparse_mixed <- pk.nca(o_data_sparse_mixed, verbose=TRUE),
+        class = "pknca_sparse_df_multi"),
+        class = "pknca_sparse_df_multi"
+      ),
+      regexp="No sparse calculations requested for an interval"
+    )
+  )
+
+  # Sparse data with multiple treatments, confirm the correct number of rows of
+  # outputs are created.
+  d_sparse_200 <- d_sparse
+  d_sparse_200$dose <- 200
+  d_sparse_multi_trt <- rbind(d_sparse, d_sparse_200)
+  d_sparse_multi_trt$dose_grp <- d_sparse_multi_trt$dose
+  o_conc_sparse_multi_trt <- PKNCAconc(d_sparse_multi_trt, conc~time|dose_grp+id, sparse=TRUE)
+  d_intervals_mixed <-
+    data.frame(
+      start=0,
+      end=c(23, 24, 25),
+      cmax=c(TRUE, TRUE, FALSE),
+      sparse_auclast=c(FALSE, TRUE, TRUE)
+    )
+  d_dose_sparse_multi_trt <- unique(d_sparse_multi_trt[, c("id", "dose")])
+  d_dose_sparse_multi_trt$time <- 0
+  d_dose_sparse_multi_trt$dose_grp <- d_dose_sparse_multi_trt$dose
+  o_dose_sparse_multi_trt <- PKNCAdose(d_dose_sparse_multi_trt, dose~time|dose_grp+id)
+  o_data_sparse_multi_trt <- PKNCAdata(o_conc_sparse_multi_trt, o_dose_sparse_multi_trt, intervals=d_intervals_mixed)
+  suppressMessages(
+    expect_warning(expect_warning(expect_warning(expect_warning(
+      o_nca_sparse_multi_trt <- pk.nca(o_data_sparse_multi_trt),
+      class = "pknca_sparse_df_multi"),
+      class = "pknca_sparse_df_multi"),
+      class = "pknca_sparse_df_multi"),
+      class = "pknca_sparse_df_multi"
+    )
+  )
+  expect_equal(nrow(as.data.frame(o_nca_sparse_multi_trt)), 16)
+  
+  # Correct detection of mixed doses within a sparse dose group when there are
+  # no grouping columns other than subject
+  d_sparse_multi_trt_bad_dose_single <- d_sparse_multi_trt[d_sparse_multi_trt$dose == 100, ]
+  d_dose_sparse_multi_trt_bad_dose_single <- unique(d_sparse_multi_trt_bad_dose_single[, c("id", "dose")])
+  d_dose_sparse_multi_trt_bad_dose_single$time <- 0
+  d_dose_sparse_multi_trt_bad_dose_single$dose[1] <- d_dose_sparse_multi_trt_bad_dose_single$dose[1] + 1
+  o_conc_sparse_multi_trt_bad_dose_single <- PKNCAconc(d_sparse_multi_trt_bad_dose_single, conc~time|id, sparse=TRUE)
+  o_dose_sparse_multi_trt_bad_dose_single <- PKNCAdose(d_dose_sparse_multi_trt_bad_dose_single, dose~time|id)
+  o_data_sparse_multi_trt_bad_dose_single <- PKNCAdata(o_conc_sparse_multi_trt_bad_dose_single, o_dose_sparse_multi_trt_bad_dose_single, intervals=d_intervals_mixed)
+  expect_error(
+    pk.nca(o_data_sparse_multi_trt_bad_dose_single),
+    regexp="With sparse PK, all subjects in a group must have the same dosing information.*Not all subjects have the same dosing information"
+  )
+  
+  # Correct detection of mixed doses within a sparse dose group
+  d_dose_sparse_multi_trt_bad_dose <- d_dose_sparse_multi_trt
+  d_dose_sparse_multi_trt_bad_dose$dose[1] <- d_dose_sparse_multi_trt$dose[1] + 1
+  o_dose_sparse_multi_trt_bad_dose <- PKNCAdose(d_dose_sparse_multi_trt_bad_dose, dose~time|dose_grp+id)
+  o_data_sparse_multi_trt_bad_dose <- PKNCAdata(o_conc_sparse_multi_trt, o_dose_sparse_multi_trt_bad_dose, intervals=d_intervals_mixed)
+  expect_error(
+    pk.nca(o_data_sparse_multi_trt_bad_dose),
+    regexp="With sparse PK, all subjects in a group must have the same dosing information.*Not all subjects have the same dosing information for this group: +dose_grp=100"
+  )
+  # Correct detection of mixed doses within a sparse dose group when there are no groups
 })

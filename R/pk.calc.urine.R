@@ -1,7 +1,7 @@
 #' Calculate amount excreted (typically in urine or feces)
 #'
 #' @details ae is \code{sum(conc*volume)}.
-#'  
+#'
 #' @param conc The concentration in the sample
 #' @param volume The volume (or mass) of the sample
 #' @param check Should the concentration and volume data be checked?
@@ -16,6 +16,8 @@ pk.calc.ae <- function(conc, volume, check=TRUE) {
 add.interval.col("ae",
                  FUN="pk.calc.ae",
                  values=c(FALSE, TRUE),
+                 unit_type="amount",
+                 pretty_name="Amount excreted",
                  desc="The amount excreted (typically into urine or feces)")
 PKNCA.set.summary(
   name="ae",
@@ -25,9 +27,9 @@ PKNCA.set.summary(
 )
 
 #' Calculate renal clearance
-#' 
+#'
 #' @details clr is \code{sum(ae)/auc}.
-#' 
+#'
 #' @param ae The amount excreted in urine (as a numeric scalar or
 #'   vector)
 #' @param auc The area under the curve (as a numeric scalar or vector)
@@ -42,6 +44,8 @@ pk.calc.clr <- function(ae, auc) {
 add.interval.col("clr.last",
                  FUN="pk.calc.clr",
                  values=c(FALSE, TRUE),
+                 unit_type="renal_clearance",
+                 pretty_name="Renal clearance (from AUClast)",
                  formalsmap=list(auc="auclast"),
                  desc="The renal clearance calculated using AUClast")
 PKNCA.set.summary(
@@ -53,6 +57,8 @@ PKNCA.set.summary(
 add.interval.col("clr.obs",
                  FUN="pk.calc.clr",
                  values=c(FALSE, TRUE),
+                 unit_type="renal_clearance",
+                 pretty_name="Renal clearance (from AUCinf,obs)",
                  formalsmap=list(auc="aucinf.obs"),
                  desc="The renal clearance calculated using AUCinf,obs")
 PKNCA.set.summary(
@@ -64,6 +70,8 @@ PKNCA.set.summary(
 add.interval.col("clr.pred",
                  FUN="pk.calc.clr",
                  values=c(FALSE, TRUE),
+                 unit_type="renal_clearance",
+                 pretty_name="Renal clearance (from AUCinf,pred)",
                  formalsmap=list(auc="aucinf.pred"),
                  desc="The renal clearance calculated using AUCinf,pred")
 PKNCA.set.summary(
@@ -74,7 +82,7 @@ PKNCA.set.summary(
 )
 
 #' Calculate fraction excreted (typically in urine or feces)
-#' 
+#'
 #' @details fe is \code{sum(ae)/dose}
 #'
 #' @param ae The amount excreted (as a numeric scalar or vector)
@@ -89,6 +97,8 @@ pk.calc.fe <- function(ae, dose) {
 }
 add.interval.col("fe",
                  FUN="pk.calc.fe",
+                 unit_type="fraction",
+                 pretty_name="Fraction excreted",
                  values=c(FALSE, TRUE),
                  desc="The fraction of the dose excreted")
 PKNCA.set.summary(

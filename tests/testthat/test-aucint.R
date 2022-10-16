@@ -1,5 +1,3 @@
-context("aucint")
-
 test_that("AUCint gives errors appropriately", {
   expect_error(pk.calc.aucint(conc=1, time=1),
                regexp="If interval is not given, start and end must be given.",
@@ -111,7 +109,7 @@ test_that("AUCint gives a warning and NA when it cannot interpolate or extrapola
   expect_equal(over_dose, NA_real_,
                info="When you cannot integrate over a dose, you get NA")
 
-  expect_warning(
+  expect_warning(expect_warning(
     before_time <-
       pk.calc.aucint(conc=tmpdata$conc,
                      time=tmpdata$time,
@@ -121,9 +119,13 @@ test_that("AUCint gives a warning and NA when it cannot interpolate or extrapola
                      auc.type="AUCinf"),
     regexp="Some interpolated/extrapolated concentration values are missing Time points with missing data are:  -1, -0.5",
     fixed=TRUE,
-    info="warned when integrating over a dose with lambda.z=NA")
-  expect_equal(before_time, NA_real_,
-               info="When you cannot interpolate a point, you get NA")
+    info="warned when integrating over a dose with lambda.z=NA"),
+    regexp="Cannot interpolate between two doses or after a dose without a concentration after the first dose"
+  )
+  expect_equal(
+    before_time, NA_real_,
+    info="When you cannot interpolate a point, you get NA"
+  )
 })
 
 test_that("AUCint respects auc.type and does the correct calculations for each AUC type", {
@@ -203,7 +205,6 @@ test_that("aucint respects doses", {
                pk.calc.aucint(conc=tmpdata_blq$conc, time=tmpdata_blq$time,
                               interval=c(0, 4), auc.type="AUCall"),
                info="Calculation with dosing at a time after all observations causes no change.")
-  ## FINDME
   # expect_warning(no_lambda.z_dose <-
   #                  pk.calc.aucint(conc=tmpdata_blq$conc, time=tmpdata_blq$time,
   #                                 interval=c(0, 4), auc.type="AUCall", time.dose=time.dose_between),
@@ -240,4 +241,18 @@ test_that("aucint works with infinite intervals", {
                pk.calc.auc.inf.pred(conc=tmpdata$conc, time=tmpdata$time,
                                     clast.pred=2, lambda.z=log(2)),
                info="Simple AUCinf.pred = aucint.inf.pred")
+})
+
+test_that("aucint respects the check argument", {
+  tmpdata <- data.frame(conc=c(8, 4, 2, 1),
+                        time=0:3)
+  expect_equal(
+    pk.calc.aucint.last(conc=tmpdata$conc, time=tmpdata$time, start=0, end=Inf),
+    pk.calc.aucint.last(conc=tmpdata$conc, time=tmpdata$time, start=0, end=Inf, check=FALSE)
+  )
+  baddata <- data.frame(conc=c(8, 4, 2, NA),
+                        time=c(0:2, NA))
+  expect_error(
+    pk.calc.aucint.last(conc=baddata$conc, time=baddata$time, start=0, end=Inf, check=FALSE)
+  )
 })

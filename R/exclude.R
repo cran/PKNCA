@@ -1,24 +1,24 @@
 #' Exclude data points or results from calculations or summarization.
-#' 
+#'
 #' @param object The object to exclude data from.
 #' @param reason The reason to add as a reason for exclusion.
-#' @param mask A logical vector or numeric index of values to exclude 
+#' @param mask A logical vector or numeric index of values to exclude
 #'   (see details).
 #' @param FUN A function to operate on the data (one group at a time) to
 #'   select reasons for exclusions (see details).
-#' @return The object with updated information in the exclude column. 
+#' @return The object with updated information in the exclude column.
 #'   The exclude column will contain the \code{reason} if \code{mask} or
 #'   \code{FUN} indicate.  If a previous reason for exclusion was given,
-#'   then subsequent reasons for exclusion will be added to the first 
+#'   then subsequent reasons for exclusion will be added to the first
 #'   with a semicolon space ("; ") separator.
-#'   
-#' @details Only one of \code{mask} or \code{FUN} may be given.  If 
-#'   \code{FUN} is given, it will be called with two arguments:  a 
-#'   data.frame (or similar object) that consists of a single group of 
-#'   the data and the full object (e.g. the PKNCAconc object), 
-#'   \code{FUN(current_group, object)}, and it must return a logical 
-#'   vector equivalent to \code{mask} or a character vector with the 
-#'   reason text given when data should be excluded or 
+#'
+#' @details Only one of \code{mask} or \code{FUN} may be given.  If
+#'   \code{FUN} is given, it will be called with two arguments:  a
+#'   data.frame (or similar object) that consists of a single group of
+#'   the data and the full object (e.g. the PKNCAconc object),
+#'   \code{FUN(current_group, object)}, and it must return a logical
+#'   vector equivalent to \code{mask} or a character vector with the
+#'   reason text given when data should be excluded or
 #'   \code{NA_character_} when the data should be included (for the
 #'   current exclusion test).
 #' @examples
@@ -32,8 +32,6 @@
 #' @export
 #' @family Result exclusions
 #' @importFrom dplyr "%>%"
-#' @importFrom dplyr n
-#' @importFrom rlang syms
 exclude <- function(object, reason, mask, FUN)
   UseMethod("exclude")
 
@@ -53,7 +51,7 @@ exclude.default <- function(object, reason, mask, FUN) {
       ))
     mask_df <-
       object[[dataname]] %>%
-      dplyr::mutate(row_number_XXX=1:n()) %>%
+      dplyr::mutate(row_number_XXX=seq_len(dplyr::n())) %>%
       dplyr::group_by(!!! rlang::syms(groupnames)) %>%
       dplyr::mutate(
         exclude_current_group_XXX_row_num=row_number_XXX,
@@ -115,8 +113,8 @@ exclude.default <- function(object, reason, mask, FUN) {
 }
 
 #' Set the exclude parameter on an object
-#' 
-#' This function adds the exclude column to an object.  To change the 
+#'
+#' This function adds the exclude column to an object.  To change the
 #' exclude value, use the \code{\link{exclude}} function.
 #' @param object The object to set the exclude column on.
 #' @param exclude The column name to set as the exclude value.

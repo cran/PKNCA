@@ -1,8 +1,8 @@
 #' Combine PKNCAconc and PKNCAdose objects
-#' 
+#'
 #' The function is inspired by \code{dplyr::full_join}, but it has different
 #' semantics.
-#' 
+#'
 #' @param conc a PKNCAconc object
 #' @param dose a PKNCAdose object or \code{NA}
 #' @return A tibble with columns for the groups, "data_conc" (the concentration
@@ -11,9 +11,6 @@
 #' @family Combine PKNCA objects
 #' @keywords Internal
 #' @noRd
-#' @importFrom dplyr full_join
-#' @importFrom tibble tibble
-#' @importFrom tidyr crossing
 full_join_PKNCAconc_PKNCAdose <- function(conc, dose) {
   stopifnot(inherits(x=conc, what="PKNCAconc"))
   if (identical(dose, NA)) {
@@ -21,7 +18,7 @@ full_join_PKNCAconc_PKNCAdose <- function(conc, dose) {
     n_dose <- tibble::tibble(data_dose=list(NA))
   } else {
     stopifnot(inherits(x=dose, what="PKNCAdose"))
-    n_dose <- prepare_PKNCAdose(dose)
+    n_dose <- prepare_PKNCAdose(dose, sparse=is_sparse_pk(conc), subject_col=conc$subject)
   }
   n_conc <- prepare_PKNCAconc(conc)
   shared_groups <- intersect(names(n_conc), names(n_dose))
@@ -33,10 +30,10 @@ full_join_PKNCAconc_PKNCAdose <- function(conc, dose) {
 }
 
 #' Convert a PKNCAdata object into a data.frame for analysis
-#' 
+#'
 #' The function is inspired by \code{dplyr::full_join}, but it has different
 #' semantics.
-#' 
+#'
 #' @param x The PKNCAdata object
 #' @return A tibble with columns the grouping variables, "data_conc" for
 #'   concentration data, "data_dose" for dosing data, and "data_intervals" for
@@ -44,8 +41,6 @@ full_join_PKNCAconc_PKNCAdose <- function(conc, dose) {
 #' @family Combine PKNCA objects
 #' @keywords Internal
 #' @noRd
-#' @importFrom dplyr full_join
-#' @importFrom tidyr crossing
 full_join_PKNCAdata <- function(x) {
   conc_dose <- full_join_PKNCAconc_PKNCAdose(x$conc, x$dose)
   n_i <-
@@ -63,15 +58,13 @@ full_join_PKNCAdata <- function(x) {
 }
 
 #' Prepare a PKNCA object and drop unnecessary columns
-#' 
+#'
 #' @param .dat The PKNCA object to prepare as a nested tibble
 #' @param ...,.names_sep,.key Ignored
-#' @return A nested tibble with a column named "data_conc" containing the concentration data and a column 
+#' @return A nested tibble with a column named "data_conc" containing the concentration data and a column
 #' @family Combine PKNCA objects
 #' @keywords Internal
 #' @noRd
-#' @importFrom dplyr grouped_df
-#' @importFrom tidyr nest
 prepare_PKNCA_general <- function(.dat, cols, exclude, group_cols, data_name, insert_if_missing=list()) {
   check_reserved_column_names(.dat)
   intermediate_group_cols <-
@@ -94,9 +87,40 @@ prepare_PKNCA_general <- function(.dat, cols, exclude, group_cols, data_name, in
     )
   # data_conc is used since it is reserved, and it will be replaced on the next
   # line.
-  as_nest <- tidyr::nest(data_standard, data_conc=!intermediate_group_cols)
+  as_nest <- tidyr::nest(data_standard, data_conc=!dplyr::all_of(intermediate_group_cols))
   names(as_nest)[names(as_nest) %in% "data_conc"] <- data_name
   ret <- restore_group_col_names(as_nest, group_cols=group_cols)
+  ret
+}
+
+prepare_PKNCAconc_dense <- function(.dat, needed_cols, group_cols_selected) {
+  ret <-
+    prepare_PKNCA_general(
+      .dat=.dat$data,
+      exclude=.dat$exclude,
+      cols=needed_cols,
+      data_name="data_conc",
+      group_cols=group_cols_selected
+    )
+  ret
+}
+
+prepare_PKNCAconc_sparse <- function(.dat, needed_cols, group_cols_selected) {
+  needed_cols$subject <- .dat$subject
+  ret <-
+    prepare_PKNCA_general(
+      .dat=.dat$data_sparse,
+      exclude=.dat$exclude,
+      cols=needed_cols,
+      data_name="data_sparse_conc",
+      group_cols=setdiff(group_cols_selected, .dat$subject)
+    )
+  # Generate the mean profile for non-sparse parameters
+  ret$data_conc <-
+    ret$data_sparse_conc %>%
+    lapply(FUN=as_sparse_pk) %>%
+    lapply(FUN=sparse_mean) %>%
+    lapply(FUN=sparse_to_dense_pk)
   ret
 }
 
@@ -113,24 +137,88 @@ prepare_PKNCAconc <- function(.dat) {
       include_half.life=.dat$columns$include_half.life,
       exclude_half.life=.dat$columns$exclude_half.life
     )
-  ret <-
-    prepare_PKNCA_general(
-      .dat=.dat$data,
-      exclude=.dat$exclude,
-      cols=needed_cols,
-      data_name="data_conc",
-      group_cols=all.vars(pformula_conc$groups)
-    )
+  data_name <- getDataName(.dat)
+  group_cols_selected <- all.vars(pformula_conc$groups)
+  if (is_sparse_pk(.dat)) {
+    ret <-
+      prepare_PKNCAconc_sparse(
+        .dat=.dat,
+        needed_cols=needed_cols,
+        group_cols_selected=group_cols_selected
+      )
+  } else if (data_name == "data") {
+    ret <-
+      prepare_PKNCAconc_dense(
+        .dat=.dat,
+        needed_cols=needed_cols,
+        group_cols_selected=group_cols_selected
+      )
+  } else {
+    stop("Please report this as a bug: Invalid data_name") # nocov
+  }
   ret
 }
 
 #' @describeIn prepare_PKNCAconc Nest a PKNCAdose object
-#' @noRd
+#'
+#' @param sparse Is the data for sparse PK?
+#' @param subject_col The column name indicating the subject identifier (to be
+#'   dropped from groups with sparse PK)
 #' @family Combine PKNCA objects
 #' @keywords Internal
-#' @importFrom dplyr grouped_df
-#' @importFrom tidyr nest
-prepare_PKNCAdose <- function(.dat) {
+#' @noRd
+prepare_PKNCAdose <- function(.dat, sparse, subject_col) {
+  ret <- prepare_PKNCAdose_general(.dat)
+  if (sparse && (length(subject_col) == 1) && (subject_col %in% names(ret))) {
+    # Verify that all subjects in a group had the same data_dose and then drop
+    # the subjects
+    # ret_grp will have one column named "sparse_group_check" with one row per ID and all of the dosing information within a group and
+    ret_grp <-
+      tidyr::nest(
+        ret,
+        sparse_group_check=!setdiff(names(ret), c("data_dose", subject_col))
+      )
+    ret_grp$data_dose <- rep(list(NULL), nrow(ret_grp))
+    for (current_row in seq_len(nrow(ret_grp))) {
+      # Dosing information for all subjects are identical to the first subject
+      all_match <-
+        all(vapply(
+          X=ret_grp$sparse_group_check[[current_row]]$data_dose,
+          FUN=identical,
+          y=ret_grp$sparse_group_check[[current_row]]$data_dose[[1]],
+          FUN.VALUE = TRUE
+        ))
+      if (all_match) {
+        # Drop the subject identifier from the dosing
+        ret_grp$data_dose[[current_row]] <- ret_grp$sparse_group_check[[current_row]]$data_dose[[1]]
+      } else {
+        names_to_print <- setdiff(names(ret_grp), c("sparse_group_check", "data_dose"))
+        msg_error_row <- paste(names_to_print, unlist(ret_grp[current_row, names_to_print]), sep="=", collapse="; ")
+        msg_error <-
+          if (length(names_to_print) > 0) {
+            paste(
+              "Not all subjects have the same dosing information for this group: ",
+              msg_error_row
+            )
+          } else {
+            "Not all subjects have the same dosing information."
+          }
+        stop(
+          "With sparse PK, all subjects in a group must have the same dosing information.\n",
+          msg_error
+        )
+      }
+    }
+    ret <- ret_grp[, setdiff(names(ret_grp), "sparse_group_check")]
+  }
+  ret
+}
+
+#' @describeIn prepare_PKNCAconc Nest a PKNCAdose object
+#' @family Combine PKNCA objects
+#' @keywords Internal
+#' @noRd
+prepare_PKNCAdose_general <- function(.dat) {
   pformula_dose <- parseFormula(.dat)
   dose_col <- all.vars(pformula_dose$lhs)
   time_col <- all.vars(pformula_dose$rhs)
@@ -159,9 +247,6 @@ prepare_PKNCAdose <- function(.dat) {
 #' @noRd
 #' @family Combine PKNCA objects
 #' @keywords Internal
-#' @importFrom dplyr grouped_df
-#' @importFrom tidyr nest
-#' @importFrom tibble as_tibble tibble
 prepare_PKNCAintervals <- function(.dat, vars=character(0)) {
   check_reserved_column_names(.dat)
   .dat <- tibble::as_tibble(.dat)
@@ -169,7 +254,7 @@ prepare_PKNCAintervals <- function(.dat, vars=character(0)) {
   if (length(vars) == 0) {
     as_nest <- tibble::tibble(data_intervals=list(.dat))
   } else {
-    as_nest <- tidyr::nest(.dat, data_intervals=!vars)
+    as_nest <- tidyr::nest(.dat, data_intervals=!dplyr::all_of(vars))
   }
   as_nest
 }
@@ -198,7 +283,7 @@ check_reserved_column_names <- function(x) {
 }
 
 #' Standardize column names and drop unnecessary columns from a data.frame or tibble
-#' 
+#'
 #' @param x The data.frame or tibble
 #' @param cols A named list where the names are the standardized column names and the values are the original column names
 #' @return A data.frame or tibble with columns cleaned of unlisted columns and with names set to the expected names.
@@ -211,15 +296,28 @@ standardize_column_names <- function(x, cols, group_cols=NULL, insert_if_missing
   stopifnot("all original cols names must be names of x"=all(unlist(cols) %in% names(x)))
   stopifnot("group_cols must be NULL or a character vector"=is.null(group_cols) || is.character(group_cols))
   if (!is.null(group_cols) && (length(group_cols) > 0)) {
-    stopifnot("group_cols must not overlap with other column names"=!any(group_cols %in% unlist(cols)))
-    stopifnot("group_cols must not overlap with standardized column names"=!any(group_cols %in% names(cols)))
+    # Give a clear error message if group columns overlap
+    mask_overlap_colvalues <- group_cols %in% unlist(cols)
+    mask_overlap_colnames <- group_cols %in% names(cols)
+    if (any(mask_overlap_colvalues)) {
+      stop(
+        "group_cols must not overlap with other column names.  Change the name of the following groups: ",
+        paste(group_cols[mask_overlap_colvalues], collapse=", ")
+      )
+    }
+    if (any(mask_overlap_colnames)) {
+      stop(
+        "group_cols must not overlap with standardized column names.  Change the name of the following groups: ",
+        paste(group_cols[mask_overlap_colnames], collapse=", ")
+      )
+    }
     new_group_cols <- paste0("group", seq_along(group_cols))
   } else {
     new_group_cols <- NULL
   }
-  cols_clean <- cols[!sapply(X=cols, FUN=is.null)]
+  cols_clean <- cols[!vapply(X = cols, FUN = is.null, FUN.VALUE = TRUE)]
   ret <-
-    setNames(
+    stats::setNames(
       # Keep only columns of interest
       x[, c(group_cols, unlist(cols_clean)), drop=FALSE],
       nm=c(new_group_cols, names(cols_clean))

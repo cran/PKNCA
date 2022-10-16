@@ -1,5 +1,4 @@
-## Options for use within the code for setting and getting PKNCA
-## default options.
+# Options for use within the code for setting and getting PKNCA default options.
 
 .PKNCA.option.check <- list(
   adj.r.squared.factor=function(x, default=FALSE, description=FALSE) {
@@ -15,7 +14,7 @@
     if (is.factor(x) |
         !is.numeric(x))
       stop("adj.r.squared.factor must be numeric (and not a factor)")
-    ## Must be between 0 and 1, exclusive
+    # Must be between 0 and 1, exclusive
     if (x <= 0 | x >= 1)
       stop("adj.r.squared.factor must be between 0 and 1, exclusive")
     if (x > 0.01)
@@ -33,7 +32,7 @@
       stop("max.missing must be a scalar")
     if (is.factor(x) | !is.numeric(x))
       stop("max.missing must be numeric (and not a factor)")
-    ## Must be between 0 and 1, inclusive
+    # Must be between 0 and 1, inclusive
     if (x < 0 | x >= 1)
       stop("max.missing must be between 0 and 1")
     if (x > 0.5)
@@ -48,18 +47,6 @@
     if (default)
       return("lin up/log down")
     match.arg(x, c("lin up/log down", "linear"))
-  },
-  conc_above=function(x, default=FALSE, description=FALSE) {
-    if (description) {
-      return(
-        "For the time_above parameter, what concentration should the value be above?"
-      )
-    }
-    if (default)
-      return(NA_real_)
-    stopifnot("conc_above must be a scalar"=length(x) == 1)
-    stopifnot("conc_above must be numeric"=is.numeric(x))
-    x
   },
   conc.na=function(x, default=FALSE, description=FALSE) {
     if (description)
@@ -126,7 +113,7 @@
         stop("When given as a list, conc.blq must only have elements named 'first', 'middle', and 'last'.")
       if (length(missing.names) != 0)
         stop("When given as a list, conc.blq must include elements named 'first', 'middle', and 'last'.")
-      ## After the names are confirmed, confirm each value.
+      # After the names are confirmed, confirm each value.
       x <- lapply(x, check.element)
     } else {
       x <- check.element(x)
@@ -276,9 +263,8 @@
     if (description)
       return("When data is single-dose, what intervals should be used?")
     if (default) {
-      ## It is good to put this through the specification checker in
-      ## case they get out of sync during development.  (A free test
-      ## case!)
+      # It is good to put this through the specification checker in case they
+      # get out of sync during development.  (A free test case!)
       x <- data.frame(
         start=0,
         end=c(24, Inf),
@@ -292,26 +278,26 @@
   })
 
 #' Set default options for PKNCA functions
-#' 
-#' This function will set the default PKNCA options.  If given no 
+#'
+#' This function will set the default PKNCA options.  If given no
 #' inputs, it will provide the current option set.  If given name/value
 #' pairs, it will set the option (as in the \code{\link{options}}
 #' function).  If given a name, it will return the value for the
 #' parameter.  If given the \code{default} option as true, it will
 #' provide the default options.
-#' 
+#'
 #' Options are either for calculation or summary functions. Calculation
 #' options are required for a calculation function to report a result
 #' (otherwise the reported value will be \code{NA}). Summary options are
 #' used during summarization and are used for assessing what values are
 #' included in the summary.
-#' 
+#'
 #' See the vignette 'Options for Controlling PKNCA' for a current list
 #' of options (\code{vignette("Options-for-Controlling-PKNCA", package="PKNCA")}).
-#' 
+#'
 #' @param \dots options to set or get the value for
 #' @param default (re)sets all default options
-#' @param check check a single option given, but do not set it (for 
+#' @param check check a single option given, but do not set it (for
 #'   validation of the values when used in another function)
 #' @param name An option name to use with the \code{value}.
 #' @param value An option value (paired with the \code{name}) to set or
@@ -320,13 +306,13 @@
 #' \describe{
 #'   \item{no arguments are given}{returns the current options.}
 #'   \item{a value is set (including the defaults)}{returns \code{NULL}}
-#'   \item{a single value is requested}{the current value of that option is returned as a scalar} 
+#'   \item{a single value is requested}{the current value of that option is returned as a scalar}
 #'   \item{multiple values are requested}{the current values of those options are returned as a list}
 #' }
 #' @family PKNCA calculation and summary settings
 #' @seealso \code{\link{PKNCA.options.describe}}
 #' @examples
-#' 
+#'
 #' PKNCA.options()
 #' PKNCA.options(default=TRUE)
 #' PKNCA.options("auc.method")
@@ -335,15 +321,14 @@
 #' @export
 PKNCA.options <- function(..., default=FALSE, check=FALSE, name, value) {
   current <- get("options", envir=.PKNCAEnv)
-  ## If the options have not been initialized, initialize them and
-  ## then proceed.
+  # If the options have not been initialized, initialize them and then proceed.
   if (is.null(current) & !default) {
     PKNCA.options(default=TRUE)
     current <- get("options", envir=.PKNCAEnv)
   }
   args <- list(...)
-  ## Put the name/value pair into the args as if they were specified
-  ## like another argument.
+  # Put the name/value pair into the args as if they were specified
+  # like another argument.
   if (missing(name)) {
     if (!missing(value))
       stop("Cannot have a value without a name")
@@ -361,27 +346,27 @@ PKNCA.options <- function(..., default=FALSE, check=FALSE, name, value) {
   if (default) {
     if (length(args) > 0)
       stop("Cannot set default and set new options at the same time.")
-    ## Extract all the default values
+    # Extract all the default values
     defaults <- lapply(.PKNCA.option.check,
                        FUN=function(x) x(default=TRUE))
-    ## Set the default options
+    # Set the default options
     assign("options", defaults, envir=.PKNCAEnv)
   } else if (check) {
-    ## Check an option for accuracy, but don't set it
+    # Check an option for accuracy, but don't set it
     if (length(args) != 1)
       stop("Must give exactly one option to check")
     n <- names(args)
     if (!(n %in% names(.PKNCA.option.check)))
       stop(paste("Invalid setting for PKNCA:", n))
-    ## Verify the option, and return the sanitized version
+    # Verify the option, and return the sanitized version
     return(.PKNCA.option.check[[n]](args[[n]]))
   } else if (length(args) > 0) {
     if (is.null(names(args))) {
-      ## Confirm that the settings exist
+      # Confirm that the settings exist
       if (length(bad.args <- setdiff(unlist(args), names(current))) > 0)
         stop(sprintf("PKNCA.options does not have value(s) for %s.",
                      paste(bad.args, collapse=", ")))
-      ## Get the setting(s)
+      # Get the setting(s)
       if (length(args) == 1) {
         ret <- current[[args[[1]]]]
       } else {
@@ -392,15 +377,15 @@ PKNCA.options <- function(..., default=FALSE, check=FALSE, name, value) {
       }
       return(ret)
     } else {
-      ## Set a value
-      ## Verify values are viable and then set them.
+      # Set a value
+      # Verify values are viable and then set them.
       for (n in names(args)) {
         if (!(n %in% names(.PKNCA.option.check)))
           stop(paste("Invalid setting for PKNCA:", n))
-        ## Verify and set the option value
+        # Verify and set the option value
         current[[n]] <- .PKNCA.option.check[[n]](args[[n]])
       }
-      ## Assign current into the setting environment
+      # Assign current into the setting environment
       assign("options", current, envir=.PKNCAEnv)
     }
   } else {
@@ -429,7 +414,7 @@ PKNCA.choose.option <- function(name, value=NULL, options=list())
   }
 
 #' Describe a PKNCA.options option by name.
-#' 
+#'
 #' @param name The option name requested.
 #' @return A character string of the description.
 #' @seealso \code{\link{PKNCA.options}}

@@ -111,7 +111,7 @@ and 'AUCall'.}
 LOQ concentrations. (See \code{\link{clean.conc.blq}} for usage
 instructions.)}
 
-\item{conc.na}{How to handle missing concentration values.  (See 
+\item{conc.na}{How to handle missing concentration values.  (See
 \code{\link{clean.conc.na}} for usage instructions.)}
 
 \item{check}{Run \code{\link{check.conc.time}}, \code{\link{clean.conc.blq}},
@@ -130,15 +130,15 @@ interval.
 }
 \section{Functions}{
 \itemize{
-\item \code{pk.calc.aucint.last}: Interpolate or extrapolate concentrations for AUClast
+\item \code{pk.calc.aucint.last()}: Interpolate or extrapolate concentrations for AUClast
 
-\item \code{pk.calc.aucint.all}: Interpolate or extrapolate concentrations for AUCall
+\item \code{pk.calc.aucint.all()}: Interpolate or extrapolate concentrations for AUCall
 
-\item \code{pk.calc.aucint.inf.obs}: Interpolate or extrapolate concentrations for AUCinf.obs
+\item \code{pk.calc.aucint.inf.obs()}: Interpolate or extrapolate concentrations for AUCinf.obs
 
-\item \code{pk.calc.aucint.inf.pred}: Interpolate or extrapolate concentrations for AUCinf.pred
+\item \code{pk.calc.aucint.inf.pred()}: Interpolate or extrapolate concentrations for AUCinf.pred
+
 }}
-
 \seealso{
 \code{\link{PKNCA.options}}, \code{\link{interp.extrap.conc.dose}}
 

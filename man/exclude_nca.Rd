@@ -14,7 +14,7 @@ exclude_nca_max.aucinf.pext(max.aucinf.pext)
 exclude_nca_min.hl.r.squared(min.hl.r.squared)
 }
 \arguments{
-\item{min.span.ratio}{The minimum acceptable span ratio (uses 
+\item{min.span.ratio}{The minimum acceptable span ratio (uses
 \code{PKNCA.options("min.span.ratio")} if not provided).}
 
 \item{max.aucinf.pext}{The maximum acceptable percent AUC
@@ -30,14 +30,14 @@ Exclude NCA parameters based on examining the parameter set.
 }
 \section{Functions}{
 \itemize{
-\item \code{exclude_nca_span.ratio}: Exclude based on span.ratio
+\item \code{exclude_nca_span.ratio()}: Exclude based on span.ratio
 
-\item \code{exclude_nca_max.aucinf.pext}: Exclude based on AUC percent extrapolated
+\item \code{exclude_nca_max.aucinf.pext()}: Exclude based on AUC percent extrapolated
 (both observed and predicted)
 
-\item \code{exclude_nca_min.hl.r.squared}: Exclude based on half-life r-squared
-}}
+\item \code{exclude_nca_min.hl.r.squared()}: Exclude based on half-life r-squared
 
+}}
 \examples{
 my_conc <- PKNCAconc(data.frame(conc=1.1^(3:0),
                                 time=0:3,

@@ -1,17 +1,17 @@
 #' A compute the Area Under the (Moment) Curve
-#' 
+#'
 #' Compute the area under the curve (AUC) and the area under the moment curve
 #' (AUMC) for pharmacokinetic (PK) data.  AUC and AUMC are used for many
 #' purposes when analyzing PK in drug development.
-#' 
+#'
 #' \code{pk.calc.auc.last} is simply a shortcut setting the \code{interval}
 #' parameter to \code{c(0, "last")}.
-#' 
+#'
 #' Extrapolation beyond Clast occurs using the half-life and Clast,obs;
 #' Clast,pred is not yet supported.
-#' 
+#'
 #' If all conc input are zero, then the AU(M)C is zero.
-#' 
+#'
 #' @param conc Concentration measured
 #' @param time Time of concentration measurement (must be monotonically
 #'   increasing and the same length as the concentration data)
@@ -19,11 +19,11 @@
 #'   integration
 #' @param auc.type The type of AUC to compute.  Choices are 'AUCinf', 'AUClast',
 #'   and 'AUCall'.
-#' @param clast,clast.obs,clast.pred The last concentration above the limit of 
+#' @param clast,clast.obs,clast.pred The last concentration above the limit of
 #'   quantification; this is used for AUCinf calculations.  If provided as
 #'   clast.obs (observed clast value, default), AUCinf is AUCinf,obs. If
 #'   provided as clast.pred, AUCinf is AUCinf,pred.
-#' @param lambda.z The elimination rate (in units of inverse time) for 
+#' @param lambda.z The elimination rate (in units of inverse time) for
 #'   extrapolation
 #' @param options List of changes to the default \code{\link{PKNCA.options}} for
 #'   calculations.
@@ -32,7 +32,7 @@
 #' @param conc.blq How to handle BLQ values in between the first and last above
 #'   LOQ concentrations. (See \code{\link{clean.conc.blq}} for usage
 #'   instructions.)
-#' @param conc.na How to handle missing concentration values.  (See 
+#' @param conc.na How to handle missing concentration values.  (See
 #'   \code{\link{clean.conc.na}} for usage instructions.)
 #' @param check Run \code{\link{check.conc.time}}, \code{\link{clean.conc.blq}},
 #'   and \code{\link{clean.conc.na}}?
@@ -41,7 +41,7 @@
 #' @param fun.log The function to use for integration of the logarithmic part of
 #'   the curve (if log integration is used; not required for AUC or AUMC
 #'   functions)
-#' @param fun.inf The function to use for extrapolation from the final 
+#' @param fun.inf The function to use for extrapolation from the final
 #'   measurement to infinite time (not required for AUC or AUMC functions.
 #' @param ... For functions other than \code{pk.calc.auxc}, these values are
 #'   passed to \code{pk.calc.auxc}
@@ -50,12 +50,12 @@
 #' @family AUC calculations
 #' @seealso \code{\link{clean.conc.blq}}
 #' @references
-#' 
+#'
 #' Gabrielsson J, Weiner D.  "Section 2.8.1 Computation methods - Linear
 #' trapezoidal rule."  Pharmacokinetic & Pharmacodynamic Data Analysis: Concepts
 #' and Applications, 4th Edition.  Stockholm, Sweden: Swedish Pharmaceutical
 #' Press, 2000.  162-4.
-#' 
+#'
 #' Gabrielsson J, Weiner D.  "Section 2.8.3 Computation methods - Log-linear
 #' trapezoidal rule."  Pharmacokinetic & Pharmacodynamic Data Analysis: Concepts
 #' and Applications, 4th Edition.  Stockholm, Sweden: Swedish Pharmaceutical
@@ -94,7 +94,19 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
   }
   if (nrow(data) == 0) {
     # All the data were missing
-    return(NA)
+    return(
+      structure(
+        NA_real_,
+        exclude="No data for AUC calculation"
+      )
+    )
+  } else if (nrow(data) == 1) {
+    return(
+      structure(
+        NA_real_,
+        exclude="AUC cannot be calculated with only one measured concentration"
+      )
+    )
   } else if (all(data$conc %in% c(0, NA))) {
     # All the data were missing or 0 before excluding points
     return(structure(0, exclude="DO NOT EXCLUDE"))
@@ -105,15 +117,24 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
   if (auc.type %in% "AUCinf" &
         is.finite(interval[2]))
     warning("Requesting AUCinf when the end of the interval is not Inf")
-  ##############################
-  # Subset the data to the range of interest
+  # if (requireNamespace("units", quietly=TRUE)) {
+  #   if (inherits(time, "units") & !inherits(interval, "units")) {
+  #     interval <- units::set_units(interval, units(time), mode="standard")
+  #   }
+  # }
+
+  # Subset the data to the range of interest ####
   interval_start <- interval[1]
   interval_end <- interval[2]
   # Find the first time point
   if (interval_start < min(data$time)) {
-    warning(sprintf(
-      "Requesting an AUC range starting (%g) before the first measurement (%g) is not allowed",
-      interval_start, min(data$time)))
+    rlang::warn(
+      message = sprintf(
+        "Requesting an AUC range starting (%g) before the first measurement (%g) is not allowed",
+        interval_start, min(data$time)
+      ),
+      class = "pknca_warn_auc_before_first"
+    )
     return(NA)
   } else if (interval_start > max(data$time)) {
     # Give this as a warning, but allow it to continue
@@ -134,7 +155,7 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
   # original version if it was there.
   data <- rbind(data.frame(conc=conc_start,
                            time=interval_start),
-                data[!(data$time %in% interval_start),])
+                data[!(data$time %in% interval_start), ])
   # * either have our ending point or the ending point is Inf
   if (is.finite(interval_end)) {
     conc_end <-
@@ -144,9 +165,11 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
                          extrap.method=auc.type,
                          check=FALSE)
     # !mask.end because we may be replacing an entry that is a 0.
-    data <- rbind(data[!(data$time %in% interval_end),],
-                  data.frame(conc=conc_end,
-                             time=interval_end))
+    data <-
+      rbind(
+        data[!(data$time %in% interval_end), ],
+        data.frame(conc=conc_end, time=interval_end)
+      )
   }
   # Subset the conc and time data to the interval of interest
   data <- data[interval_start <= data$time & data$time <= interval_end, , drop=FALSE]
@@ -161,8 +184,8 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
     # still true)
     stop("Unknown error with NA tlast but non-BLQ concentrations") # nocov
   } else {
-    # ############################
-    # Compute the AUxC
+
+    # Compute the AUxC ####
     # Compute it in linear space from the start to Tlast
     if (auc.type %in% "AUCall" &
         tlast != max(data$time)) {
@@ -192,9 +215,9 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
       ret[mask_down] <-
         fun.log(data$conc[idx_1_down], data$conc[idx_2_down],
                 data$time[idx_1_down], data$time[idx_2_down])
-    } else if (!(method %in% "linear")) {
+    } else if (!(method %in% "linear")) { # nocov
       # This should have already been caught, but the test exists to double-check
-      stop("Invalid AUC integration method") # nocov
+      stop("Invalid AUC integration method (please report a bug)") # nocov
     }
     if (auc.type %in% "AUCinf") {
       # Whether AUCinf,obs or AUCinf,pred is calculated depends on if clast,obs
@@ -207,9 +230,9 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
 }
 
 fun.auc.linear <- function(conc.1, conc.2, time.1, time.2)
-  (time.2-time.1)*(conc.2+conc.1)/2
+  (time.2-time.1) * (conc.2+conc.1)/2
 fun.auc.log <- function(conc.1, conc.2, time.1, time.2)
-  (time.2-time.1)*(conc.2-conc.1)/log(conc.2/conc.1)
+  (time.2-time.1) * (conc.2-conc.1)/log(conc.2/conc.1)
 fun.auc.inf <- function(clast, tlast, lambda.z)
   clast/lambda.z
 
@@ -222,10 +245,9 @@ pk.calc.auc <- function(conc, time, ..., options=list())
                fun.log=fun.auc.log,
                fun.inf=fun.auc.inf)
 
-## Note that lambda.z is set to NA for both auc.last and auc.all
-## because all interpolation should happen within given points.
-## lambda.z should not be used, and if it is used, that should be
-## caught as an error.
+# Note that lambda.z is set to NA for both auc.last and auc.all because all
+# interpolation should happen within given points. lambda.z should not be used,
+# and if it is used, that should be caught as an error.
 #' @describeIn pk.calc.auxc Compute the AUClast.
 #' @export
 pk.calc.auc.last <- function(conc, time, ..., options=list()) {
@@ -283,11 +305,11 @@ pk.calc.auc.all <- function(conc, time, ..., options=list()) {
 pk.calc.aumc <- function(conc, time, ..., options=list())
   pk.calc.auxc(conc=conc, time=time, ..., options=options,
     fun.linear=function(conc.1, conc.2, time.1, time.2) {
-      (time.2-time.1)*(conc.2*time.2+conc.1*time.1)/2
+      (time.2-time.1) * (conc.2*time.2+conc.1*time.1)/2
     },
     fun.log=function(conc.1, conc.2, time.1, time.2) {
-      ((time.2-time.1)*(conc.2*time.2-conc.1*time.1)/log(conc.2/conc.1)-
-       (time.2-time.1)^2*(conc.2-conc.1)/(log(conc.2/conc.1)^2))
+      ((time.2-time.1) * (conc.2*time.2-conc.1*time.1) / log(conc.2/conc.1)-
+       (time.2-time.1)^2 * (conc.2-conc.1) / (log(conc.2/conc.1)^2))
     },
     fun.inf=function(conc.last, time.last, lambda.z) {
       (conc.last*time.last/lambda.z) + conc.last/(lambda.z^2)
@@ -340,98 +362,73 @@ pk.calc.aumc.all <- function(conc, time, ..., options=list()) {
                lambda.z=NA)
 }
 
-## Add the columns to the interval specification
+# Add the columns to the interval specification
 add.interval.col("aucinf.obs",
                  FUN="pk.calc.auc.inf.obs",
                  values=c(FALSE, TRUE),
+                 unit_type="auc",
+                 pretty_name="AUCinf,obs",
                  desc="The area under the concentration time curve from the beginning of the interval to infinity with extrapolation to infinity from the observed Clast",
                  depends=c("lambda.z", "clast.obs"))
-PKNCA.set.summary(
-  name="aucinf.obs",
-  description="geometric mean and geometric coefficient of variation",
-  point=business.geomean,
-  spread=business.geocv
-)
 
 add.interval.col("aucinf.pred",
                  FUN="pk.calc.auc.inf.pred",
                  values=c(FALSE, TRUE),
+                 unit_type="auc",
+                 pretty_name="AUCinf,pred",
                  desc="The area under the concentration time curve from the beginning of the interval to infinity with extrapolation to infinity from the predicted Clast",
                  depends=c("lambda.z", "clast.pred"))
-PKNCA.set.summary(
-  name="aucinf.pred",
-  description="geometric mean and geometric coefficient of variation",
-  point=business.geomean,
-  spread=business.geocv
-)
 
 add.interval.col("auclast",
                  FUN="pk.calc.auc.last",
                  values=c(FALSE, TRUE),
-                 desc="The area under the concentration time curve from the beginning of the interval to the last concentration above the limit of quantification",
-                 depends=c())
-PKNCA.set.summary(
-  name="auclast",
-  description="geometric mean and geometric coefficient of variation",
-  point=business.geomean,
-  spread=business.geocv
-)
+                 unit_type="auc",
+                 pretty_name="AUClast",
+                 desc="The area under the concentration time curve from the beginning of the interval to the last concentration above the limit of quantification")
 
 add.interval.col("aucall",
                  FUN="pk.calc.auc.all",
                  values=c(FALSE, TRUE),
-                 desc="The area under the concentration time curve from the beginning of the interval to the last concentration above the limit of quantification plus the triangle from that last concentration to 0 at the first concentration below the limit of quantification",
-                 depends=c())
-PKNCA.set.summary(
-  name="aucall",
-  description="geometric mean and geometric coefficient of variation",
-  point=business.geomean,
-  spread=business.geocv
-)
+                 unit_type="auc",
+                 pretty_name="AUCall",
+                 desc="The area under the concentration time curve from the beginning of the interval to the last concentration above the limit of quantification plus the triangle from that last concentration to 0 at the first concentration below the limit of quantification",)
 
 add.interval.col("aumcinf.obs",
                  FUN="pk.calc.aumc.inf.obs",
                  values=c(FALSE, TRUE),
+                 unit_type="aumc",
+                 pretty_name="AUMC,inf,obs",
                  desc="The area under the concentration time moment curve from the beginning of the interval to infinity with extrapolation to infinity from the observed Clast",
                  depends=c("lambda.z", "clast.obs"))
-PKNCA.set.summary(
-  name="aumcinf.obs",
-  description="geometric mean and geometric coefficient of variation",
-  point=business.geomean,
-  spread=business.geocv
-)
 
 add.interval.col("aumcinf.pred",
                  FUN="pk.calc.aumc.inf.pred",
                  values=c(FALSE, TRUE),
+                 unit_type="aumc",
+                 pretty_name="AUMC,inf,pred",
                  desc="The area under the concentration time moment curve from the beginning of the interval to infinity with extrapolation to infinity from the predicted Clast",
                  depends=c("lambda.z", "clast.pred"))
-PKNCA.set.summary(
-  name="aumcinf.pred",
-  description="geometric mean and geometric coefficient of variation",
-  point=business.geomean,
-  spread=business.geocv
-)
 
 add.interval.col("aumclast",
                  FUN="pk.calc.aumc.last",
                  values=c(FALSE, TRUE),
-                 desc="The area under the concentration time moment curve from the beginning of the interval to the last concentration above the limit of quantification",
-                 depends=c())
-PKNCA.set.summary(
-  name="aumclast",
-  description="geometric mean and geometric coefficient of variation",
-  point=business.geomean,
-  spread=business.geocv
-)
+                 unit_type="aumc",
+                 pretty_name="AUMC,last",
+                 desc="The area under the concentration time moment curve from the beginning of the interval to the last concentration above the limit of quantification")
 
 add.interval.col("aumcall",
                  FUN="pk.calc.aumc.all",
                  values=c(FALSE, TRUE),
-                 desc="The area under the concentration time moment curve from the beginning of the interval to the last concentration above the limit of quantification plus the moment of the triangle from that last concentration to 0 at the first concentration below the limit of quantification",
-                 depends=c())
+                 unit_type="aumc",
+                 pretty_name="AUMC,all",
+                 desc="The area under the concentration time moment curve from the beginning of the interval to the last concentration above the limit of quantification plus the moment of the triangle from that last concentration to 0 at the first concentration below the limit of quantification")
+
 PKNCA.set.summary(
-  name="aumcall",
+  name=
+    c(
+      "aucinf.obs", "aucinf.pred", "auclast", "aucall",
+      "aumcinf.obs", "aumcinf.pred", "aumclast", "aumcall"
+    ),
   description="geometric mean and geometric coefficient of variation",
   point=business.geomean,
   spread=business.geocv
