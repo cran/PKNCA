@@ -359,9 +359,9 @@ automatically generates the units for each NCA parameter.</p>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          PPORRESU PPTESTCD</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20             hr     tmax</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49          ng/mL     cmax</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 73     mg/(ng/mL)   vd.obs</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 75       hr*ng/mL  auclast</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 108 mg/(hr*ng/mL)   cl.obs</span></span></code></pre></div>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 74     mg/(ng/mL)   vd.obs</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 76       hr*ng/mL  auclast</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 111 mg/(hr*ng/mL)   cl.obs</span></span></code></pre></div>
 <p>As you see above, the default units table has a column for the
 <code>PPTESTCD</code> indicating the parameter. And, the column
 <code>PPORRESU</code> indicates what the default units are.</p>
@@ -386,9 +386,9 @@ moles.</p>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          PPORRESU PPTESTCD PPSTRESU conversion_factor</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20             hr     tmax      day      4.166667e-02</span></span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49          ng/mL     cmax    ng/mL      1.000000e+00</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 73     mg/(ng/mL)   vd.obs        L      1.000000e+03</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 75       hr*ng/mL  auclast hr*ng/mL      1.000000e+00</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 108 mg/(hr*ng/mL)   cl.obs     L/hr      1.000000e+03</span></span></code></pre></div>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 74     mg/(ng/mL)   vd.obs        L      1.000000e+03</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 76       hr*ng/mL  auclast hr*ng/mL      1.000000e+00</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 111 mg/(hr*ng/mL)   cl.obs     L/hr      1.000000e+03</span></span></code></pre></div>
 <p>Now, the units are much cleaner to look at.</p>
 <p>To do a conversion that is not possible directly with the
 <code>units</code> library, you can add the conversion factor manually
@@ -413,9 +413,9 @@ not specify that conversion; all conversions must be specified.</p>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          PPORRESU PPTESTCD PPSTRESU conversion_factor</span></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20             hr     tmax      day      4.166667e-02</span></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49          ng/mL     cmax   nmol/L      8.130081e+00</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 73     mg/(ng/mL)   vd.obs        L      1.000000e+03</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 75       hr*ng/mL  auclast hr*ng/mL      1.000000e+00</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 108 mg/(hr*ng/mL)   cl.obs     L/hr      1.000000e+03</span></span></code></pre></div>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 74     mg/(ng/mL)   vd.obs        L      1.000000e+03</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 76       hr*ng/mL  auclast hr*ng/mL      1.000000e+00</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 111 mg/(hr*ng/mL)   cl.obs     L/hr      1.000000e+03</span></span></code></pre></div>
 </div>
 <div id="the-basic-steps-to-add-units-to-an-nca-analysis" class="section level1">
 <h1>The Basic Steps to Add Units to an NCA Analysis</h1>

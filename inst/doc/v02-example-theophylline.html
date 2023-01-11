@@ -522,7 +522,7 @@ selected based on the <code>single.dose.aucs setting</code> in
 <code>PKNCA.options</code></p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>data_obj_automatic <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">PKNCA.options</span>(<span class="st">&quot;single.dose.aucs&quot;</span>))</span></code></pre></div>
-<table>
+<table style="width:100%;">
 <colgroup>
 <col width="0%" />
 <col width="0%" />
@@ -555,6 +555,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
@@ -665,11 +668,14 @@ selected based on the <code>single.dose.aucs setting</code> in
 <th align="left">vss.iv.last</th>
 <th align="left">cav</th>
 <th align="left">ctrough</th>
+<th align="left">cstart</th>
 <th align="left">ptr</th>
 <th align="left">tlag</th>
 <th align="left">deg.fluc</th>
 <th align="left">swing</th>
 <th align="left">ceoi</th>
+<th align="left">aucabove.predose.all</th>
+<th align="left">aucabove.trough.all</th>
 <th align="left">ae</th>
 <th align="left">clr.last</th>
 <th align="left">clr.obs</th>
@@ -867,6 +873,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="right">0</td>
@@ -883,6 +892,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -985,7 +997,7 @@ selected based on the <code>single.dose.aucs setting</code> in
 </tbody>
 </table>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(data_obj_automatic<span class="sc">$</span>intervals)</span></code></pre></div>
-<table style="width:100%;">
+<table>
 <colgroup>
 <col width="0%" />
 <col width="0%" />
@@ -1018,6 +1030,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
@@ -1129,11 +1144,14 @@ selected based on the <code>single.dose.aucs setting</code> in
 <th align="left">vss.iv.last</th>
 <th align="left">cav</th>
 <th align="left">ctrough</th>
+<th align="left">cstart</th>
 <th align="left">ptr</th>
 <th align="left">tlag</th>
 <th align="left">deg.fluc</th>
 <th align="left">swing</th>
 <th align="left">ceoi</th>
+<th align="left">aucabove.predose.all</th>
+<th align="left">aucabove.trough.all</th>
 <th align="left">ae</th>
 <th align="left">clr.last</th>
 <th align="left">clr.obs</th>
@@ -1332,6 +1350,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">1</td>
 </tr>
 <tr class="even">
@@ -1349,6 +1370,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -1453,6 +1477,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="right">0</td>
 <td align="right">24</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -1611,6 +1638,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -1792,6 +1822,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">3</td>
 </tr>
 <tr class="even">
@@ -1809,6 +1842,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -1913,6 +1949,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="right">0</td>
 <td align="right">24</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -2071,6 +2110,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -2252,6 +2294,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">5</td>
 </tr>
 <tr class="even">
@@ -2269,6 +2314,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -2373,6 +2421,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="right">0</td>
 <td align="right">24</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -2531,6 +2582,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -2712,6 +2766,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">7</td>
 </tr>
 <tr class="even">
@@ -2729,6 +2786,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -2833,6 +2893,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="right">0</td>
 <td align="right">24</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -2991,6 +3054,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -3172,6 +3238,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">9</td>
 </tr>
 <tr class="even">
@@ -3189,6 +3258,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -3293,6 +3365,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="right">0</td>
 <td align="right">24</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -3451,6 +3526,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -3632,6 +3710,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">11</td>
 </tr>
 <tr class="even">
@@ -3649,6 +3730,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -3753,6 +3837,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="right">0</td>
 <td align="right">24</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -3879,6 +3966,9 @@ selected based on the <code>single.dose.aucs setting</code> in
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -4001,7 +4091,7 @@ you do not have to specify it in the parameters requested.</p>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>data_obj_manual <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj,</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                             <span class="at">intervals=</span>intervals_manual)</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(data_obj_manual<span class="sc">$</span>intervals)</span></code></pre></div>
-<table>
+<table style="width:100%;">
 <colgroup>
 <col width="0%" />
 <col width="0%" />
@@ -4034,6 +4124,9 @@ you do not have to specify it in the parameters requested.</p>
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
@@ -4144,11 +4237,14 @@ you do not have to specify it in the parameters requested.</p>
 <th align="left">vss.iv.last</th>
 <th align="left">cav</th>
 <th align="left">ctrough</th>
+<th align="left">cstart</th>
 <th align="left">ptr</th>
 <th align="left">tlag</th>
 <th align="left">deg.fluc</th>
 <th align="left">swing</th>
 <th align="left">ceoi</th>
+<th align="left">aucabove.predose.all</th>
+<th align="left">aucabove.trough.all</th>
 <th align="left">ae</th>
 <th align="left">clr.last</th>
 <th align="left">clr.obs</th>
@@ -4248,6 +4344,9 @@ you do not have to specify it in the parameters requested.</p>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -4656,48 +4755,51 @@ not to calculate anything that was not requested.</p>
 ##   cl.last cl.all     f mrt.last mrt.iv.last vss.last vss.iv.last   cav ctrough
 ## 1   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE   FALSE
 ## 2   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE   FALSE
-##     ptr  tlag deg.fluc swing  ceoi    ae clr.last clr.obs clr.pred    fe
-## 1 FALSE FALSE    FALSE FALSE FALSE FALSE    FALSE   FALSE    FALSE FALSE
-## 2 FALSE FALSE    FALSE FALSE FALSE FALSE    FALSE   FALSE    FALSE FALSE
-##   sparse_auclast time_above aucivlast aucivall aucivint.last aucivint.all
-## 1          FALSE      FALSE     FALSE    FALSE         FALSE        FALSE
-## 2          FALSE      FALSE     FALSE    FALSE         FALSE        FALSE
-##   aucivpbextlast aucivpbextall aucivpbextint.last aucivpbextint.all half.life
-## 1          FALSE         FALSE              FALSE             FALSE     FALSE
-## 2          FALSE         FALSE              FALSE             FALSE     FALSE
-##   r.squared adj.r.squared lambda.z lambda.z.time.first lambda.z.n.points
-## 1     FALSE         FALSE    FALSE               FALSE             FALSE
-## 2     FALSE         FALSE    FALSE               FALSE             FALSE
-##   clast.pred span.ratio thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last
-## 1      FALSE      FALSE          FALSE             FALSE    FALSE       FALSE
-## 2      FALSE      FALSE          FALSE             FALSE    FALSE       FALSE
-##   aucinf.obs aucinf.pred aumcinf.obs aumcinf.pred aucint.inf.obs
-## 1      FALSE       FALSE       FALSE        FALSE          FALSE
-## 2      FALSE       FALSE       FALSE        FALSE          FALSE
-##   aucint.inf.obs.dose aucint.inf.pred aucint.inf.pred.dose aucivinf.obs
-## 1               FALSE           FALSE                FALSE        FALSE
-## 2               FALSE           FALSE                FALSE        FALSE
-##   aucivinf.pred aucivpbextinf.obs aucivpbextinf.pred aucpext.obs aucpext.pred
-## 1         FALSE             FALSE              FALSE       FALSE        FALSE
-## 2         FALSE             FALSE              FALSE       FALSE        FALSE
-##   cl.obs cl.pred mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred
-## 1  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-## 2  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-##   vz.obs vz.pred vss.obs vss.pred vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred
-## 1  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-## 2  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-##   vd.obs vd.pred thalf.eff.obs thalf.eff.pred thalf.eff.iv.obs
-## 1  FALSE   FALSE         FALSE          FALSE            FALSE
-## 2  FALSE   FALSE         FALSE          FALSE            FALSE
-##   thalf.eff.iv.pred kel.obs kel.pred kel.iv.obs kel.iv.pred auclast.dn
-## 1             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
-## 2             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
-##   aucall.dn aucinf.obs.dn aucinf.pred.dn aumclast.dn aumcall.dn aumcinf.obs.dn
-## 1     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
-## 2     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
-##   aumcinf.pred.dn cmax.dn cmin.dn clast.obs.dn clast.pred.dn cav.dn ctrough.dn
-## 1           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
-## 2           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE</code></pre>
+##   cstart   ptr  tlag deg.fluc swing  ceoi aucabove.predose.all
+## 1  FALSE FALSE FALSE    FALSE FALSE FALSE                FALSE
+## 2  FALSE FALSE FALSE    FALSE FALSE FALSE                FALSE
+##   aucabove.trough.all    ae clr.last clr.obs clr.pred    fe sparse_auclast
+## 1               FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE
+## 2               FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE
+##   time_above aucivlast aucivall aucivint.last aucivint.all aucivpbextlast
+## 1      FALSE     FALSE    FALSE         FALSE        FALSE          FALSE
+## 2      FALSE     FALSE    FALSE         FALSE        FALSE          FALSE
+##   aucivpbextall aucivpbextint.last aucivpbextint.all half.life r.squared
+## 1         FALSE              FALSE             FALSE     FALSE     FALSE
+## 2         FALSE              FALSE             FALSE     FALSE     FALSE
+##   adj.r.squared lambda.z lambda.z.time.first lambda.z.n.points clast.pred
+## 1         FALSE    FALSE               FALSE             FALSE      FALSE
+## 2         FALSE    FALSE               FALSE             FALSE      FALSE
+##   span.ratio thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last aucinf.obs
+## 1      FALSE          FALSE             FALSE    FALSE       FALSE      FALSE
+## 2      FALSE          FALSE             FALSE    FALSE       FALSE      FALSE
+##   aucinf.pred aumcinf.obs aumcinf.pred aucint.inf.obs aucint.inf.obs.dose
+## 1       FALSE       FALSE        FALSE          FALSE               FALSE
+## 2       FALSE       FALSE        FALSE          FALSE               FALSE
+##   aucint.inf.pred aucint.inf.pred.dose aucivinf.obs aucivinf.pred
+## 1           FALSE                FALSE        FALSE         FALSE
+## 2           FALSE                FALSE        FALSE         FALSE
+##   aucivpbextinf.obs aucivpbextinf.pred aucpext.obs aucpext.pred cl.obs cl.pred
+## 1             FALSE              FALSE       FALSE        FALSE  FALSE   FALSE
+## 2             FALSE              FALSE       FALSE        FALSE  FALSE   FALSE
+##   mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred vz.obs vz.pred
+## 1   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
+## 2   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
+##   vss.obs vss.pred vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred vd.obs vd.pred
+## 1   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
+## 2   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
+##   thalf.eff.obs thalf.eff.pred thalf.eff.iv.obs thalf.eff.iv.pred kel.obs
+## 1         FALSE          FALSE            FALSE             FALSE   FALSE
+## 2         FALSE          FALSE            FALSE             FALSE   FALSE
+##   kel.pred kel.iv.obs kel.iv.pred auclast.dn aucall.dn aucinf.obs.dn
+## 1    FALSE      FALSE       FALSE      FALSE     FALSE         FALSE
+## 2    FALSE      FALSE       FALSE      FALSE     FALSE         FALSE
+##   aucinf.pred.dn aumclast.dn aumcall.dn aumcinf.obs.dn aumcinf.pred.dn cmax.dn
+## 1          FALSE       FALSE      FALSE          FALSE           FALSE   FALSE
+## 2          FALSE       FALSE      FALSE          FALSE           FALSE   FALSE
+##   cmin.dn clast.obs.dn clast.pred.dn cav.dn ctrough.dn
+## 1   FALSE        FALSE         FALSE  FALSE      FALSE
+## 2   FALSE        FALSE         FALSE  FALSE      FALSE</code></pre>
 <p>After the data is ready, the calculations and summary can
 progress.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>results_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span>
@@ -4803,57 +4905,62 @@ progress.</p>
 ##   cl.last cl.all     f mrt.last mrt.iv.last vss.last vss.iv.last   cav ctrough
 ## 1   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE   FALSE
 ## 2   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE   FALSE
-##     ptr  tlag deg.fluc swing  ceoi    ae clr.last clr.obs clr.pred    fe
-## 1 FALSE FALSE    FALSE FALSE FALSE FALSE    FALSE   FALSE    FALSE FALSE
-## 2 FALSE FALSE    FALSE FALSE FALSE FALSE    FALSE   FALSE    FALSE FALSE
-##   sparse_auclast time_above aucivlast aucivall aucivint.last aucivint.all
-## 1          FALSE      FALSE     FALSE    FALSE         FALSE        FALSE
-## 2          FALSE      FALSE     FALSE    FALSE         FALSE        FALSE
-##   aucivpbextlast aucivpbextall aucivpbextint.last aucivpbextint.all half.life
-## 1          FALSE         FALSE              FALSE             FALSE     FALSE
-## 2          FALSE         FALSE              FALSE             FALSE      TRUE
-##   r.squared adj.r.squared lambda.z lambda.z.time.first lambda.z.n.points
-## 1     FALSE         FALSE    FALSE               FALSE             FALSE
-## 2     FALSE         FALSE    FALSE               FALSE             FALSE
-##   clast.pred span.ratio thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last
-## 1      FALSE      FALSE          FALSE             FALSE    FALSE       FALSE
-## 2      FALSE      FALSE          FALSE             FALSE    FALSE       FALSE
-##   aucinf.obs aucinf.pred aumcinf.obs aumcinf.pred aucint.inf.obs
-## 1      FALSE       FALSE       FALSE        FALSE          FALSE
-## 2       TRUE       FALSE       FALSE        FALSE          FALSE
-##   aucint.inf.obs.dose aucint.inf.pred aucint.inf.pred.dose aucivinf.obs
-## 1               FALSE           FALSE                FALSE        FALSE
-## 2               FALSE           FALSE                FALSE        FALSE
-##   aucivinf.pred aucivpbextinf.obs aucivpbextinf.pred aucpext.obs aucpext.pred
-## 1         FALSE             FALSE              FALSE       FALSE        FALSE
-## 2         FALSE             FALSE              FALSE       FALSE        FALSE
-##   cl.obs cl.pred mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred
-## 1  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-## 2  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-##   vz.obs vz.pred vss.obs vss.pred vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred
-## 1  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-## 2  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-##   vd.obs vd.pred thalf.eff.obs thalf.eff.pred thalf.eff.iv.obs
-## 1  FALSE   FALSE         FALSE          FALSE            FALSE
-## 2  FALSE   FALSE         FALSE          FALSE            FALSE
-##   thalf.eff.iv.pred kel.obs kel.pred kel.iv.obs kel.iv.pred auclast.dn
-## 1             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
-## 2             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
-##   aucall.dn aucinf.obs.dn aucinf.pred.dn aumclast.dn aumcall.dn aumcinf.obs.dn
-## 1     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
-## 2     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
-##   aumcinf.pred.dn cmax.dn cmin.dn clast.obs.dn clast.pred.dn cav.dn ctrough.dn
-## 1           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
-## 2           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
+##   cstart   ptr  tlag deg.fluc swing  ceoi aucabove.predose.all
+## 1  FALSE FALSE FALSE    FALSE FALSE FALSE                FALSE
+## 2  FALSE FALSE FALSE    FALSE FALSE FALSE                FALSE
+##   aucabove.trough.all    ae clr.last clr.obs clr.pred    fe sparse_auclast
+## 1               FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE
+## 2               FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE
+##   time_above aucivlast aucivall aucivint.last aucivint.all aucivpbextlast
+## 1      FALSE     FALSE    FALSE         FALSE        FALSE          FALSE
+## 2      FALSE     FALSE    FALSE         FALSE        FALSE          FALSE
+##   aucivpbextall aucivpbextint.last aucivpbextint.all half.life r.squared
+## 1         FALSE              FALSE             FALSE     FALSE     FALSE
+## 2         FALSE              FALSE             FALSE      TRUE     FALSE
+##   adj.r.squared lambda.z lambda.z.time.first lambda.z.n.points clast.pred
+## 1         FALSE    FALSE               FALSE             FALSE      FALSE
+## 2         FALSE    FALSE               FALSE             FALSE      FALSE
+##   span.ratio thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last aucinf.obs
+## 1      FALSE          FALSE             FALSE    FALSE       FALSE      FALSE
+## 2      FALSE          FALSE             FALSE    FALSE       FALSE       TRUE
+##   aucinf.pred aumcinf.obs aumcinf.pred aucint.inf.obs aucint.inf.obs.dose
+## 1       FALSE       FALSE        FALSE          FALSE               FALSE
+## 2       FALSE       FALSE        FALSE          FALSE               FALSE
+##   aucint.inf.pred aucint.inf.pred.dose aucivinf.obs aucivinf.pred
+## 1           FALSE                FALSE        FALSE         FALSE
+## 2           FALSE                FALSE        FALSE         FALSE
+##   aucivpbextinf.obs aucivpbextinf.pred aucpext.obs aucpext.pred cl.obs cl.pred
+## 1             FALSE              FALSE       FALSE        FALSE  FALSE   FALSE
+## 2             FALSE              FALSE       FALSE        FALSE  FALSE   FALSE
+##   mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred vz.obs vz.pred
+## 1   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
+## 2   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
+##   vss.obs vss.pred vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred vd.obs vd.pred
+## 1   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
+## 2   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
+##   thalf.eff.obs thalf.eff.pred thalf.eff.iv.obs thalf.eff.iv.pred kel.obs
+## 1         FALSE          FALSE            FALSE             FALSE   FALSE
+## 2         FALSE          FALSE            FALSE             FALSE   FALSE
+##   kel.pred kel.iv.obs kel.iv.pred auclast.dn aucall.dn aucinf.obs.dn
+## 1    FALSE      FALSE       FALSE      FALSE     FALSE         FALSE
+## 2    FALSE      FALSE       FALSE      FALSE     FALSE         FALSE
+##   aucinf.pred.dn aumclast.dn aumcall.dn aumcinf.obs.dn aumcinf.pred.dn cmax.dn
+## 1          FALSE       FALSE      FALSE          FALSE           FALSE   FALSE
+## 2          FALSE       FALSE      FALSE          FALSE           FALSE   FALSE
+##   cmin.dn clast.obs.dn clast.pred.dn cav.dn ctrough.dn
+## 1   FALSE        FALSE         FALSE  FALSE      FALSE
+## 2   FALSE        FALSE         FALSE  FALSE      FALSE
 ## 
 ## 
-## $exclude
+## $columns
+## $columns$exclude
 ## [1] &quot;exclude&quot;
+## 
 ## 
 ## attr(,&quot;class&quot;)
 ## [1] &quot;PKNCAresults&quot; &quot;list&quot;        
 ## attr(,&quot;provenance&quot;)
-## Provenance hash ee687a520af821aa354fef62aa53cba0 generated on 2022-10-15 22:04:52 with R version 4.2.1 (2022-06-23 ucrt).</code></pre>
+## Provenance hash ee687a520af821aa354fef62aa53cba0 generated on 2023-01-10 11:56:54 with R version 4.2.1 (2022-06-23 ucrt).</code></pre>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results_obj)</span></code></pre></div>
 <pre><code>##  start end  N     auclast        cmax
 ##      0  24 12 98.8 [23.0] 8.65 [17.0]

@@ -268,7 +268,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 effects throughout the package. The options are controlled using either
 the <code>PKNCA.options</code> function or by passing the
 <code>options</code> argument to any of the functions with that as an
-argument. All options supported by the current version of PKNCA (0.10.0)
+argument. All options supported by the current version of PKNCA (0.10.1)
 are listed below with their descriptions.</p>
 </div>
 <div id="options" class="section level1">
@@ -356,7 +356,7 @@ interval.</p>
 <div id="single.dose.aucs" class="section level2">
 <h2>single.dose.aucs</h2>
 <p>When data is single-dose, what intervals should be used?</p>
-<table>
+<table style="width:100%;">
 <colgroup>
 <col width="0%" />
 <col width="0%" />
@@ -389,6 +389,9 @@ interval.</p>
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
@@ -499,11 +502,14 @@ interval.</p>
 <th align="left">vss.iv.last</th>
 <th align="left">cav</th>
 <th align="left">ctrough</th>
+<th align="left">cstart</th>
 <th align="left">ptr</th>
 <th align="left">tlag</th>
 <th align="left">deg.fluc</th>
 <th align="left">swing</th>
 <th align="left">ceoi</th>
+<th align="left">aucabove.predose.all</th>
+<th align="left">aucabove.trough.all</th>
 <th align="left">ae</th>
 <th align="left">clr.last</th>
 <th align="left">clr.obs</th>
@@ -701,6 +707,9 @@ interval.</p>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="right">0</td>
@@ -717,6 +726,9 @@ interval.</p>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>

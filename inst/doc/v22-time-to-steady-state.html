@@ -12,7 +12,7 @@
 
 <meta name="author" content="Bill Denney" />
 
-<meta name="date" content="2022-10-15" />
+<meta name="date" content="2023-01-10" />
 
 <title>Noncompartmental evaluation of time to steady-state</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Noncompartmental evaluation of time to
 steady-state</h1>
 <h4 class="author">Bill Denney</h4>
-<h4 class="date">2022-10-15</h4>
+<h4 class="date">2023-01-10</h4>
 
 
 
@@ -397,11 +397,11 @@ nonlinear model</li>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">subject =</span> steady_state_noise<span class="sc">$</span>Subject,</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">time.dosing =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">168</span> <span class="sc">-</span> <span class="dv">12</span>, <span class="at">by=</span><span class="dv">12</span>)</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in nlme.formula(conc ~ ctrough.ss * (1 - exp(tss.constant * time/</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; tss)), : Iteration 1, LME step: nlminb() did not converge (code = 1). Do</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in nlme.formula(conc ~ ctrough.ss * (1 - exp(tss.constant *</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; time/tss)), : Iteration 1, LME step: nlminb() did not converge (code = 1). Do</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; increase &#39;msMaxIter&#39;!</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in nlme.formula(conc ~ ctrough.ss * (1 - exp(tss.constant * time/</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; tss)), : Iteration 2, LME step: nlminb() did not converge (code = 1). Do</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in nlme.formula(conc ~ ctrough.ss * (1 - exp(tss.constant *</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; time/tss)), : Iteration 2, LME step: nlminb() did not converge (code = 1). Do</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; increase &#39;msMaxIter&#39;!</span></span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>tss_mono</span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    subject tss.monoexponential.population tss.monoexponential.popind</span></span>
