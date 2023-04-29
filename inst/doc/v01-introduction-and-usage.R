@@ -49,28 +49,37 @@ PKNCA.options()
 #  PKNCA.options(default=TRUE)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  PKNCA.set.summary(name="cmax",
-#                    point=business.geomean,
-#                    spread=business.geocv,
-#                    rounding=list(signif=3))
+#  PKNCA.set.summary(
+#    name = "cmax",
+#    description = "geometric mean and geometric coefficient of variation",
+#    point = business.geomean,
+#    spread = business.geocv,
+#    rounding = list(signif=3)
+#  )
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  PKNCA.set.summary(name="tmax",
-#                    point=business.median,
-#                    spread=business.range,
-#                    rounding=list(round=2))
+#  PKNCA.set.summary(
+#    name = "tmax",
+#    description = "median and range",
+#    point = business.median,
+#    spread = business.range,
+#    rounding = list(round=2)
+#  )
 
 ## ----custom_summary_fun, eval=FALSE-------------------------------------------
 #  median_na <- function(x) {
-#    median(x, na.rm=TRUE)
+#    median(x, na.rm = TRUE)
 #  }
 #  quantprob_na <- function(x) {
-#    quantile(x, probs=c(0.05, 0.95), na.rm=TRUE)
+#    quantile(x, probs = c(0.05, 0.95), na.rm=TRUE)
 #  }
-#  PKNCA.set.summary(name="auclast",
-#                    point=median_na,
-#                    spread=quantprob_na,
-#                    rounding=list(signif=3))
+#  PKNCA.set.summary(
+#    name="auclast",
+#    description = "median and 5th to 95th percentile",
+#    point=median_na,
+#    spread=quantprob_na,
+#    rounding=list(signif=3)
+#  )
 
 ## ----multi_summary_settings, eval=FALSE---------------------------------------
 #  median_na <- function(x) {
@@ -79,10 +88,13 @@ PKNCA.options()
 #  quantprob_na <- function(x) {
 #    quantile(x, probs=c(0.05, 0.95), na.rm=TRUE)
 #  }
-#  PKNCA.set.summary(name=c("auclast", "cmax", "tmax", "half.life", "aucinf.pred"),
-#                    point=median_na,
-#                    spread=quantprob_na,
-#                    rounding=list(signif=3))
+#  PKNCA.set.summary(
+#    name=c("auclast", "cmax", "tmax", "half.life", "aucinf.pred"),
+#    description = "median and 5th to 95th percentile",
+#    point=median_na,
+#    spread=quantprob_na,
+#    rounding=list(signif=3)
+#  )
 
 ## ----grouping, eval=FALSE-----------------------------------------------------
 #  ## Generate a faux multi-study, multi-analyte dataset.
@@ -117,11 +129,13 @@ PKNCA.options()
 
 ## -----------------------------------------------------------------------------
 intervals <-
-  data.frame(start=0, end=c(24, Inf),
-             cmax=c(FALSE, TRUE),
-             tmax=c(FALSE, TRUE),
-             auclast=TRUE,
-             aucinf.obs=c(FALSE, TRUE))
+  data.frame(
+    start=0, end=c(24, Inf),
+    cmax=c(FALSE, TRUE),
+    tmax=c(FALSE, TRUE),
+    auclast=TRUE,
+    aucinf.obs=c(FALSE, TRUE)
+  )
 
 ## ----asis=TRUE, echo=FALSE----------------------------------------------------
 knitr::kable(PKNCA.options()$single.dose.aucs)
@@ -140,13 +154,18 @@ PKNCA::find.tau(dose_times)
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  intervals_manual <-
-#    data.frame(start=0, end=c(24, Inf),
-#               cmax=c(FALSE, TRUE),
-#               tmax=c(FALSE, TRUE),
-#               auclast=TRUE,
-#               aucinf.obs=c(FALSE, TRUE))
-#  data_obj <- PKNCAdata(conc_obj, dose_obj,
-#                        intervals=intervals_manual)
+#    data.frame(
+#      start=0, end=c(24, Inf),
+#      cmax=c(FALSE, TRUE),
+#      tmax=c(FALSE, TRUE),
+#      auclast=TRUE,
+#      aucinf.obs=c(FALSE, TRUE)
+#    )
+#  data_obj <-
+#    PKNCAdata(
+#      conc_obj, dose_obj,
+#      intervals=intervals_manual
+#    )
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  data_obj <- PKNCAdata(conc_obj, dose_obj)

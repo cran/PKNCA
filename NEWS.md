@@ -4,6 +4,16 @@ will continue until then.  These will be especially noticeable around
 the inclusion of IV NCA parameters and additional specifications of
 the dosing including dose amount and route.
 
+# PKNCA 0.10.2
+
+* A minor change to `pk.calc.aucpext()` was made so that it now returns
+  `NA_real_` instead of `NaN`.
+* A minor change was made so that AUC and amount excreted (ae) calculations will
+  provide an exclusion reason the result is `NA`.
+* A minor new feature makes the specification of imputation easier.  You can
+  give the imputation with or without the "PKNCA_impute_method_" prefix.  So,
+  "PKNCA_impute_method_start_predose" and "start_predose" are equivalent.
+
 # PKNCA 0.10.1
 
 * A new parameter `aucabove.trough.all` was added to calculate the NCA above the

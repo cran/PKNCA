@@ -3658,7 +3658,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 
 </article></slide><slide class=""><hgroup><h2>Hands-on: First NCA calculation with PKNCA</h2></hgroup><article  id="hands-on-first-nca-calculation-with-pknca">
 
-<pre class = 'prettyprint lang-r'>library(tidyverse)
+<pre class = 'prettyprint lang-r'>library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(purrr)
 library(PKNCA)
 # Concentration data setup
 d_conc &lt;-
@@ -4919,7 +4922,7 @@ o_nca &lt;- pk.nca(o_data)</pre>
 
 <pre >## Warning in summary.PKNCAresults(o_nca, drop.group = c(&quot;Subject&quot;, &quot;end&quot;)):
 ## drop.group including start or end may result in incorrect groupings (such as
-## inaccurate comparison of intervals). Drop these with care.</pre>
+## inaccurate comparison of intervals).  Drop these with care.</pre>
 
 <pre >##  start Study_Part  N aucinf.obs
 ##      0     Single 12 120 [29.5]

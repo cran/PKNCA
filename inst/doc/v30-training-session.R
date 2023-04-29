@@ -2,7 +2,8 @@
 knitr::opts_chunk$set(echo = FALSE)
 requireNamespace("pmxTools")
 library(PKNCA)
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
 breaks_hours <- function(n=5, Q=c(1, 6, 4, 12, 2, 24, 168), ...) {
   n_default <- n
   Q_default <- Q
@@ -71,7 +72,10 @@ d_interval_1 <-
 pander::pander(d_interval_1)
 
 ## ----echo=TRUE----------------------------------------------------------------
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(purrr)
 library(PKNCA)
 # Concentration data setup
 d_conc <-
