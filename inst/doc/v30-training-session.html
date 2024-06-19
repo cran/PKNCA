@@ -9,7 +9,7 @@
 
 
 
-  <meta name="date" content="2021-11-19" />
+  <meta name="date" content="2023-10-18" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3069,18 +3069,21 @@ var loadDeck = function(event) {
   });
 };
 
-if (document.readyState !== "loading" &&
-    document.querySelector('slides') === null) { 
-  // if the document is done loading but our element hasn't yet appeared, defer
-  // loading of the deck
-  window.setTimeout(function() {
-    loadDeck(null);
-  }, 0);
-} else {
-  // still loading the DOM, so wait until it's finished
-  document.addEventListener("DOMContentLoaded", loadDeck);
-}
+if (!window.Shiny) {
+  // If Shiny is loaded, the slide deck is initialized in ioslides template
 
+  if (document.readyState !== "loading" &&
+      document.querySelector('slides') === null) {
+    // if the document is done loading but our element hasn't yet appeared, defer
+    // loading of the deck
+    window.setTimeout(function() {
+      loadDeck(null);
+    }, 0);
+  } else {
+    // still loading the DOM, so wait until it's finished
+    document.addEventListener("DOMContentLoaded", loadDeck);
+  }
+}
 
 
 </script>
@@ -3123,7 +3126,7 @@ div.column{display: inline-block; vertical-align: top; width: 50%;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -3200,7 +3203,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">19 November 2021</p>
+            <p style="margin-top: 6px; margin-left: -2px;">18 October 2023</p>
           </hgroup>
   </slide>
 
@@ -3366,7 +3369,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 
 <slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Introduction to PKNCA and Basics of Its Use</h2></hgroup><article  id="introduction-to-pknca-and-basics-of-its-use">
 
-<p>Creation of these materials were supported by funding from the Metrum Research Group.</p>
+<p>Creation of these materials were partially supported by funding from the Metrum Research Group.</p>
 
 </article></slide><slide class=""><hgroup><h2>Introduction to PKNCA</h2></hgroup><article  id="introduction-to-pknca" class="build smaller">
 
@@ -3435,7 +3438,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 
 </article></slide><slide class=""><hgroup><h2>Dataset Basics: Minimum data</h2></hgroup><article  id="dataset-basics-minimum-data">
 
-<p>PKNCA requires at minimum concentration, time, and what you want to calculate.</p>
+<p>PKNCA requires at least the concentration, time, and what you want to calculate.</p>
 
 <p><img src="data:image/png;base64,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" width="576" /></p>
 
@@ -3669,7 +3672,8 @@ d_conc &lt;-
   filter(Subject %in% 1)
 o_conc &lt;- PKNCAconc(conc~Time, data=d_conc)
 # Setup intervals for calculation
-d_intervals &lt;- data.frame(start=0, end=24, cmax=TRUE, tmax=TRUE, auclast=TRUE, aucint.inf.obs=TRUE)
+d_intervals &lt;- data.frame(start=0, end=24, cmax=TRUE, tmax=TRUE,
+                          auclast=TRUE, aucint.inf.obs=TRUE)
 # Combine concentration and dose
 o_data &lt;- PKNCAdata(o_conc, intervals=d_intervals)
 # Calculate the results (suppressMessages() hides a message that isn&#39;t needed now)
@@ -3822,18 +3826,16 @@ pander::pander(summary(o_result))</pre>
 
 <table class = 'rmdtable'>
 <caption>auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation</caption>
-<col width="9.195402%" />
-<col width="6.896552%" />
-<col width="4.597701%" />
-<col width="13.793103%" />
-<col width="13.793103%" />
-<col width="22.988506%" />
-<col width="13.793103%" />
-<col width="14.942529%" />
+<col width="11.111111%" />
+<col width="8.333333%" />
+<col width="13.888889%" />
+<col width="9.722222%" />
+<col width="9.722222%" />
+<col width="16.666667%" />
+<col width="18.055556%" />
 <tr class="header">
 <th align="center">start</th>
 <th align="center">end</th>
-<th align="center">N</th>
 <th align="center">auclast</th>
 <th align="center">cmax</th>
 <th align="center">tmax</th>
@@ -3843,8 +3845,7 @@ pander::pander(summary(o_result))</pre>
 <tr class="odd">
 <td align="center">0</td>
 <td align="center">24</td>
-<td align="center">1</td>
-<td align="center">92.4 [NC]</td>
+<td align="center">92.4</td>
 <td align="center">.</td>
 <td align="center">.</td>
 <td align="center">.</td>
@@ -3853,16 +3854,23 @@ pander::pander(summary(o_result))</pre>
 <tr class="even">
 <td align="center">0</td>
 <td align="center">Inf</td>
-<td align="center">1</td>
 <td align="center">.</td>
-<td align="center">10.5 [NC]</td>
-<td align="center">1.12 [1.12, 1.12]</td>
-<td align="center">14.3 [NC]</td>
-<td align="center">215 [NC]</td>
+<td align="center">10.5</td>
+<td align="center">1.12</td>
+<td align="center">14.3</td>
+<td align="center">215</td>
 </tr>
 </table>
 
 </article></slide><slide class=""><hgroup><h2>How do I do a simple calculation? Get individual results</h2></hgroup><article  id="how-do-i-do-a-simple-calculation-get-individual-results" class="smaller">
+
+<p>Use <code>as.data.frame()</code> to get the individual NCA parameter results.</p>
+
+<pre class = 'prettyprint lang-r'># Look at individual results
+pander::pander(head(
+  as.data.frame(o_result),
+  n=3
+))</pre>
 
 <table class = 'rmdtable'>
 <col width="11.111111%" />
@@ -4115,7 +4123,8 @@ try({
 </article></slide><slide class=""><hgroup><h2>Calculate without dosing data, try 2</h2></hgroup><article  id="calculate-without-dosing-data-try-2">
 
 <pre class = 'prettyprint lang-r'>o_conc &lt;- PKNCAconc(conc~Time|Treatment+Subject, data=d_conc)
-d_intervals &lt;- data.frame(start=0, end=Inf, cmax=TRUE, tmax=TRUE, half.life=TRUE, aucinf.obs=TRUE)
+d_intervals &lt;- data.frame(start=0, end=Inf, cmax=TRUE, tmax=TRUE,
+                          half.life=TRUE, aucinf.obs=TRUE)
 o_data_manual_intervals &lt;- PKNCAdata(o_conc, intervals=d_intervals)
 summary(pk.nca(o_data_manual_intervals))</pre>
 
@@ -4125,7 +4134,7 @@ summary(pk.nca(o_data_manual_intervals))</pre>
 ##      0 Inf High dose 5 9.16 [19.4] 3.48 [0.980, 3.55] 7.73 [1.08] 120 [26.2]
 ##      0 Inf  Low dose 7 8.30 [15.2] 1.12 [0.630, 2.02] 8.50 [2.67] 111 [31.6]
 ## 
-## Caption: cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation</pre>
+## Caption: cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation; N: number of subjects</pre>
 
 </article></slide><slide class=""><hgroup><h2>Dosing data helps with interval setup</h2></hgroup><article  id="dosing-data-helps-with-interval-setup">
 
@@ -4146,7 +4155,7 @@ summary(pk.nca(o_data_auto_intervals))</pre>
 ##           .     105 [23.3]
 ##  120 [26.2]     120 [26.2]
 ## 
-## Caption: auclast, cmax, aucinf.obs, aucint.inf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation</pre>
+## Caption: auclast, cmax, aucinf.obs, aucint.inf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation; N: number of subjects</pre>
 
 </article></slide><slide class=""><hgroup><h2>AUC considerations with PKNCA (1/3)</h2></hgroup><article  id="auc-considerations-with-pknca-13" class="columns-2">
 
@@ -4247,17 +4256,17 @@ as.data.frame(o_nca)</pre>
 <p>When you use <code>exclude</code>, this is how you give your data to PKNCA:</p>
 
 <pre class = 'prettyprint lang-r'>d_before_exclude &lt;-
-  data.frame(
-    time=0:4,
-    conc=c(0, 2, 1, 0.5, 0.25),
-    not_this=c(NA, &quot;Not this&quot;, NA, NA, NA)
-  )
+ data.frame(
+  time=0:4,
+  conc=c(0, 2, 1, 0.5, 0.25),
+  not_this=c(NA, &quot;Not this&quot;, rep(NA, 3))
+ )
 o_conc &lt;-
-  PKNCAconc(
-    data=d_before_exclude,
-    conc~time,
-    exclude=&quot;not_this&quot;
-  )</pre>
+ PKNCAconc(
+  data=d_before_exclude,
+  conc~time,
+  exclude=&quot;not_this&quot;
+ )</pre>
 
 <p class="forceBreak">
 
@@ -4366,8 +4375,8 @@ o_data &lt;- PKNCAdata(o_conc, intervals=d_intervals)
 o_nca &lt;- suppressMessages(pk.nca(o_data))
 summary(o_nca)</pre>
 
-<pre >##  start end N        ae
-##      0  24 1 1300 [NC]
+<pre >##  start end   ae
+##      0  24 1300
 ## 
 ## Caption: ae: geometric mean and geometric coefficient of variation</pre>
 
@@ -4510,15 +4519,15 @@ as.data.frame(o_nca_excluded)</pre>
 
 <pre class = 'prettyprint lang-r'>summary(o_nca)</pre>
 
-<pre >##  start end N aucinf.obs
-##      0 Inf 1 0.721 [NC]
+<pre >##  start end aucinf.obs
+##      0 Inf      0.721
 ## 
 ## Caption: aucinf.obs: geometric mean and geometric coefficient of variation</pre>
 
 <pre class = 'prettyprint lang-r'>summary(o_nca_excluded)</pre>
 
-<pre >##  start end N aucinf.obs
-##      0 Inf 1         NC
+<pre >##  start end aucinf.obs
+##      0 Inf         NC
 ## 
 ## Caption: aucinf.obs: geometric mean and geometric coefficient of variation</pre>
 
@@ -4601,11 +4610,7 @@ d_plot &lt;-
   mutate(
     figure=
       lapply(
-        pmap(
-          .l=list(data=data),
-          .f=ggplot,
-          aes(x=Time, y=conc)
-        ),
+        pmap(.l=list(data=data), .f=ggplot,aes(x=Time, y=conc)),
         FUN=&quot;+&quot;,
         geom_line()
       )
@@ -4622,19 +4627,16 @@ d_plot &lt;-
 <caption>aucinf.obs: geometric mean and geometric coefficient of variation</caption>
 <col width="11.111111%" />
 <col width="8.333333%" />
-<col width="5.555556%" />
 <col width="18.055556%" />
 <tr class="header">
 <th align="center">start</th>
 <th align="center">end</th>
-<th align="center">N</th>
 <th align="center">aucinf.obs</th>
 </tr>
 <tr class="odd">
 <td align="center">0</td>
 <td align="center">Inf</td>
-<td align="center">1</td>
-<td align="center">0.721 [NC]</td>
+<td align="center">0.721</td>
 </tr>
 </table>
 
@@ -4642,11 +4644,11 @@ d_plot &lt;-
 
 <pre class = 'prettyprint lang-r'>pander::pander(as.data.frame(o_nca))</pre>
 
-</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Limitations</h2></hgroup><article  id="limitations">
-
 </article></slide><slide class=""><hgroup><h2>Units (especially clearance)</h2></hgroup><article  id="units-especially-clearance">
 
-<p>PKNCA does not (yet) support units. The most common place where that becomes an issue is with clearance which ends up having unusual units like “mg/(hr*ng/mL)” (with units of mg for dosing, hr for time, and ng/mL for concentration).</p>
+<p>PKNCA supports units with the <code>pknca_units_table()</code> function. See the <a href='http://billdenney.github.io/pknca/articles/v07-unit-conversion.html' title=''>Unit Assignment and Conversion with PKNCA</a> vignette for more information.</p>
+
+<p>When units are not specified, The most common place where that becomes an issue is with clearance which ends up having unusual units like “mg/(hr*ng/mL)” (with units of mg for dosing, hr for time, and ng/mL for concentration).</p>
 
 </article></slide><slide class=""><hgroup><h2>Data imputation</h2></hgroup><article  id="data-imputation">
 
@@ -4660,15 +4662,21 @@ d_plot &lt;-
 
 </article></slide><slide class=""><hgroup><h2>IV bolus AUC (need to add C0)</h2></hgroup><article  id="iv-bolus-auc-need-to-add-c0">
 
-<p>PKNCA does not have an IV-aware AUC calculation (yet). So, C0 must be separately imputed.</p>
+<p>Due to the need for back-extrapolation to C<sub>0</sub>, AUCs for IV bolus dosing need to use different AUC parameters such as <code>&quot;aucivlast&quot;</code> instead of <code>&quot;auclast&quot;</code>.</p>
 
 </article></slide><slide class=""><hgroup><h2>Combined, multi-subject data (e.g. sparse animal sampling)</h2></hgroup><article  id="combined-multi-subject-data-e.g.-sparse-animal-sampling">
 
-<p>Averaging the concentration at a time point will allow for the mean sparse sampling result. But general sparse sampling methods are not (yet) implemented.</p>
+<p>Sparse NCA calculations are supported in PKNCA. See the <a href='http://billdenney.github.io/pknca/articles/v04-sparse.html' title=''>Sparse NCA Calculations</a> vignette for more information.</p>
+
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Limitations</h2></hgroup><article  id="limitations">
 
 </article></slide><slide class=""><hgroup><h2>Secondary parameters (e.g. bioavailability and renal clearance)</h2></hgroup><article  id="secondary-parameters-e.g.-bioavailability-and-renal-clearance">
 
-<p>PKNCA does not (yet) have the ability to calculate secondary PK parameters that require looking at more than one group/interval at a time. (If you have good ideas for how to define the intervals for that, please let me know.)</p>
+<p>PKNCA does not (yet) have the ability to calculate secondary PK parameters that require looking at more than one group/interval at a time.</p>
+
+</article></slide><slide class=""><hgroup><h2>Validation of PKNCA</h2></hgroup><article  id="validation-of-pknca">
+
+<p>PKNCA has an extensive testing and validation suite built-in. To run the testing and validation suite of tests with a full report generated, see the <a href='http://billdenney.github.io/pknca/articles/v60-PKNCA-validation.html' title=''>PKNCA Validation</a> vignette.</p>
 
 </article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Hands-on</h2></hgroup><article  id="hands-on">
 
@@ -4725,86 +4733,96 @@ o_data$intervals %&gt;% select(-Subject) %&gt;% unique() %&gt;% as.data.frame()<
 ## 2      FALSE           FALSE FALSE  TRUE FALSE  TRUE FALSE  FALSE     FALSE
 ## 3      FALSE           FALSE FALSE  TRUE FALSE  TRUE FALSE  FALSE     FALSE
 ## 4      FALSE           FALSE FALSE  TRUE FALSE  TRUE FALSE  FALSE     FALSE
-##   cl.last cl.all     f mrt.last mrt.iv.last vss.last vss.iv.last   cav ctrough
-## 1   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE   FALSE
-## 2   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE   FALSE
-## 3   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE   FALSE
-## 4   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE   FALSE
-##   cstart   ptr  tlag deg.fluc swing  ceoi aucabove.predose.all
-## 1  FALSE FALSE FALSE    FALSE FALSE FALSE                FALSE
-## 2  FALSE FALSE FALSE    FALSE FALSE FALSE                FALSE
-## 3  FALSE FALSE FALSE    FALSE FALSE FALSE                FALSE
-## 4  FALSE FALSE FALSE    FALSE FALSE FALSE                FALSE
-##   aucabove.trough.all    ae clr.last clr.obs clr.pred    fe sparse_auclast
-## 1               FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE
-## 2               FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE
-## 3               FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE
-## 4               FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE
-##   time_above aucivlast aucivall aucivint.last aucivint.all aucivpbextlast
-## 1      FALSE     FALSE    FALSE         FALSE        FALSE          FALSE
-## 2      FALSE     FALSE    FALSE         FALSE        FALSE          FALSE
-## 3      FALSE     FALSE    FALSE         FALSE        FALSE          FALSE
-## 4      FALSE     FALSE    FALSE         FALSE        FALSE          FALSE
-##   aucivpbextall aucivpbextint.last aucivpbextint.all half.life r.squared
-## 1         FALSE              FALSE             FALSE     FALSE     FALSE
-## 2         FALSE              FALSE             FALSE      TRUE     FALSE
-## 3         FALSE              FALSE             FALSE     FALSE     FALSE
-## 4         FALSE              FALSE             FALSE     FALSE     FALSE
-##   adj.r.squared lambda.z lambda.z.time.first lambda.z.n.points clast.pred
-## 1         FALSE    FALSE               FALSE             FALSE      FALSE
-## 2         FALSE    FALSE               FALSE             FALSE      FALSE
-## 3         FALSE    FALSE               FALSE             FALSE      FALSE
-## 4         FALSE    FALSE               FALSE             FALSE      FALSE
-##   span.ratio thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last aucinf.obs
-## 1      FALSE          FALSE             FALSE    FALSE       FALSE      FALSE
-## 2      FALSE          FALSE             FALSE    FALSE       FALSE       TRUE
-## 3      FALSE          FALSE             FALSE    FALSE       FALSE      FALSE
-## 4      FALSE          FALSE             FALSE    FALSE       FALSE      FALSE
-##   aucinf.pred aumcinf.obs aumcinf.pred aucint.inf.obs aucint.inf.obs.dose
-## 1       FALSE       FALSE        FALSE          FALSE               FALSE
-## 2       FALSE       FALSE        FALSE          FALSE               FALSE
-## 3       FALSE       FALSE        FALSE          FALSE               FALSE
-## 4       FALSE       FALSE        FALSE          FALSE               FALSE
-##   aucint.inf.pred aucint.inf.pred.dose aucivinf.obs aucivinf.pred
-## 1           FALSE                FALSE        FALSE         FALSE
-## 2           FALSE                FALSE        FALSE         FALSE
-## 3           FALSE                FALSE        FALSE         FALSE
-## 4           FALSE                FALSE        FALSE         FALSE
-##   aucivpbextinf.obs aucivpbextinf.pred aucpext.obs aucpext.pred cl.obs cl.pred
-## 1             FALSE              FALSE       FALSE        FALSE  FALSE   FALSE
-## 2             FALSE              FALSE       FALSE        FALSE  FALSE   FALSE
-## 3             FALSE              FALSE       FALSE        FALSE  FALSE   FALSE
-## 4             FALSE              FALSE       FALSE        FALSE  FALSE   FALSE
-##   mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred vz.obs vz.pred
-## 1   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
-## 2   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
-## 3   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
-## 4   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
-##   vss.obs vss.pred vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred vd.obs vd.pred
-## 1   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
-## 2   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
-## 3   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
-## 4   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE
-##   thalf.eff.obs thalf.eff.pred thalf.eff.iv.obs thalf.eff.iv.pred kel.obs
-## 1         FALSE          FALSE            FALSE             FALSE   FALSE
-## 2         FALSE          FALSE            FALSE             FALSE   FALSE
-## 3         FALSE          FALSE            FALSE             FALSE   FALSE
-## 4         FALSE          FALSE            FALSE             FALSE   FALSE
-##   kel.pred kel.iv.obs kel.iv.pred auclast.dn aucall.dn aucinf.obs.dn
-## 1    FALSE      FALSE       FALSE      FALSE     FALSE         FALSE
-## 2    FALSE      FALSE       FALSE      FALSE     FALSE         FALSE
-## 3    FALSE      FALSE       FALSE      FALSE     FALSE         FALSE
-## 4    FALSE      FALSE       FALSE      FALSE     FALSE         FALSE
-##   aucinf.pred.dn aumclast.dn aumcall.dn aumcinf.obs.dn aumcinf.pred.dn cmax.dn
-## 1          FALSE       FALSE      FALSE          FALSE           FALSE   FALSE
-## 2          FALSE       FALSE      FALSE          FALSE           FALSE   FALSE
-## 3          FALSE       FALSE      FALSE          FALSE           FALSE   FALSE
-## 4          FALSE       FALSE      FALSE          FALSE           FALSE   FALSE
-##   cmin.dn clast.obs.dn clast.pred.dn cav.dn ctrough.dn Study_Part
-## 1   FALSE        FALSE         FALSE  FALSE      FALSE     Single
-## 2   FALSE        FALSE         FALSE  FALSE      FALSE     Single
-## 3   FALSE        FALSE         FALSE  FALSE      FALSE   Multiple
-## 4   FALSE        FALSE         FALSE  FALSE      FALSE   Multiple</pre>
+##   cl.last cl.all     f mrt.last mrt.iv.last vss.last vss.iv.last   cav
+## 1   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE
+## 2   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE
+## 3   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE
+## 4   FALSE  FALSE FALSE    FALSE       FALSE    FALSE       FALSE FALSE
+##   cav.int.last cav.int.all ctrough cstart   ptr  tlag deg.fluc swing  ceoi
+## 1        FALSE       FALSE   FALSE  FALSE FALSE FALSE    FALSE FALSE FALSE
+## 2        FALSE       FALSE   FALSE  FALSE FALSE FALSE    FALSE FALSE FALSE
+## 3        FALSE       FALSE   FALSE  FALSE FALSE FALSE    FALSE FALSE FALSE
+## 4        FALSE       FALSE   FALSE  FALSE FALSE FALSE    FALSE FALSE FALSE
+##   aucabove.predose.all aucabove.trough.all count_conc totdose    ae clr.last
+## 1                FALSE               FALSE      FALSE   FALSE FALSE    FALSE
+## 2                FALSE               FALSE      FALSE   FALSE FALSE    FALSE
+## 3                FALSE               FALSE      FALSE   FALSE FALSE    FALSE
+## 4                FALSE               FALSE      FALSE   FALSE FALSE    FALSE
+##   clr.obs clr.pred    fe sparse_auclast sparse_auc_se sparse_auc_df time_above
+## 1   FALSE    FALSE FALSE          FALSE         FALSE         FALSE      FALSE
+## 2   FALSE    FALSE FALSE          FALSE         FALSE         FALSE      FALSE
+## 3   FALSE    FALSE FALSE          FALSE         FALSE         FALSE      FALSE
+## 4   FALSE    FALSE FALSE          FALSE         FALSE         FALSE      FALSE
+##   aucivlast aucivall aucivint.last aucivint.all aucivpbextlast aucivpbextall
+## 1     FALSE    FALSE         FALSE        FALSE          FALSE         FALSE
+## 2     FALSE    FALSE         FALSE        FALSE          FALSE         FALSE
+## 3     FALSE    FALSE         FALSE        FALSE          FALSE         FALSE
+## 4     FALSE    FALSE         FALSE        FALSE          FALSE         FALSE
+##   aucivpbextint.last aucivpbextint.all half.life r.squared adj.r.squared
+## 1              FALSE             FALSE     FALSE     FALSE         FALSE
+## 2              FALSE             FALSE      TRUE     FALSE         FALSE
+## 3              FALSE             FALSE     FALSE     FALSE         FALSE
+## 4              FALSE             FALSE     FALSE     FALSE         FALSE
+##   lambda.z lambda.z.time.first lambda.z.n.points clast.pred span.ratio
+## 1    FALSE               FALSE             FALSE      FALSE      FALSE
+## 2    FALSE               FALSE             FALSE      FALSE      FALSE
+## 3    FALSE               FALSE             FALSE      FALSE      FALSE
+## 4    FALSE               FALSE             FALSE      FALSE      FALSE
+##   thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last aucinf.obs aucinf.pred
+## 1          FALSE             FALSE    FALSE       FALSE      FALSE       FALSE
+## 2          FALSE             FALSE    FALSE       FALSE       TRUE       FALSE
+## 3          FALSE             FALSE    FALSE       FALSE      FALSE       FALSE
+## 4          FALSE             FALSE    FALSE       FALSE      FALSE       FALSE
+##   aumcinf.obs aumcinf.pred aucint.inf.obs aucint.inf.obs.dose aucint.inf.pred
+## 1       FALSE        FALSE          FALSE               FALSE           FALSE
+## 2       FALSE        FALSE          FALSE               FALSE           FALSE
+## 3       FALSE        FALSE          FALSE               FALSE           FALSE
+## 4       FALSE        FALSE          FALSE               FALSE           FALSE
+##   aucint.inf.pred.dose aucivinf.obs aucivinf.pred aucivpbextinf.obs
+## 1                FALSE        FALSE         FALSE             FALSE
+## 2                FALSE        FALSE         FALSE             FALSE
+## 3                FALSE        FALSE         FALSE             FALSE
+## 4                FALSE        FALSE         FALSE             FALSE
+##   aucivpbextinf.pred aucpext.obs aucpext.pred cl.obs cl.pred mrt.obs mrt.pred
+## 1              FALSE       FALSE        FALSE  FALSE   FALSE   FALSE    FALSE
+## 2              FALSE       FALSE        FALSE  FALSE   FALSE   FALSE    FALSE
+## 3              FALSE       FALSE        FALSE  FALSE   FALSE   FALSE    FALSE
+## 4              FALSE       FALSE        FALSE  FALSE   FALSE   FALSE    FALSE
+##   mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred vz.obs vz.pred vss.obs vss.pred
+## 1      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE
+## 2      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE
+## 3      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE
+## 4      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE
+##   vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred cav.int.inf.obs
+## 1      FALSE       FALSE      FALSE       FALSE           FALSE
+## 2      FALSE       FALSE      FALSE       FALSE           FALSE
+## 3      FALSE       FALSE      FALSE       FALSE           FALSE
+## 4      FALSE       FALSE      FALSE       FALSE           FALSE
+##   cav.int.inf.pred thalf.eff.obs thalf.eff.pred thalf.eff.iv.obs
+## 1            FALSE         FALSE          FALSE            FALSE
+## 2            FALSE         FALSE          FALSE            FALSE
+## 3            FALSE         FALSE          FALSE            FALSE
+## 4            FALSE         FALSE          FALSE            FALSE
+##   thalf.eff.iv.pred kel.obs kel.pred kel.iv.obs kel.iv.pred auclast.dn
+## 1             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
+## 2             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
+## 3             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
+## 4             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
+##   aucall.dn aucinf.obs.dn aucinf.pred.dn aumclast.dn aumcall.dn aumcinf.obs.dn
+## 1     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
+## 2     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
+## 3     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
+## 4     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
+##   aumcinf.pred.dn cmax.dn cmin.dn clast.obs.dn clast.pred.dn cav.dn ctrough.dn
+## 1           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
+## 2           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
+## 3           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
+## 4           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
+##   Study_Part
+## 1     Single
+## 2     Single
+## 3   Multiple
+## 4   Multiple</pre>
 
 <pre class = 'prettyprint lang-r'>o_nca &lt;- pk.nca(o_data)</pre>
 
@@ -4870,7 +4888,7 @@ o_nca &lt;- pk.nca(o_data)</pre>
 <pre >##  start end Study_Part N aucinf.obs
 ##      0  24     Single 2 144 [69.0]
 ## 
-## Caption: aucinf.obs: geometric mean and geometric coefficient of variation</pre>
+## Caption: aucinf.obs: geometric mean and geometric coefficient of variation; N: number of subjects</pre>
 
 </article></slide><slide class=""><hgroup><h2>Single- and Multiple-dose, single analyte: Use custom intervals per subjects</h2></hgroup><article  id="single--and-multiple-dose-single-analyte-use-custom-intervals-per-subjects" class="smaller">
 
@@ -4920,14 +4938,21 @@ o_nca &lt;- pk.nca(o_data)</pre>
 
 <pre class = 'prettyprint lang-r'>summary(o_nca, drop.group=c(&quot;Subject&quot;, &quot;end&quot;))</pre>
 
-<pre >## Warning in summary.PKNCAresults(o_nca, drop.group = c(&quot;Subject&quot;, &quot;end&quot;)):
-## drop.group including start or end may result in incorrect groupings (such as
-## inaccurate comparison of intervals).  Drop these with care.</pre>
+<pre >## Warning: The `drop.group` argument of `summary.PKNCAresults()` is deprecated as of PKNCA
+## 0.11.0.
+## ℹ Please use the `drop_group` argument instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.</pre>
+
+<pre >## Warning in get_summary_PKNCAresults_drop_group(object = object, drop_group =
+## drop_group): drop.group including start or end may result in incorrect
+## groupings (such as inaccurate comparison of intervals).  Drop these with care.</pre>
 
 <pre >##  start Study_Part  N aucinf.obs
 ##      0     Single 12 120 [29.5]
 ## 
-## Caption: aucinf.obs: geometric mean and geometric coefficient of variation</pre>
+## Caption: aucinf.obs: geometric mean and geometric coefficient of variation; N: number of subjects</pre>
 
 </article></slide><slide class=""><hgroup><h2>Single- and Multiple-dose, parent and metabolite</h2></hgroup><article  id="single--and-multiple-dose-parent-and-metabolite">
 
@@ -4969,7 +4994,7 @@ summary(o_nca)</pre>
 ##            .           .
 ##            .           .
 ## 
-## Caption: auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation</pre></article></slide>
+## Caption: auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation; N: number of subjects</pre></article></slide>
 
 
   <slide class="backdrop"></slide>
@@ -4996,6 +5021,11 @@ summary(o_nca)</pre>
        window.jQuery(document).on('slideenter', function(e) {
          window.jQuery(e.target).trigger('shown');
       });
+    }
+    if (window.Shiny) {
+      // Initialize slides when this script appears on the page, since it
+      // indicates that the <slides> markup has been fully loaded.
+      window.loadDeck();
     }
   })();
 </script>

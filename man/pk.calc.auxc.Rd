@@ -28,9 +28,9 @@ pk.calc.auxc(
   conc.blq = NULL,
   conc.na = NULL,
   check = TRUE,
-  fun.linear,
-  fun.log,
-  fun.inf
+  fun_linear,
+  fun_log,
+  fun_inf
 )
 
 pk.calc.auc(conc, time, ..., options = list())
@@ -58,10 +58,9 @@ pk.calc.aumc.inf.pred(conc, time, clast.pred, ..., options = list(), lambda.z)
 pk.calc.aumc.all(conc, time, ..., options = list())
 }
 \arguments{
-\item{conc}{Concentration measured}
+\item{conc}{Measured concentrations}
 
-\item{time}{Time of concentration measurement (must be monotonically
-increasing and the same length as the concentration data)}
+\item{time}{Time of the measurement of the concentrations}
 
 \item{interval}{Numeric vector of two numbers for the start and end time of
 integration}
@@ -77,34 +76,33 @@ extrapolation}
 \item{auc.type}{The type of AUC to compute.  Choices are 'AUCinf', 'AUClast',
 and 'AUCall'.}
 
-\item{options}{List of changes to the default \code{\link{PKNCA.options}} for
-calculations.}
+\item{options}{List of changes to the default PKNCA options (see
+\code{PKNCA.options()})}
 
-\item{method}{The method for integration (either 'lin up/log down' or
-'linear')}
+\item{method}{The method for integration (one of 'lin up/log down',
+'lin-log', or 'linear')}
 
 \item{conc.blq}{How to handle BLQ values in between the first and last above
-LOQ concentrations. (See \code{\link{clean.conc.blq}} for usage
-instructions.)}
+LOQ concentrations. (See \code{\link[=clean.conc.blq]{clean.conc.blq()}} for usage instructions.)}
 
 \item{conc.na}{How to handle missing concentration values.  (See
-\code{\link{clean.conc.na}} for usage instructions.)}
+\code{\link[=clean.conc.na]{clean.conc.na()}} for usage instructions.)}
 
-\item{check}{Run \code{\link{check.conc.time}}, \code{\link{clean.conc.blq}},
-and \code{\link{clean.conc.na}}?}
+\item{check}{Run \code{\link[=assert_conc_time]{assert_conc_time()}}, \code{\link[=clean.conc.blq]{clean.conc.blq()}}, and
+\code{\link[=clean.conc.na]{clean.conc.na()}}?}
 
-\item{fun.linear}{The function to use for integration of the linear part of
+\item{fun_linear}{The function to use for integration of the linear part of
 the curve (not required for AUC or AUMC functions)}
 
-\item{fun.log}{The function to use for integration of the logarithmic part of
+\item{fun_log}{The function to use for integration of the logarithmic part of
 the curve (if log integration is used; not required for AUC or AUMC
 functions)}
 
-\item{fun.inf}{The function to use for extrapolation from the final
+\item{fun_inf}{The function to use for extrapolation from the final
 measurement to infinite time (not required for AUC or AUMC functions.}
 
-\item{...}{For functions other than \code{pk.calc.auxc}, these values are
-passed to \code{pk.calc.auxc}}
+\item{...}{For functions other than \code{pk.calc.auxc}, these values are passed
+to \code{pk.calc.auxc}}
 }
 \value{
 A numeric value for the AU(M)C.
@@ -168,7 +166,7 @@ and Applications, 4th Edition.  Stockholm, Sweden: Swedish Pharmaceutical
 Press, 2000.  164-7.
 }
 \seealso{
-\code{\link{clean.conc.blq}}
+\code{\link[=clean.conc.blq]{clean.conc.blq()}}
 
 Other AUC calculations: 
 \code{\link{pk.calc.aucint}()}

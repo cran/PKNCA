@@ -2,6 +2,7 @@
 % Please edit documentation in R/PKNCA.R
 \docType{package}
 \name{PKNCA}
+\alias{PKNCA-package}
 \alias{PKNCA}
 \title{Compute noncompartmental pharmacokinetics}
 \description{
@@ -11,8 +12,7 @@ parameters.
 \details{
 PKNCA has been cross-validated with both Phoenix WinNonlin(R) and Pumas
 (click here for the
-\href{http://www.humanpredictions.com/wp-content/uploads/2020/01/ACOP_2019_T102_NCA_performance_evaluation_Yingbo_revised.pdf}{cross-validation
-article})
+\href{http://www.humanpredictions.com/wp-content/uploads/2020/01/ACOP_2019_T102_NCA_performance_evaluation_Yingbo_revised.pdf}{cross-validation article})
 
 A common workflow would load data from a file or database into a
 data.frame then run the following code.
@@ -35,4 +35,28 @@ summary(my.results)
 # Look at a listing of results
 as.data.frame(my.results)
 }
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://billdenney.github.io/pknca/}
+  \item \url{https://github.com/billdenney/pknca}
+  \item \url{http://billdenney.github.io/pknca/}
+  \item Report bugs at \url{https://github.com/billdenney/pknca/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Bill Denney \email{wdenney@humanpredictions.com} (\href{https://orcid.org/0000-0002-5759-428X}{ORCID})
+
+Authors:
+\itemize{
+  \item Clare Buckeridge \email{clare.buckeridge@pfizer.com}
+}
+
+Other contributors:
+\itemize{
+  \item Sridhar Duvvuri [contributor]
+}
+
 }

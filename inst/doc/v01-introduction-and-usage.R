@@ -173,3 +173,9 @@ PKNCA::find.tau(dose_times)
 #  intervals_manual$aucinf.obs[1] <- TRUE
 #  data_obj$intervals <- intervals_manual
 
+## ----eval=FALSE---------------------------------------------------------------
+#  data_obj <- PKNCAdata(conc_obj, dose_obj, options = list(keep_interval_cols = "dosetype"))
+
+## ----eval=FALSE---------------------------------------------------------------
+#  summary(o_nca)
+

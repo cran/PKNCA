@@ -22,7 +22,7 @@ test_that("pk.nca", {
   # internals.
   mydata.failure$intervals <- data.frame()
   expect_warning(myresult.failure <- pk.nca(mydata.failure),
-                 regexp="No intervals given; no calculations done.",
+                 regexp="No intervals given; no calculations will be done.",
                  info="An empty result is returned if there are no intervals")
 
   tmpconc <- generate.conc(2, 1, 0:24)
@@ -498,7 +498,8 @@ test_that("calculate with sparse data", {
   df_result <- as.data.frame(o_nca)
   expect_true("sparse_auclast" %in% df_result$PPTESTCD)
   expect_equal(df_result$PPORRES[df_result$PPTESTCD %in% "sparse_auclast"], 39.4689)
-  expect_s3_class(summary(o_nca), "summary_PKNCAresults")
+  sum_o_nca <- summary(o_nca)
+  expect_s3_class(sum_o_nca, "summary_PKNCAresults")
 
   # Mixed sparse and dense calculations when only one type is requested in an
   # interval works The example below has dense-only; sparse and dense; and and
@@ -586,4 +587,101 @@ test_that("calculate with sparse data", {
     regexp="With sparse PK, all subjects in a group must have the same dosing information.*Not all subjects have the same dosing information for this group: +dose_grp=100"
   )
   # Correct detection of mixed doses within a sparse dose group when there are no groups
+})
+
+test_that("Unexpected interval columns do not cause an error (#238)", {
+  d_conc <-
+    data.frame(
+      ID = 1L,
+      time = 0:6,
+      conc = c(0, 0.7, 0.71, 0.85, 1, 0.76, 0.74)
+    )
+  d_dose <- data.frame(dose = 1)
+  d_intervals <- data.frame(start = 0, end = 6, cmax = TRUE, aucinf = TRUE)
+  o_conc <- PKNCAconc(d_conc, formula = conc~time|ID)
+  o_dose <- PKNCAdose(d_dose, formula = dose~.)
+  o_data <- PKNCAdata(o_conc, o_dose, intervals = d_intervals)
+  expect_s3_class(pk.nca(o_data), "PKNCAresults")
+})
+
+test_that("aucint works within pk.calc.all for all zero concentrations with interpolated or extrapolated concentrations", {
+  # AUCint.inf.obs
+  d_interval <- data.frame(start = 0, end = 4, aucint.inf.obs = TRUE)
+  d_conctime <- data.frame(conc = c(0, 0, 0, 0), time = 0:3)
+  o_conc <- PKNCAconc(d_conctime, conc~time)
+  o_data <- PKNCAdata(o_conc, intervals = d_interval)
+  suppressWarnings(suppressMessages(
+    o_nca <- pk.nca(o_data)
+  ))
+  results <- setNames(as.data.frame(o_nca)$PPORRES, nm = as.data.frame(o_nca)$PPTESTCD)
+  zero_names <- c("clast.obs", "aucint.inf.obs")
+  na_names <- setdiff(names(results), zero_names)
+  expect_equal(
+    results[zero_names],
+    setNames(rep(0, length(zero_names)), zero_names)
+  )
+  expect_equal(
+    results[na_names],
+    setNames(rep(NA_real_, length(na_names)), na_names)
+  )
+
+  # AUCint.inf.pred
+  d_interval <- data.frame(start = 0, end = 4, aucint.inf.pred = TRUE)
+  d_conctime <- data.frame(conc = c(0, 0, 0, 0), time = 0:3)
+  o_conc <- PKNCAconc(d_conctime, conc~time)
+  o_data <- PKNCAdata(o_conc, intervals = d_interval)
+  suppressWarnings(suppressMessages(
+    o_nca <- pk.nca(o_data)
+  ))
+  expect_equal(
+    as.data.frame(o_nca)$PPORRES,
+    c(rep(NA_real_, 10), 0)
+  )
+})
+
+test_that("The option keep_interval_cols is respected", {
+  d_interval <- data.frame(start = 0, end = 4, cmax = TRUE, foo = "A")
+  d_conctime <- data.frame(conc = c(0, 0, 0, 0), time = 0:3)
+  o_conc <- PKNCAconc(d_conctime, conc~time)
+  o_data <- PKNCAdata(o_conc, intervals = d_interval)
+  suppressWarnings(suppressMessages(
+    o_nca <- pk.nca(o_data)
+  ))
+  expect_false("foo" %in% names(o_nca$result))
+  expect_false("foo" %in% names(summary(o_nca)))
+
+  o_data <- PKNCAdata(o_conc, intervals = d_interval, options = list(keep_interval_cols = "foo"))
+  suppressWarnings(suppressMessages(
+    o_nca <- pk.nca(o_data)
+  ))
+  expect_equal(o_nca$result$foo, "A")
+  expect_true("foo" %in% names(summary(o_nca)))
+})
+
+test_that("dose is calculable", {
+  tmpconc <- generate.conc(2, 1, 0:24)
+  tmpdose <- generate.dose(tmpconc)
+  myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID)
+  mydose <- PKNCAdose(tmpdose, formula=dose~time|treatment+ID)
+  mydata <- PKNCAdata(myconc, mydose, intervals = data.frame(start = 0, end = Inf, totdose = TRUE))
+  myresult <- pk.nca(mydata)
+
+  # One dose in the interval
+  expect_equal(as.data.frame(myresult)$PPORRES, rep(1, 2))
+  expect_equal(as.data.frame(myresult)$PPTESTCD, rep("totdose", 2))
+
+  # Don't give dose data
+  mydata <- PKNCAdata(myconc, intervals = data.frame(start = 0, end = Inf, totdose = TRUE))
+  suppressMessages(myresult <- pk.nca(mydata))
+  expect_equal(as.data.frame(myresult)$PPORRES, rep(NA_real_, 2))
+  expect_equal(as.data.frame(myresult)$PPTESTCD, rep("totdose", 2))
+
+  # Multiple doses in the interval
+  tmpdose_second <- tmpdose
+  tmpdose_second$time <- 1
+  mydose <- PKNCAdose(rbind(tmpdose, tmpdose_second), formula=dose~time|treatment+ID)
+  mydata <- PKNCAdata(myconc, mydose, intervals = data.frame(start = 0, end = Inf, totdose = TRUE))
+  myresult <- pk.nca(mydata)
+  expect_equal(as.data.frame(myresult)$PPORRES, rep(2, 2))
+  expect_equal(as.data.frame(myresult)$PPTESTCD, rep("totdose", 2))
 })

@@ -7,7 +7,7 @@ assign("interval.cols", list(), envir=.PKNCAEnv)
 #' Add columns for calculations within PKNCA intervals
 #'
 #' @param name The column name as a character string
-#' @param FUN The function to run (as a character string) or \code{NA} if the
+#' @param FUN The function to run (as a character string) or `NA` if the
 #'   parameter is automatically calculated when calculating another parameter.
 #' @param values Valid values for the column
 #' @param depends Character vector of columns that must be run before this
@@ -21,17 +21,16 @@ assign("interval.cols", list(), envir=.PKNCAEnv)
 #'   name is used.)
 #' @param formalsmap A named list mapping parameter names in the function call
 #'   to NCA parameter names.  See the details for information on use of
-#'   \code{formalsmap}.
+#'   `formalsmap`.
 #' @param datatype The type of data used for the calculation
-#' @return NULL (Calling this function has a side effect of changing the
+#' @returns NULL (Calling this function has a side effect of changing the
 #'   available intervals for calculations)
 #'
-#' @details
-#' The \code{formalsmap} argument enables mapping some alternate formal argument
-#' names to parameters.  It is used to generalize functions that may use
-#' multiple similar arguments (such as the variants of mean residence time). The
-#' names of the list should correspond to function formal parameter names and
-#' the values should be one of the following:
+#' @details The `formalsmap` argument enables mapping some alternate formal
+#' argument names to parameters.  It is used to generalize functions that may
+#' use multiple similar arguments (such as the variants of mean residence time).
+#' The names of the list should correspond to function formal parameter names
+#' and the values should be one of the following:
 #'
 #' \itemize{
 #'   \item{For the current interval:}
@@ -103,6 +102,11 @@ add.interval.col <- function(name,
   } else if (!(is.character(FUN) | is.na(FUN))) {
     stop("FUN must be a character string or NA")
   }
+  if (!is.null(depends)) {
+    if (!is.character(depends)) {
+      stop("'depends' must be NULL or a character vector")
+    }
+  }
   checkmate::assert_logical(sparse, any.missing=FALSE, len=1)
   unit_type <-
     match.arg(
@@ -112,6 +116,7 @@ add.interval.col <- function(name,
         "time", "inverse_time",
         "amount",
         "conc", "conc_dosenorm",
+        "dose",
         "volume",
         "auc", "aumc",
         "auc_dosenorm", "aumc_dosenorm",
@@ -170,27 +175,17 @@ add.interval.col <- function(name,
   assign("interval.cols", current, envir=.PKNCAEnv)
 }
 
-# Add the start and end interval columns
-add.interval.col("start",
-  FUN = NA,
-  values = as.numeric,
-  unit_type="time",
-  pretty_name="Interval Start",
-  desc = "Starting time of the interval"
-)
-add.interval.col("end",
-  FUN = NA,
-  values = as.numeric,
-  unit_type="time",
-  pretty_name="Interval End",
-  desc = "Ending time of the interval (potentially infinity)"
-)
-
 #' Sort the interval columns by dependencies.
 #'
 #' Columns are always to the right of columns that they depend on.
 sort.interval.cols <- function() {
   current <- get("interval.cols", envir=.PKNCAEnv)
+  # Only sort if necessary
+  sort_order <- get0("interval.cols_sorted", envir=.PKNCAEnv)
+  if (identical(sort_order, names(current))) {
+    # It is already sorted
+    return(sort_order)
+  }
   # Build a dependency tree
   myorder <- rep(NA, length(current))
   names(myorder) <- names(current)
@@ -221,15 +216,17 @@ sort.interval.cols <- function() {
     }
   }
   current <- current[names(sort(myorder))]
+  assign("interval.cols_sorted", names(current), envir=.PKNCAEnv)
   assign("interval.cols", current, envir=.PKNCAEnv)
   invisible(myorder)
 }
 
 #' Get the columns that can be used in an interval specification
-#' @return A list with named elements for each parameter.  Each list element
+#'
+#' @returns A list with named elements for each parameter.  Each list element
 #'   contains the parameter definition.
-#' @seealso \code{\link{check.interval.specification}()} and the vignette
-#'   "Selection of Calculation Intervals"
+#' @seealso [check.interval.specification()] and the vignette "Selection of
+#'   Calculation Intervals"
 #' @examples
 #' get.interval.cols()
 #' @family Interval specifications
@@ -238,3 +235,21 @@ get.interval.cols <- function() {
   sort.interval.cols()
   get("interval.cols", envir=.PKNCAEnv)
 }
+
+# Add the start and end interval columns
+add.interval.col(
+  "start",
+  FUN = NA,
+  values = as.numeric,
+  unit_type="time",
+  pretty_name="Interval Start",
+  desc = "Starting time of the interval"
+)
+add.interval.col(
+  "end",
+  FUN = NA,
+  values = as.numeric,
+  unit_type="time",
+  pretty_name="Interval End",
+  desc = "Ending time of the interval (potentially infinity)"
+)

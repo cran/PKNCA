@@ -50,7 +50,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -382,14 +382,15 @@ testing results: Tests were not run because tests are not installed.</p>
 </div>
 <div id="session-information" class="section level1">
 <h1>Session Information</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.Date</span>()</span></code></pre></div>
-<pre><code>## [1] &quot;2023-04-29&quot;</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
-<pre><code>## R version 4.2.2 (2022-10-31 ucrt)
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">Sys.Date</span>()</span></code></pre></div>
+<pre><code>## [1] &quot;2024-06-19&quot;</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<pre><code>## R version 4.3.2 (2023-10-31 ucrt)
 ## Platform: x86_64-w64-mingw32/x64 (64-bit)
-## Running under: Windows 10 x64 (build 22621)
+## Running under: Windows 11 x64 (build 22631)
 ## 
 ## Matrix products: default
+## 
 ## 
 ## locale:
 ## [1] LC_COLLATE=C                          
@@ -398,35 +399,37 @@ testing results: Tests were not run because tests are not installed.</p>
 ## [4] LC_NUMERIC=C                          
 ## [5] LC_TIME=English_United States.utf8    
 ## 
+## time zone: America/New_York
+## tzcode source: internal
+## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] testthat_3.1.7.9000 purrr_1.0.1         tidyr_1.3.0        
-## [4] ggplot2_3.4.1       cowplot_1.1.1       knitr_1.42         
-## [7] dplyr_1.1.0         PKNCA_0.10.2       
+## [1] testthat_3.2.1 purrr_1.0.2    tidyr_1.3.1    ggplot2_3.4.4  cowplot_1.1.3 
+## [6] knitr_1.45     dplyr_1.1.2    PKNCA_0.11.0  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_1.2.0     xfun_0.37            bslib_0.4.2         
-##  [4] pander_0.6.5         lattice_0.20-45      colorspace_2.1-0    
-##  [7] vctrs_0.5.2          generics_0.1.3       htmltools_0.5.4     
-## [10] yaml_2.3.7           utf8_1.2.2           rlang_1.1.0         
-## [13] jquerylib_0.1.4      pillar_1.8.1         glue_1.6.2          
-## [16] withr_2.5.0          distributional_0.3.1 lifecycle_1.0.3     
-## [19] stringr_1.5.0        munsell_0.5.0        gtable_0.3.2        
-## [22] data.tree_1.0.0      evaluate_0.20        labeling_0.4.2      
-## [25] gghalves_0.1.3       fastmap_1.1.0        parallel_4.2.2      
-## [28] fansi_1.0.3          pmxTools_1.3         highr_0.10          
-## [31] Rcpp_1.0.10          backports_1.4.1      scales_1.2.1        
-## [34] checkmate_2.1.0      cachem_1.0.6         jsonlite_1.8.4      
-## [37] mime_0.12            farver_2.1.1         brio_1.1.3          
-## [40] digest_0.6.31        stringi_1.7.12       grid_4.2.2          
-## [43] ggdist_3.2.0         cli_3.6.1            tools_4.2.2         
-## [46] magrittr_2.0.3       sass_0.4.4           patchwork_1.1.2     
-## [49] tibble_3.1.8         pkgconfig_2.0.3      MASS_7.3-58.1       
-## [52] xml2_1.3.3           rmarkdown_2.20       rstudioapi_0.14     
-## [55] R6_2.5.1             units_0.8-1          nlme_3.1-159        
-## [58] compiler_4.2.2</code></pre>
+##  [1] ggdist_3.3.0         sass_0.4.7           utf8_1.2.3          
+##  [4] generics_0.1.3       pmxTools_1.3         xml2_1.3.5          
+##  [7] stringi_1.8.3        lattice_0.21-9       gghalves_0.1.4      
+## [10] digest_0.6.34        magrittr_2.0.3       evaluate_0.21       
+## [13] grid_4.3.2           fastmap_1.1.1        jsonlite_1.8.7      
+## [16] brio_1.1.3           backports_1.4.1      pander_0.6.5        
+## [19] fansi_1.0.4          scales_1.2.1         jquerylib_0.1.4     
+## [22] cli_3.6.1            crayon_1.5.2         rlang_1.1.1         
+## [25] units_0.8-5          munsell_0.5.0        withr_3.0.0         
+## [28] cachem_1.0.8         yaml_2.3.7           tools_4.3.2         
+## [31] parallel_4.3.2       checkmate_2.2.0      colorspace_2.1-0    
+## [34] mime_0.12            vctrs_0.6.3          R6_2.5.1            
+## [37] lifecycle_1.0.4      stringr_1.5.1        MASS_7.3-60         
+## [40] pkgconfig_2.0.3      pillar_1.9.0         bslib_0.5.1         
+## [43] gtable_0.3.3         glue_1.6.2           Rcpp_1.0.11         
+## [46] xfun_0.40            tibble_3.2.1         tidyselect_1.2.0    
+## [49] highr_0.10           data.tree_1.0.0      rstudioapi_0.15.0   
+## [52] farver_2.1.1         patchwork_1.1.2      htmltools_0.5.6     
+## [55] nlme_3.1-163         rmarkdown_2.25       labeling_0.4.2      
+## [58] compiler_4.3.2       distributional_0.3.2</code></pre>
 </div>
 
 

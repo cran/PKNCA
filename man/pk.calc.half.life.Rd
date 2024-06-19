@@ -21,9 +21,9 @@ pk.calc.half.life(
 )
 }
 \arguments{
-\item{conc}{Concentration measured}
+\item{conc}{Measured concentrations}
 
-\item{time}{Time of concentration measurement}
+\item{time}{Time of the measurement of the concentrations}
 
 \item{tmax}{Time of maximum concentration (will be calculated and
 included in the return data frame if not given)}
@@ -38,8 +38,8 @@ frame if not given)}
 \code{TRUE}, this option causes the options of \code{adj.r.squared.factor},
 \code{min.hl.points}, and \code{allow.tmax.in.half.life} to be ignored.}
 
-\item{options}{List of changes to the default
-\code{\link{PKNCA.options}} for calculations.}
+\item{options}{List of changes to the default PKNCA options (see
+\code{PKNCA.options()})}
 
 \item{min.hl.points}{The minimum number of points that must be
 included to calculate the half-life}
@@ -47,36 +47,36 @@ included to calculate the half-life}
 \item{adj.r.squared.factor}{The allowance in adjusted r-squared for
 adding another point.}
 
-\item{conc.blq}{See \code{\link{clean.conc.blq}}}
+\item{conc.blq}{See \code{\link[=clean.conc.blq]{clean.conc.blq()}}}
 
-\item{conc.na}{See \code{\link{clean.conc.na}}}
+\item{conc.na}{See \code{\link[=clean.conc.na]{clean.conc.na()}}}
 
-\item{first.tmax}{See \code{\link{pk.calc.tmax}}.}
+\item{first.tmax}{See \code{\link[=pk.calc.tmax]{pk.calc.tmax()}}.}
 
 \item{allow.tmax.in.half.life}{Allow the concentration point for tmax
 to be included in the half-life slope calculation.}
 
-\item{check}{Run \code{\link{check.conc.time}},
-\code{\link{clean.conc.blq}}, and \code{\link{clean.conc.na}}?}
+\item{check}{Run \code{\link[=assert_conc_time]{assert_conc_time()}},
+\code{\link[=clean.conc.blq]{clean.conc.blq()}}, and \code{\link[=clean.conc.na]{clean.conc.na()}}?}
 }
 \value{
 A data frame with one row and columns for
- \describe{
-  \item{tmax}{Time of maximum observed concentration (only included
-    if not given as an input)}
-  \item{tlast}{Time of last observed concentration above the LOQ (only
-    included if not given as an input)}
-  \item{r.squared}{coefficient of determination}
-  \item{adj.r.squared}{adjusted coefficient of determination}
-  \item{lambda.z}{elimination rate}
-  \item{lambda.z.time.first}{first time for half-life calculation}
-  \item{lambda.z.n.points}{number of points in half-life calculation}
-  \item{clast.pred}{Concentration at tlast as predicted by the half-life
-    line}
-  \item{half.life}{half-life}
-  \item{span.ratio}{span ratio [ratio of half-life to time used for
-    half-life calculation}
- }
+\describe{
+\item{tmax}{Time of maximum observed concentration (only included
+if not given as an input)}
+\item{tlast}{Time of last observed concentration above the LOQ (only
+included if not given as an input)}
+\item{r.squared}{coefficient of determination}
+\item{adj.r.squared}{adjusted coefficient of determination}
+\item{lambda.z}{elimination rate}
+\item{lambda.z.time.first}{first time for half-life calculation}
+\item{lambda.z.n.points}{number of points in half-life calculation}
+\item{clast.pred}{Concentration at tlast as predicted by the half-life
+line}
+\item{half.life}{half-life}
+\item{span.ratio}{span ratio [ratio of half-life to time used for
+half-life calculation}
+}
 }
 \description{
 The terminal elimination half-life is estimated from the final points in the
@@ -90,14 +90,14 @@ methods used.
 
 If \code{manually.selected.points} is \code{FALSE} (default), the
 half-life is calculated by computing the best fit line for all points at or
-after tmax (based on the value of \code{allow.tmax.in.half.life}.  The best
+after tmax (based on the value of \code{allow.tmax.in.half.life}).  The best
 half-life is chosen by the following rules in order:
 
 \itemize{
- \item{At least \code{min.hl.points} points included}
- \item{A \code{lambda.z} > 0 and at the same time the best adjusted r-squared
- (within \code{adj.r.squared.factor})}
- \item{The one with the most points included}
+\item{At least \code{min.hl.points} points included}
+\item{A \code{lambda.z} > 0 and at the same time the best adjusted r-squared
+(within \code{adj.r.squared.factor})}
+\item{The one with the most points included}
 }
 
 If \code{manually.selected.points} is \code{TRUE}, the \code{conc}

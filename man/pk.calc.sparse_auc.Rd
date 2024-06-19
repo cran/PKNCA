@@ -18,24 +18,23 @@ pk.calc.sparse_auc(
 pk.calc.sparse_auclast(conc, time, subject, ..., options = list())
 }
 \arguments{
-\item{conc}{Concentration measured}
+\item{conc}{Measured concentrations}
 
-\item{time}{Time of concentration measurement (must be monotonically
-increasing and the same length as the concentration data)}
+\item{time}{Time of the measurement of the concentrations}
 
 \item{subject}{Subject identifiers (may be any class; may not be null)}
 
-\item{method}{The method for integration (either 'lin up/log down' or
-'linear')}
+\item{method}{The method for integration (one of 'lin up/log down',
+'lin-log', or 'linear')}
 
 \item{auc.type}{The type of AUC to compute.  Choices are 'AUCinf', 'AUClast',
 and 'AUCall'.}
 
-\item{...}{For functions other than \code{pk.calc.auxc}, these values are
-passed to \code{pk.calc.auxc}}
+\item{...}{For functions other than \code{pk.calc.auxc}, these values are passed
+to \code{pk.calc.auxc}}
 
-\item{options}{List of changes to the default \code{\link{PKNCA.options}} for
-calculations.}
+\item{options}{List of changes to the default PKNCA options (see
+\code{PKNCA.options()})}
 }
 \description{
 The AUC is calculated as:
@@ -45,10 +44,10 @@ The AUC is calculated as:
 
 Where:
 
-\itemize{
-  \item{\eqn{AUC}{AUC}}{is the estimated area under the concentration-time curve}
-  \item{\eqn{w_i}{w_i}}{is the weight applied to the concentration at time i (related to the time which it affects, see \code{\link{sparse_auc_weight_linear}})}
-  \item{\eqn{\bar{C}_i}{Cbar_i}}{is the average concentration at time i}
+\describe{
+\item{\eqn{AUC}{AUC}}{is the estimated area under the concentration-time curve}
+\item{\eqn{w_i}{w_i}}{is the weight applied to the concentration at time i (related to the time which it affects, see \code{\link[=sparse_auc_weight_linear]{sparse_auc_weight_linear()}})}
+\item{\eqn{\bar{C}_i}{Cbar_i}}{is the average concentration at time i}
 }
 }
 \section{Functions}{

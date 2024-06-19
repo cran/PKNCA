@@ -1,37 +1,30 @@
 #' Compute NCA parameters for each interval for each subject.
 #'
-#' The \code{pk.nca} function computes the NCA parameters from a
-#' \code{PKNCAdata} object.  All options for the calculation and input data are
-#' set in prior functions (\code{PKNCAconc}, \code{PKNCAdose}, and
-#' \code{PKNCAdata}).  Options for calculations are set either in
-#' \code{PKNCAdata} or with the current default options in \code{PKNCA.options}.
+#' The `pk.nca` function computes the NCA parameters from a `PKNCAdata` object.
+#' All options for the calculation and input data are set in prior functions
+#' (`PKNCAconc`, `PKNCAdose`, and `PKNCAdata`).  Options for calculations are
+#' set either in `PKNCAdata` or with the current default options in
+#' `PKNCA.options`.
 #'
 #' When performing calculations, all time results are relative to the start of
 #' the interval.  For example, if an interval starts at 168 hours, ends at 192
-#' hours, and and the maximum concentration is at 169 hours,
-#' \code{tmax=169-168=1}.
+#' hours, and and the maximum concentration is at 169 hours, `tmax=169-168=1`.
 #'
 #' @param data A PKNCAdata object
-#' @param verbose Indicate, by \code{message()}, the current state of
-#'   calculation.
-#' @return A \code{PKNCAresults} object.
-#' @seealso \code{\link{PKNCAdata}}, \code{\link{PKNCA.options}},
-#'  \code{\link{summary.PKNCAresults}}, \code{\link{as.data.frame.PKNCAresults}},
-#'  \code{\link{exclude}}
+#' @param verbose Indicate, by `message()`, the current state of calculation.
+#' @returns A `PKNCAresults` object.
+#' @seealso [PKNCAdata()], [PKNCA.options()], [summary.PKNCAresults()],
+#'   [as.data.frame.PKNCAresults()], [exclude()]
 #' @export
 pk.nca <- function(data, verbose=FALSE) {
-  if (nrow(data$intervals) == 0) {
-    warning("No intervals given; no calculations done.")
-    results <- data.frame()
-  } else {
+  assert_PKNCAdata(data)
+  results <- data.frame()
+  if (nrow(data$intervals) > 0) {
     if (verbose) message("Setting up options")
     # Merge the options into the default options.
     tmp_options <- PKNCA.options()
     tmp_options[names(data$options)] <- data$options
     data$options <- tmp_options
-    if (!is.na(data$impute)) {
-      data <- add_impute_to_intervals(data)
-    }
     splitdata <- full_join_PKNCAdata(data)
     group_info <-
       splitdata[
@@ -43,16 +36,17 @@ pk.nca <- function(data, verbose=FALSE) {
     if (verbose) message("Starting dense PK NCA calculations.")
     results_dense <-
       purrr::pmap(
-        .l=list(
-          data_conc=splitdata$data_conc,
-          data_dose=splitdata$data_dose,
-          data_intervals=splitdata$data_intervals
+        .l = list(
+          data_conc = splitdata$data_conc,
+          data_dose = splitdata$data_dose,
+          data_intervals = splitdata$data_intervals
         ),
-        .f=pk.nca.intervals,
-        options=data$options,
-        impute=data$impute,
-        verbose=verbose,
-        sparse=FALSE
+        .f = pk.nca.intervals,
+        options = data$options,
+        impute = data$impute,
+        verbose = verbose,
+        sparse = FALSE,
+        .progress = data$options$progress
       )
     if (verbose) message("Combining completed dense PK calculation results.")
     results <- pk_nca_result_to_df(group_info, results_dense)
@@ -158,11 +152,12 @@ filter_interval <- function(data, start, end, include_na=FALSE, include_end=TRUE
 #' @param interval An interval specification
 #' @inheritParams PKNCAconc
 #' @return A logical value indicating if the interval requests any sparse (if
-#'   \code{sparse=TRUE}) or dense (if \code{sparse=FALSE}) calculations.
+#'   `sparse=TRUE`) or dense (if `sparse=FALSE`) calculations.
 #' @keywords Internal
 any_sparse_dense_in_interval <- function(interval, sparse) {
-  requested <- vapply(X = interval, FUN = isTRUE, FUN.VALUE = TRUE)
   all_intervals <- get.interval.cols()
+  interval_subset <- interval[, names(interval) %in% names(all_intervals)]
+  requested <- vapply(X = interval_subset, FUN = isTRUE, FUN.VALUE = TRUE)
   # Extract if the parameters to be calculated (`names(requested[requested])`)
   # are sparse, and compare that to if the request is for sparse or dense
   any(
@@ -182,12 +177,12 @@ any_sparse_dense_in_interval <- function(interval, sparse) {
 #' Compute NCA for multiple intervals
 #'
 #' @param data_conc A data.frame or tibble with standardized column names as
-#'   output from \code{prepare_PKNCAconc()}
+#'   output from `prepare_PKNCAconc()`
 #' @param data_dose A data.frame or tibble with standardized column names as
-#'   output from \code{prepare_PKNCAdose()}
+#'   output from `prepare_PKNCAdose()`
 #' @param data_intervals A data.frame or tibble with standardized column names
-#'   as output from \code{prepare_PKNCAintervals()}
-#' @param impute The column name in \code{data_intervals} to use for imputation
+#'   as output from `prepare_PKNCAintervals()`
+#' @param impute The column name in `data_intervals` to use for imputation
 #' @inheritParams PKNCAdata
 #' @inheritParams pk.nca
 #' @inheritParams pk.nca.interval
@@ -229,7 +224,7 @@ pk.nca.intervals <- function(data_conc, data_dose, data_intervals, sparse,
       dose_data_interval <- NA_data_dose_
     }
     # Setup for detailed error reporting in case it's needed
-    error.preamble <-
+    error_preamble <-
       paste(
         "Error with interval",
         paste(
@@ -238,16 +233,11 @@ pk.nca.intervals <- function(data_conc, data_dose, data_intervals, sparse,
           sep="=", collapse=", ")
       )
     if (nrow(conc_data_interval) == 0) {
-      warning(paste(error.preamble, "No data for interval", sep=": "))
+      warning(paste(error_preamble, "No data for interval", sep=": "))
     } else if (!has_calc_sparse_dense) {
       if (verbose) message("No ", ifelse(sparse, "sparse", "dense"), " calculations requested for an interval")
     } else {
-      impute_method <-
-        if (is.na(impute)) {
-          NA_character_
-        } else {
-          data_intervals[[impute]][i]
-        }
+      impute_method <- get_impute_method(intervals = current_interval, impute = impute)
       args <- list(
         # Interval-level data
         conc=conc_data_interval$conc,
@@ -282,11 +272,11 @@ pk.nca.intervals <- function(data_conc, data_dose, data_intervals, sparse,
         args$exclude_half.life <- conc_data_interval$exclude_half.life
       }
       # Try the calculation
-      calculated.interval <-
+      calculated_interval <-
         tryCatch(
           do.call(pk.nca.interval, args),
           error=function(e) {
-            e$message <- paste("Please report a bug.\n", error.preamble, e$message, sep=": ") # nocov
+            e$message <- paste("Please report a bug.\n", error_preamble, e$message, sep=": ") # nocov
             stop(e) # nocov
           }
         )
@@ -295,8 +285,8 @@ pk.nca.intervals <- function(data_conc, data_dose, data_intervals, sparse,
         rbind(
           ret,
           cbind(
-            current_interval[, c("start", "end")],
-            calculated.interval,
+            current_interval[, c("start", "end", options$keep_interval_cols)],
+            calculated_interval,
             row.names=NULL
           )
         )
@@ -307,51 +297,46 @@ pk.nca.intervals <- function(data_conc, data_dose, data_intervals, sparse,
 
 #' Compute all PK parameters for a single concentration-time data set
 #'
-#' For one subject/time range, compute all available PK parameters. All
-#' the internal options should be set by \code{\link{PKNCA.options}}
-#' prior to running.  The only part that changes with a call to this
-#' function is the \code{conc}entration and \code{time}.
+#' For one subject/time range, compute all available PK parameters. All the
+#' internal options should be set by [PKNCA.options()] prior to running.  The
+#' only part that changes with a call to this function is the `conc`entration
+#' and `time`.
 #'
-#' @param conc,conc.group Concentration measured for the current
-#'   interval or all data for the group
-#' @param time,time.group Time of concentration measurement for the
-#'   current interval or all data for the group
+#' @inheritParams assert_conc_time
+#' @inheritParams PKNCA.choose.option
+#' @param conc.group All concentrations measured for the group
+#' @param time.group Time of all concentrations measured for the group
 #' @param volume,volume.group The volume (or mass) of the concentration
-#'   measurement for the current interval or all data for the group
-#'   (typically for urine and fecal measurements)
-#' @param duration.conc,duration.conc.group The duration of the
-#'   concentration measurement for the current interval or all data for
-#'   the group (typically for urine and fecal measurements)
-#' @param dose,dose.group Dose amount (may be a scalar or vector) for
-#'   the current interval or all data for the group
-#' @param time.dose,time.dose.group Time of the dose for the current
-#'   interval or all data for the group (must be the same length as
-#'   \code{dose} or \code{dose.group})
+#'   measurement for the current interval or all data for the group (typically
+#'   for urine and fecal measurements)
+#' @param duration.conc,duration.conc.group The duration of the concentration
+#'   measurement for the current interval or all data for the group (typically
+#'   for urine and fecal measurements)
+#' @param dose,dose.group Dose amount (may be a scalar or vector) for the
+#'   current interval or all data for the group
+#' @param time.dose,time.dose.group Time of the dose for the current interval or
+#'   all data for the group (must be the same length as `dose` or `dose.group`)
 #' @param duration.dose,duration.dose.group The duration of the dose
 #'   administration for the current interval or all data for the group
-#'   (typically zero for extravascular and intravascular bolus and
-#'   nonzero for intravascular infusion)
-#' @param route,route.group The route of dosing for the current interval
-#'   or all data for the group
+#'   (typically zero for extravascular and intravascular bolus and nonzero for
+#'   intravascular infusion)
+#' @param route,route.group The route of dosing for the current interval or all
+#'   data for the group
 #' @param impute_method The method to use for imputation as a character string
 #' @param interval One row of an interval definition (see
-#'   \code{\link{check.interval.specification}} for how to define the
-#'   interval.
-#' @param include_half.life An optional boolean vector of the
-#'   concentration measurements to include in the half-life calculation.
-#'   If given, no half-life point selection will occur.
-#' @param exclude_half.life An optional boolean vector of the
-#'   concentration measurements to exclude from the half-life
-#'   calculation.
+#'   [check.interval.specification()] for how to define the interval.
+#' @param include_half.life An optional boolean vector of the concentration
+#'   measurements to include in the half-life calculation. If given, no
+#'   half-life point selection will occur.
+#' @param exclude_half.life An optional boolean vector of the concentration
+#'   measurements to exclude from the half-life calculation.
 #' @param subject Subject identifiers (used for sparse calculations)
 #' @param sparse Should only sparse calculations be performed (TRUE) or only
 #'   dense calculations (FALSE)?
-#' @param options List of changes to the default
-#'   \code{\link{PKNCA.options}} for calculations.
-#' @return A data frame with the start and end time along with all PK
-#'   parameters for the \code{interval}
+#' @returns A data frame with the start and end time along with all PK
+#'   parameters for the `interval`
 #'
-#' @seealso \code{\link{check.interval.specification}}
+#' @seealso [check.interval.specification()]
 #' @export
 pk.nca.interval <- function(conc, time, volume, duration.conc,
                             dose, time.dose, duration.dose, route,
@@ -366,7 +351,7 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
   if (nrow(interval) != 1) {
     stop("Please report a bug.  Interval must be a one-row data.frame")
   }
-  if (!is.na(impute_method)) {
+  if (!all(is.na(impute_method))) {
     impute_funs <- PKNCA_impute_fun_list(impute_method)
     stopifnot(length(impute_funs) == 1)
     impute_data <- data.frame(conc=conc, time=time)
@@ -374,6 +359,8 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
       impute_args <- as.list(impute_data)
       impute_args$start <- interval$start[1]
       impute_args$end <- interval$end[1]
+      impute_args$conc.group <- conc.group
+      impute_args$time.group <- time.group
       impute_args$options <- options
       impute_data <- do.call(current_fun_nm, args=impute_args)
     }
@@ -396,17 +383,13 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
   # Make sure that we calculate all of the dependencies.  Do this in
   # reverse order for dependencies of dependencies.
   for (n in rev(names(all_intervals))) {
-    if (interval[[1,n]]) {
-      for (deps in all_intervals[[n]]$depends) {
-        interval[1,deps] <- TRUE
-      }
+    if (interval[[n]]) {
+      interval[all_intervals[[n]]$depends] <- TRUE
     }
   }
-  # Check if units will be used
-  #uses_units <- inherits(time, "units")
   # Do the calculations
   for (n in names(all_intervals)) {
-    request_to_calculate <- as.logical(interval[[n]][[1]])
+    request_to_calculate <- as.logical(interval[[n]])
     has_calculation_function <- !is.na(all_intervals[[n]]$FUN)
     is_correct_sparse_dense <- all_intervals[[n]]$sparse == sparse
     if (request_to_calculate & has_calculation_function & is_correct_sparse_dense) {

@@ -323,7 +323,7 @@ the <code>exclude</code> column is set to
 <div id="best-practices" class="section level2">
 <h2>Best Practices</h2>
 <ul>
-<li>Use the function <code>check.conc.time</code> if the function takes
+<li>Use the function <code>assert_conc_time</code> if the function takes
 either <code>conc</code> or <code>time</code> as an input.</li>
 <li>Make sure that you check for missing values (<code>NA</code>) in
 your inputs.</li>
@@ -389,14 +389,14 @@ must return a scalar or a two-long vector.</li>
 C<sub>max</sub>:</p>
 <pre><code>#&#39; Determine maximum observed PK concentration
 #&#39;
-#&#39; @param conc Concentration measured
-#&#39; @param check Run \code{\link{check.conc.time}}?
+#&#39; @inheritParams assert_conc_time
+#&#39; @param check Run \code{\link{assert_conc_time}}?
 #&#39; @return a number for the maximum concentration or NA if all
 #&#39; concentrations are missing
 #&#39; @export
 pk.calc.cmax &lt;- function(conc, check=TRUE) {
   if (check)
-    check.conc.time(conc=conc)
+    assert_conc_time(conc=conc)
   if (length(conc) == 0 | all(is.na(conc))) {
     NA
   } else {

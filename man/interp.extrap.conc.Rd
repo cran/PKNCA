@@ -15,8 +15,10 @@ interp.extrap.conc(
   lambda.z = NA,
   clast = pk.calc.clast.obs(conc, time),
   options = list(),
-  interp.method = NULL,
-  extrap.method = "AUCinf",
+  method = NULL,
+  auc.type = "AUCinf",
+  interp.method,
+  extrap.method,
   ...,
   conc.blq = NULL,
   conc.na = NULL,
@@ -28,7 +30,8 @@ interpolate.conc(
   time,
   time.out,
   options = list(),
-  interp.method = NULL,
+  method = NULL,
+  interp.method,
   conc.blq = NULL,
   conc.na = NULL,
   conc.origin = 0,
@@ -42,7 +45,8 @@ extrapolate.conc(
   time.out,
   lambda.z = NA,
   clast = pk.calc.clast.obs(conc, time),
-  extrap.method = "AUCinf",
+  auc.type = "AUCinf",
+  extrap.method,
   options = list(),
   conc.na = NULL,
   conc.blq = NULL,
@@ -68,43 +72,44 @@ interp.extrap.conc.dose(
 \arguments{
 \item{conc}{Measured concentrations}
 
-\item{time}{Time of the concentration measurement}
+\item{time}{Time of the measurement of the concentrations}
 
 \item{time.out}{Time when interpolation is requested (vector for
 \code{interp.extrap.conc()}, scalar otherwise)}
 
-\item{lambda.z}{The elimination rate constant.  \code{NA} will prevent
-extrapolation.}
+\item{lambda.z}{The elimination rate (in units of inverse time) for
+extrapolation}
 
 \item{clast}{The last observed concentration above the limit of
 quantification.  If not given, \code{clast} is calculated from
-\code{\link{pk.calc.clast.obs}()}}
+\code{\link[=pk.calc.clast.obs]{pk.calc.clast.obs()}}}
 
-\item{options}{List of changes to the default \code{\link{PKNCA.options}()}
-for calculations.}
+\item{options}{List of changes to the default PKNCA options (see
+\code{PKNCA.options()})}
 
-\item{interp.method}{The method for interpolation (either "lin up/log down"
-or "linear")}
+\item{method}{The method for integration (one of 'lin up/log down',
+'lin-log', or 'linear')}
 
-\item{extrap.method}{The method for extrapolation: "AUCinf", "AUClast", or
-"AUCall".  See details for usage.}
+\item{auc.type}{The type of AUC to compute.  Choices are 'AUCinf', 'AUClast',
+and 'AUCall'.}
+
+\item{interp.method, extrap.method}{deprecated in favor of method and auc.type}
 
 \item{...}{Additional arguments passed to \code{interpolate.conc()} or
 \code{extrapolate.conc()}.}
 
-\item{conc.blq}{How to handle BLQ values. (See \code{\link{clean.conc.blq}()}
-for usage instructions.)}
+\item{conc.blq}{How to handle BLQ values. (See \code{\link[=clean.conc.blq]{clean.conc.blq()}} for usage
+instructions.)}
 
-\item{conc.na}{How to handle NA concentrations.  (See
-\code{\link{clean.conc.na}()})}
+\item{conc.na}{How to handle NA concentrations.  (See \code{\link[=clean.conc.na]{clean.conc.na()}})}
 
-\item{check}{Run \code{\link{check.conc.time}()},
-\code{\link{clean.conc.blq}()}, and \code{\link{clean.conc.na}()}?}
+\item{check}{Run \code{\link[=assert_conc_time]{assert_conc_time()}}, \code{\link[=clean.conc.blq]{clean.conc.blq()}}, and
+\code{\link[=clean.conc.na]{clean.conc.na()}}?}
 
 \item{conc.origin}{The concentration before the first measurement.
-\code{conc.origin} is typically used to set predose values to zero
-(default), set a predose concentration for endogenous compounds, or set
-predose concentrations to \code{NA} if otherwise unknown.}
+\code{conc.origin} is typically used to set predose values to zero (default),
+set a predose concentration for endogenous compounds, or set predose
+concentrations to \code{NA} if otherwise unknown.}
 
 \item{time.dose}{Time of the dose}
 
@@ -114,52 +119,48 @@ predose concentrations to \code{NA} if otherwise unknown.}
 \item{duration.dose}{What is the duration of administration? See the details
 for how this parameter is used.}
 
-\item{out.after}{Should interpolation occur from the data before
-(\code{FALSE}) or after (\code{TRUE}) the interpolated point?  See the
-details for how this parameter is used.  It only has a meaningful effect at
-the instant of an IV bolus dose.}
+\item{out.after}{Should interpolation occur from the data before (\code{FALSE}) or
+after (\code{TRUE}) the interpolated point?  See the details for how this
+parameter is used.  It only has a meaningful effect at the instant of an IV
+bolus dose.}
 }
 \value{
 The interpolated or extrapolated concentration value as a scalar
-  double (or vector for \code{interp.extrap.conc()}).
+double (or vector for \code{interp.extrap.conc()}).
 }
 \description{
-\code{interpolate.conc()} and \code{extrapolate.conc()} returns an
-interpolated (or extrapolated) concentration. \code{interp.extrap.conc()}
-will choose whether interpolation or extrapolation is required and will also
-operate on many concentrations.  These will typically be used to estimate the
-concentration between two measured concentrations or after the last measured
-concentration. Of note, these functions will not extrapolate prior to the
-first point.
+\code{interpolate.conc()} and \code{extrapolate.conc()} returns an interpolated (or
+extrapolated) concentration. \code{interp.extrap.conc()} will choose whether
+interpolation or extrapolation is required and will also operate on many
+concentrations.  These will typically be used to estimate the concentration
+between two measured concentrations or after the last measured concentration.
+Of note, these functions will not extrapolate prior to the first point.
 }
 \details{
+An \code{NA} value for the \code{lambda.z} parameter will prevent extrapolation.
+
 \describe{
-  \item{extrap.method}{
-    \describe{
-      \item{'AUCinf'}{Use lambda.z to extrapolate beyond the last point with the half-life.}
-      \item{'AUCall'}{If the last point is above the limit of quantification or missing, this is identical to 'AUCinf'. If the last point is below the limit of quantification, then linear interpolation between the Clast and the next BLQ is used for that  interval and all additional points are extrapolated as 0.}
-      \item{'AUClast'}{Extrapolates all points after the last above the  limit of quantification as 0.}
-    }
-  }
+\item{extrap.method}{
+\describe{
+\item{'AUCinf'}{Use lambda.z to extrapolate beyond the last point with the half-life.}
+\item{'AUCall'}{If the last point is above the limit of quantification or missing, this is identical to 'AUCinf'. If the last point is below the limit of quantification, then linear interpolation between the Clast and the next BLQ is used for that  interval and all additional points are extrapolated as 0.}
+\item{'AUClast'}{Extrapolates all points after the last above the  limit of quantification as 0.}
+}
+}
 }
 
-\code{duration.dose} and \code{direction.out} are ignored if \code{route.dose
-== "extravascular"}.  \code{direction.out} is ignored if \code{duration.dose
-> 0}.
+\code{duration.dose} and \code{direction.out} are ignored if \code{route.dose == "extravascular"}.  \code{direction.out} is ignored if \code{duration.dose > 0}.
 
-\code{route.dose} and \code{duration.dose} affect how
-interpolation/extrapolation of the concentration occurs at the time of
-dosing.  If \code{route.dose == "intravascular"} and \code{duration.dose ==
-0} then extrapolation occurs for an IV bolus using \code{\link{pk.calc.c0}()}
-with the data after dosing.  Otherwise (either \code{route.dose ==
-"extravascular"} or \code{duration.dose > 0}), extrapolation occurs using the
-concentrations before dosing and estimating the half-life (or more precisely,
-estimating \code{lambda.z}).  Finally, \code{direction.out} can change the
-direction of interpolation in cases with \code{route.dose == "intravascular"}
-and \code{duration.dose == 0}.  When \code{direction.out == "before"}
-interpolation occurs only with data before the dose (as is the case for
-\code{route.dose == "extravascular"}), but if \code{direction.out == "after"}
-interpolation occurs from the data after dosing.
+\code{route.dose} and \code{duration.dose} affect how interpolation/extrapolation of
+the concentration occurs at the time of dosing.  If \code{route.dose == "intravascular"} and \code{duration.dose == 0} then extrapolation occurs for an IV
+bolus using \code{\link[=pk.calc.c0]{pk.calc.c0()}} with the data after dosing.  Otherwise (either
+\code{route.dose == "extravascular"} or \code{duration.dose > 0}), extrapolation occurs
+using the concentrations before dosing and estimating the half-life (or more
+precisely, estimating \code{lambda.z}).  Finally, \code{direction.out} can change the
+direction of interpolation in cases with \code{route.dose == "intravascular"} and
+\code{duration.dose == 0}.  When \code{direction.out == "before"} interpolation occurs
+only with data before the dose (as is the case for \code{route.dose == "extravascular"}), but if \code{direction.out == "after"} interpolation occurs
+from the data after dosing.
 }
 \section{Functions}{
 \itemize{
@@ -167,11 +168,10 @@ interpolation occurs from the data after dosing.
 
 \item \code{extrapolate.conc()}: Extrapolate concentrations after Tlast
 
-\item \code{interp.extrap.conc.dose()}: Interpolate and extrapolate
-concentrations without interpolating or extrapolating beyond doses.
+\item \code{interp.extrap.conc.dose()}: Interpolate and extrapolate concentrations
+without interpolating or extrapolating beyond doses.
 
 }}
 \seealso{
-\code{\link{pk.calc.clast.obs}()},
-  \code{\link{pk.calc.half.life}()}, \code{\link{pk.calc.c0}()}
+\code{\link[=pk.calc.clast.obs]{pk.calc.clast.obs()}}, \code{\link[=pk.calc.half.life]{pk.calc.half.life()}}, \code{\link[=pk.calc.c0]{pk.calc.c0()}}
 }

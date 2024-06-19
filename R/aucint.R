@@ -2,25 +2,30 @@
 #' extrapolation of concentrations for the beginning and end of the
 #' interval.
 #'
+#' @details
+#' When `pk.calc.aucint()` needs to extrapolate using `lambda.z` (in other
+#' words, using the half-life), it will always extrapolate using the logarithmic
+#' trapezoidal rule to align with using a half-life calculation for the
+#' extrapolation.
+#'
+#'
 #' @inheritParams pk.calc.auxc
-#' @param start,end The start and end of the interval (cannot be given
-#'   if \code{interval} is given)
-#' @param clast,clast.obs,clast.pred The last concentration above the
-#'   limit of quantification; this is used for AUCinf calculations.  If
-#'   provided as clast.obs (observed clast value, default), AUCinf is
-#'   AUCinf,obs. If provided as clast.pred, AUCinf is AUCinf,pred.
-#' @param lambda.z The elimination rate (in units of inverse time) for
-#'   extrapolation
+#' @inheritParams assert_intervaltime_single
+#' @inheritParams assert_lambdaz
+#' @param clast,clast.obs,clast.pred The last concentration above the limit of
+#'   quantification; this is used for AUCinf calculations.  If provided as
+#'   clast.obs (observed clast value, default), AUCinf is AUCinf,obs. If
+#'   provided as clast.pred, AUCinf is AUCinf,pred.
 #' @param time.dose,route,duration.dose The time of doses, route of
 #'   administration, and duration of dose used with interpolation and
-#'   extrapolation of concentration data (see
-#'   \code{\link{interp.extrap.conc.dose}}).  If \code{NULL},
-#'   \code{\link{interp.extrap.conc}} will be used instead (assuming
-#'   that no doses affecting concentrations are in the interval).
-#' @param ... Additional arguments passed to \code{pk.calc.auxc} and
-#'   \code{interp.extrap.conc}
+#'   extrapolation of concentration data (see [interp.extrap.conc.dose()]).  If
+#'   `NULL`, [interp.extrap.conc()] will be used instead (assuming that no doses
+#'   affecting concentrations are in the interval).
+#' @param ... Additional arguments passed to `pk.calc.auxc` and
+#'   `interp.extrap.conc`
 #' @family AUC calculations
-#' @seealso \code{\link{PKNCA.options}}, \code{\link{interp.extrap.conc.dose}}
+#' @seealso [PKNCA.options()], [interp.extrap.conc.dose()]
+#' @returns The AUC for an interval of time as a number
 #' @export
 pk.calc.aucint <- function(conc, time,
                            interval=NULL, start=NULL, end=NULL,
@@ -41,7 +46,7 @@ pk.calc.aucint <- function(conc, time,
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
   if (check) {
-    check.conc.time(conc, time)
+    assert_conc_time(conc, time)
     data <-
       clean.conc.blq(
         conc, time,
@@ -52,32 +57,10 @@ pk.calc.aucint <- function(conc, time,
   } else {
     data <- data.frame(conc, time)
   }
-  if (is.null(interval)) {
-    if (is.null(start) | is.null(end)) {
-      stop("If interval is not given, start and end must be given.")
-    } else if (length(start) != 1) {
-      stop("start must be a scalar")
-    } else if (length(end) != 1) {
-      stop("end must be a scalar")
-    } else if (!is.numeric(start) | is.factor(start)) {
-      stop("start must be a number")
-    } else if (!is.numeric(end) | is.factor(end)) {
-      stop("end must be a number")
-    }
-    interval <- c(start, end)
-  } else if (!is.null(start) | !is.null(end)) {
-    stop("start and end cannot be given if interval is given")
+  if (all(data$conc %in% 0)) {
+    return(structure(0, exclude = "DO NOT EXCLUDE"))
   }
-  if (length(interval) != 2) {
-    stop("interval must be a vector with 2 elements")
-  } else if (!is.numeric(interval) | is.factor(interval)) {
-    stop("interval must be numeric")
-  } else if (is.infinite(interval[1])) {
-    stop("interval beginning (or start) must be finite")
-  }
-  if (interval[1] >= interval[2]) {
-    stop("interval start must be before interval end.")
-  }
+  interval <- assert_intervaltime_single(interval = interval, start = start, end = end)
   missing_times <-
     if (is.infinite(interval[2])) {
       setdiff(c(interval[1], time.dose), data$time)
@@ -89,42 +72,51 @@ pk.calc.aucint <- function(conc, time,
   time_clast <- NULL
   if (auc.type %in% "AUCinf") {
     tlast <- pk.calc.tlast(conc=data$conc, time=data$time)
-    if (clast != pk.calc.clast.obs(conc=data$conc, time=data$time) &
-        interval[2] > tlast) {
+    clast_obs <- pk.calc.clast.obs(conc=data$conc, time=data$time)
+    if (is.na(clast)) {
+      # All concentrations are NA
+      return(structure(NA_real_, exclude = "clast is NA"))
+    } else if (clast != clast_obs & interval[2] > tlast) {
       # If using clast.pred, we need to doubly calculate at tlast.
       conc_clast <- clast
       time_clast <- tlast
     }
   }
-  if (length(missing_times)) {
+  extrap_times <- numeric()
+  if (length(missing_times) > 0) {
     if (is.null(time.dose)) {
       missing_conc <-
         interp.extrap.conc(
-          conc=data$conc, time=data$time,
-          time.out=missing_times,
-          interp.method=method,
-          extrap.method=auc.type,
-          clast=clast, lambda.z=lambda.z,
-          options=options,
-          ...)
+          conc = data$conc, time = data$time,
+          time.out = missing_times,
+          method = method,
+          auc.type = auc.type,
+          clast = clast,
+          lambda.z = lambda.z,
+          options = options,
+          ...
+        )
     } else {
       missing_conc <-
         interp.extrap.conc.dose(
-          conc=data$conc, time=data$time,
-          time.out=missing_times,
-          interp.method=method,
-          extrap.method=auc.type,
-          clast=clast, lambda.z=lambda.z,
-          options=options,
+          conc = data$conc, time = data$time,
+          time.out = missing_times,
+          method = method,
+          auc.type = auc.type,
+          clast = clast, lambda.z = lambda.z,
+          options = options,
           # arguments specific to interp.extrap.conc.dose
-          time.dose=time.dose,
-          route.dose=route,
-          duration.dose=duration.dose,
-          out.after=FALSE,
-          ...)
+          time.dose = time.dose,
+          route.dose = route,
+          duration.dose = duration.dose,
+          out.after = FALSE,
+          ...
+        )
     }
     new_data <- data.frame(conc=c(data$conc, conc_clast, missing_conc),
                            time=c(data$time, time_clast, missing_times))
+    tlast <- pk.calc.tlast(conc = data$conc, time = data$time, check = FALSE)
+    extrap_times <- missing_times[missing_times > tlast]
     new_data <- new_data[new_data$time >= interval[1] &
                            new_data$time <= interval[2],]
     new_data <- new_data[order(new_data$time),]
@@ -147,34 +139,57 @@ pk.calc.aucint <- function(conc, time,
       return(NA_real_)
     }
   } else {
-    conc_interp <- data$conc
-    time_interp <- data$time
+    mask_time <- data$time >= interval[1] & data$time <= interval[2]
+    conc_interp <- data$conc[mask_time]
+    time_interp <- data$time[mask_time]
   }
   # AUCinf traces an AUClast curve if the interval is finite (because
   # the interval doesn't go to infinity) while AUCall and AUClast trace
   # their own curves.  Or, they all trace their own curves.
   auc.type_map <-
     if (is.infinite(interval[2])) {
-      list(AUClast="AUClast",
-           AUCall="AUCall",
-           AUCinf="AUCinf")[[auc.type]]
+      list(
+        AUClast="AUClast",
+        AUCall="AUCall",
+        AUCinf="AUCinf"
+      )[[auc.type]]
     } else {
-      list(AUClast="AUClast",
-           AUCall="AUCall",
-           AUCinf="AUClast")[[auc.type]]
+      list(
+        AUClast="AUClast",
+        AUCall="AUCall",
+        AUCinf="AUClast"
+      )[[auc.type]]
     }
-  pk.calc.auc(conc=conc_interp, time=time_interp,
-              interval=interval,
-              clast=clast, lambda.z=lambda.z,
-              auc.type=auc.type_map,
-              options=options,
-              method=method,
-              ...,
-              check=FALSE)
+
+  interval_method <-
+    choose_interval_method(
+      conc = conc_interp,
+      time = time_interp,
+      tlast = max(time_interp),
+      method = method,
+      auc.type = auc.type,
+      options = options
+    )
+  if (is.finite(interval[2])) {
+    interval_method[length(interval_method)] <- "zero"
+  }
+  if (length(extrap_times) > 0) {
+    interval_method[which(time_interp == extrap_times) - 1] <- "log"
+  }
+  ret <-
+    auc_integrate(
+      conc = conc_interp, time = time_interp,
+      clast = clast, tlast = tlast, lambda.z = lambda.z,
+      interval_method = interval_method,
+      fun_linear = aucintegrate_linear,
+      fun_log = aucintegrate_log,
+      fun_inf = aucintegrate_inf
+    )
+  ret
 }
 
-#' @describeIn pk.calc.aucint
-#' Interpolate or extrapolate concentrations for AUClast
+#' @describeIn pk.calc.aucint Interpolate or extrapolate concentrations for
+#'   AUClast
 #' @export
 pk.calc.aucint.last <- function(conc, time, start=NULL, end=NULL, time.dose, ..., options=list()) {
   if (missing(time.dose))
@@ -186,8 +201,8 @@ pk.calc.aucint.last <- function(conc, time, start=NULL, end=NULL, time.dose, ...
                  ...,
                  auc.type="AUClast")
 }
-#' @describeIn pk.calc.aucint
-#' Interpolate or extrapolate concentrations for AUCall
+#' @describeIn pk.calc.aucint Interpolate or extrapolate concentrations for
+#'   AUCall
 #' @export
 pk.calc.aucint.all <- function(conc, time, start=NULL, end=NULL, time.dose, ..., options=list()) {
   if (missing(time.dose))
@@ -199,8 +214,8 @@ pk.calc.aucint.all <- function(conc, time, start=NULL, end=NULL, time.dose, ...,
                  ...,
                  auc.type="AUCall")
 }
-#' @describeIn pk.calc.aucint
-#' Interpolate or extrapolate concentrations for AUCinf.obs
+#' @describeIn pk.calc.aucint Interpolate or extrapolate concentrations for
+#'   AUCinf.obs
 #' @export
 pk.calc.aucint.inf.obs <- function(conc, time, start=NULL, end=NULL, time.dose, lambda.z, clast.obs, ..., options=list()) {
   if (missing(time.dose))
@@ -212,8 +227,8 @@ pk.calc.aucint.inf.obs <- function(conc, time, start=NULL, end=NULL, time.dose, 
                  options=options, ...,
                  auc.type="AUCinf")
 }
-#' @describeIn pk.calc.aucint
-#' Interpolate or extrapolate concentrations for AUCinf.pred
+#' @describeIn pk.calc.aucint Interpolate or extrapolate concentrations for
+#'   AUCinf.pred
 #' @export
 pk.calc.aucint.inf.pred <- function(conc, time, start=NULL, end=NULL, time.dose, lambda.z, clast.pred, ..., options=list()) {
   if (missing(time.dose))

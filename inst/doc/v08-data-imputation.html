@@ -12,7 +12,7 @@
 
 <meta name="author" content="Bill Denney" />
 
-<meta name="date" content="2023-04-29" />
+<meta name="date" content="2024-06-19" />
 
 <title>Data Imputation</title>
 
@@ -51,7 +51,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Data Imputation</h1>
 <h4 class="author">Bill Denney</h4>
-<h4 class="date">2023-04-29</h4>
+<h4 class="date">2024-06-19</h4>
 
 
 
@@ -352,13 +352,13 @@ concentrations to the beginning of the dosing interval.</p>
 calculation interval.</p>
 <p>The current list of imputation methods built into PKNCA can be found
 by looking at <code>?PKNCA_impute_method</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;*&quot;</span>, <span class="fu">ls</span>(<span class="st">&quot;package:PKNCA&quot;</span>, <span class="at">pattern =</span> <span class="st">&quot;^PKNCA_impute_method&quot;</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>), <span class="at">sep =</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; * PKNCA_impute_method_start_cmin</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; * PKNCA_impute_method_start_conc0</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; * PKNCA_impute_method_start_predose</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="st">&quot;*&quot;</span>, <span class="fu">ls</span>(<span class="st">&quot;package:PKNCA&quot;</span>, <span class="at">pattern =</span> <span class="st">&quot;^PKNCA_impute_method&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>), <span class="at">sep =</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; * PKNCA_impute_method_start_cmin</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; * PKNCA_impute_method_start_conc0</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; * PKNCA_impute_method_start_predose</span></span></code></pre></div>
 <div id="how-does-imputation-occur" class="section level2">
 <h2>How does imputation occur?</h2>
 <p>(You can skip this section if you don’t desire the details of the
@@ -413,71 +413,71 @@ two methods will be applied in order.</p>
 <h2>Imputation for the full dataset</h2>
 <p>If an imputation applies to the full dataset, it can be provided in
 the <code>impute</code> argument to <code>PKNCAdata()</code>:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove time 0 to illustrate that imputation works</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>d_conc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(datasets<span class="sc">::</span>Theoph)[<span class="sc">!</span>datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>, ]</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAconc</span>(d_conc, conc<span class="sc">~</span>Time<span class="sc">|</span>Subject)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>d_dose <span class="ot">&lt;-</span> <span class="fu">unique</span>(datasets<span class="sc">::</span>Theoph[datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">c</span>(<span class="st">&quot;Dose&quot;</span>, <span class="st">&quot;Time&quot;</span>, <span class="st">&quot;Subject&quot;</span>)])</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>dose_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdose</span>(d_dose, Dose<span class="sc">~</span>Time<span class="sc">|</span>Subject)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj, <span class="at">impute =</span> <span class="st">&quot;start_predose,start_conc0&quot;</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>nca_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(nca_obj)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  start end  N     auclast        cmax               tmax   half.life aucinf.obs</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0  24 12 74.6 [24.2]           .                  .           .          .</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0 Inf 12           . 8.65 [17.0] 1.14 [0.630, 3.55] 8.18 [2.12] 115 [28.4]</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Caption: auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co"># Remove time 0 to illustrate that imputation works</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>d_conc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(datasets<span class="sc">::</span>Theoph)[<span class="sc">!</span>datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>, ]</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAconc</span>(d_conc, conc<span class="sc">~</span>Time<span class="sc">|</span>Subject)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>d_dose <span class="ot">&lt;-</span> <span class="fu">unique</span>(datasets<span class="sc">::</span>Theoph[datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>                                  <span class="fu">c</span>(<span class="st">&quot;Dose&quot;</span>, <span class="st">&quot;Time&quot;</span>, <span class="st">&quot;Subject&quot;</span>)])</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>dose_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdose</span>(d_dose, Dose<span class="sc">~</span>Time<span class="sc">|</span>Subject)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj, <span class="at">impute =</span> <span class="st">&quot;start_predose,start_conc0&quot;</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>nca_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="fu">summary</span>(nca_obj)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt;  start end  N     auclast        cmax               tmax   half.life aucinf.obs</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt;      0  24 12 74.6 [24.2]           .                  .           .          .</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt;      0 Inf 12           . 8.65 [17.0] 1.14 [0.630, 3.55] 8.18 [2.12] 115 [28.4]</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; Caption: auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation; N: number of subjects</span></span></code></pre></div>
 </div>
 <div id="imputation-by-calculation-interval" class="section level2">
 <h2>Imputation by calculation interval</h2>
 <p>If an imputation applies to specific intervals, the column in the
 interval data.frame can be provided in the <code>impute</code> argument
 to <code>PKNCAdata()</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove time 0 to illustrate that imputation works</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>d_conc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(datasets<span class="sc">::</span>Theoph)[<span class="sc">!</span>datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>, ]</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAconc</span>(d_conc, conc<span class="sc">~</span>Time<span class="sc">|</span>Subject)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>d_dose <span class="ot">&lt;-</span> <span class="fu">unique</span>(datasets<span class="sc">::</span>Theoph[datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">c</span>(<span class="st">&quot;Dose&quot;</span>, <span class="st">&quot;Time&quot;</span>, <span class="st">&quot;Subject&quot;</span>)])</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>dose_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdose</span>(d_dose, Dose<span class="sc">~</span>Time<span class="sc">|</span>Subject)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>d_intervals <span class="ot">&lt;-</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">start=</span><span class="dv">0</span>, <span class="at">end=</span><span class="fu">c</span>(<span class="dv">24</span>, <span class="fl">24.1</span>),</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">auclast=</span><span class="cn">TRUE</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">impute=</span><span class="fu">c</span>(<span class="cn">NA</span>, <span class="st">&quot;start_conc0&quot;</span>)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj, <span class="at">intervals =</span> d_intervals, <span class="at">impute =</span> <span class="st">&quot;impute&quot;</span>)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>nca_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (0.27) is not allowed</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement (0.25) is not allowed</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Requesting an AUC range starting (0) before the first measurement (0.25) is not allowed</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Requesting an AUC range starting (0) before the first measurement (0.25) is not allowed</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement (0.27) is not allowed</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Requesting an AUC range starting (0) before the first measurement (0.27) is not allowed</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (0.35) is not allowed</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (0.3) is not allowed</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (0.25) is not allowed</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (0.37) is not allowed</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (0.25) is not allowed</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (0.3) is not allowed</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co"># PKNCA does not impute time 0 by default, so AUClast in the 0-24 interval is</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co"># not calculated</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(nca_obj)</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  start  end  N     auclast</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0 24.0 12          NC</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0 24.1 12 76.4 [23.0]</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Caption: auclast: geometric mean and geometric coefficient of variation</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># Remove time 0 to illustrate that imputation works</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>d_conc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(datasets<span class="sc">::</span>Theoph)[<span class="sc">!</span>datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>, ]</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAconc</span>(d_conc, conc<span class="sc">~</span>Time<span class="sc">|</span>Subject)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>d_dose <span class="ot">&lt;-</span> <span class="fu">unique</span>(datasets<span class="sc">::</span>Theoph[datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                                  <span class="fu">c</span>(<span class="st">&quot;Dose&quot;</span>, <span class="st">&quot;Time&quot;</span>, <span class="st">&quot;Subject&quot;</span>)])</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>dose_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdose</span>(d_dose, Dose<span class="sc">~</span>Time<span class="sc">|</span>Subject)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>d_intervals <span class="ot">&lt;-</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">start=</span><span class="dv">0</span>, <span class="at">end=</span><span class="fu">c</span>(<span class="dv">24</span>, <span class="fl">24.1</span>),</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="at">auclast=</span><span class="cn">TRUE</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">impute=</span><span class="fu">c</span>(<span class="cn">NA</span>, <span class="st">&quot;start_conc0&quot;</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  )</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj, <span class="at">intervals =</span> d_intervals, <span class="at">impute =</span> <span class="st">&quot;impute&quot;</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>nca_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; (0.27) is not allowed</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement (0.25) is not allowed</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; Requesting an AUC range starting (0) before the first measurement (0.25) is not allowed</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; Requesting an AUC range starting (0) before the first measurement (0.25) is not allowed</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement (0.27) is not allowed</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; Requesting an AUC range starting (0) before the first measurement (0.27) is not allowed</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; (0.35) is not allowed</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; (0.3) is not allowed</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; (0.25) is not allowed</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt; (0.37) is not allowed</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; (0.25) is not allowed</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt; Warning: Requesting an AUC range starting (0) before the first measurement</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt; (0.3) is not allowed</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="co"># PKNCA does not impute time 0 by default, so AUClast in the 0-24 interval is</span></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="co"># not calculated</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a><span class="fu">summary</span>(nca_obj)</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a><span class="co">#&gt;  start  end  N     auclast</span></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a><span class="co">#&gt;      0 24.0 12          NC</span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="co">#&gt;      0 24.1 12 76.4 [23.0]</span></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co">#&gt; Caption: auclast: geometric mean and geometric coefficient of variation; N: number of subjects</span></span></code></pre></div>
 </div>
 <div id="advanced-writing-your-own-imputation-functions" class="section level2">
 <h2>Advanced: Writing your own imputation functions</h2>
@@ -495,9 +495,15 @@ is a brief description of the method. (Such as
 named <code>conc</code> and <code>time</code>. The rows in the
 data.frame must be sorted by <code>time</code>.</li>
 </ol>
-<p>In addition to the above, the function may take named arguments of
-<code>start</code> and <code>end</code> to indicate the start and end
-time of the interval.</p>
+<p>In addition to the above, the function may take named arguments
+of:</p>
+<ul>
+<li><code>start</code> and <code>end</code> to indicate the start and
+end time of the interval, and</li>
+<li><code>conc.group</code> and <code>time.group</code> to indicate the
+concentrations and times that have not been filtered for the
+interval.</li>
+</ul>
 </div>
 
 

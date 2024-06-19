@@ -50,7 +50,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -378,28 +378,28 @@ results from the results object are described below.</p>
 below comes from the Introduction and Usage vignette and is reproduced
 here simply to have results available. See that vignette for more
 details about running PKNCA.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(dplyr))</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>d_conc <span class="ot">&lt;-</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>(datasets<span class="sc">::</span>Theoph) <span class="sc">%&gt;%</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Subject=</span><span class="fu">as.numeric</span>(<span class="fu">as.character</span>(Subject)))</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Generate the dosing data</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>d_dose <span class="ot">&lt;-</span> d_conc[d_conc<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>,]</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>d_dose<span class="sc">$</span>Time <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    d_conc,</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>dose_obj <span class="ot">&lt;-</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">PKNCAdose</span>(</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    d_dose,</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    Dose<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>results_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(dplyr))</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>d_conc <span class="ot">&lt;-</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="fu">as.data.frame</span>(datasets<span class="sc">::</span>Theoph) <span class="sc">%&gt;%</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Subject=</span><span class="fu">as.numeric</span>(<span class="fu">as.character</span>(Subject)))</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="do">## Generate the dosing data</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>d_dose <span class="ot">&lt;-</span> d_conc[d_conc<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>,]</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>d_dose<span class="sc">$</span>Time <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>    d_conc,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>  )</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>dose_obj <span class="ot">&lt;-</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>  <span class="fu">PKNCAdose</span>(</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>    d_dose,</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>    Dose<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>  )</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj)</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>results_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span></code></pre></div>
 </div>
 <div id="modifying-results" class="section level1">
 <h1>Modifying Results</h1>
@@ -418,11 +418,11 @@ ratio will exclude all parameters that depend on <span class="math inline">\(\la
 R command line and review that help page. To use them, provide the
 function to the <code>FUN</code> argument of <code>exclude()</code> as
 illustrated below.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>results_excl_span <span class="ot">&lt;-</span> <span class="fu">exclude</span>(results_obj, <span class="at">FUN=</span><span class="fu">exclude_nca_span.ratio</span>())</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Without any exclusions applied, the &#39;exclude&#39; column is all NA.</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(results_obj) <span class="sc">%&gt;%</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>results_excl_span <span class="ot">&lt;-</span> <span class="fu">exclude</span>(results_obj, <span class="at">FUN=</span><span class="fu">exclude_nca_span.ratio</span>())</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Without any exclusions applied, the &#39;exclude&#39; column is all NA.</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">as.data.frame</span>(results_obj) <span class="sc">%&gt;%</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 14 × 6
 ##    Subject start   end PPTESTCD             PPORRES exclude
 ##      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt; &lt;chr&gt;  
@@ -440,9 +440,9 @@ illustrated below.</p>
 ## 12       1     0   Inf half.life            14.3    &lt;NA&gt;   
 ## 13       1     0   Inf span.ratio            1.07   &lt;NA&gt;   
 ## 14       1     0   Inf aucinf.obs          215.     &lt;NA&gt;</code></pre>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># With exclusions applied, the &#39;exclude&#39; column has the reason for exclusion.</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(results_excl_span) <span class="sc">%&gt;%</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># With exclusions applied, the &#39;exclude&#39; column has the reason for exclusion.</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">as.data.frame</span>(results_excl_span) <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 14 × 6
 ##    Subject start   end PPTESTCD             PPORRES exclude       
 ##      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt; &lt;chr&gt;         
@@ -473,24 +473,24 @@ described in the details section of <code>?exclude</code>.</p>
 provided. But, excluding specific points allows for errors to also enter
 the analysis because parameters that depend on the excluded parameter
 will not be excluded.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mask_exclude_cmax <span class="ot">&lt;-</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  results_obj <span class="sc">%&gt;%</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mask_exclude=</span>Subject <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> PPTESTCD <span class="sc">==</span> <span class="st">&quot;cmax&quot;</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;[[&quot;</span>(<span class="st">&quot;mask_exclude&quot;</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>results_excl_specific <span class="ot">&lt;-</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exclude</span>(</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    results_obj,</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">mask=</span>mask_exclude_cmax,</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">reason=</span><span class="st">&quot;Cmax was actually above the ULOQ&quot;</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Without any exclusions applied, the &#39;exclude&#39; column is all NA.</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>results_obj <span class="sc">%&gt;%</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>mask_exclude_cmax <span class="ot">&lt;-</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  results_obj <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>    <span class="at">mask_exclude=</span>Subject <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> PPTESTCD <span class="sc">==</span> <span class="st">&quot;cmax&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="st">&quot;[[&quot;</span>(<span class="st">&quot;mask_exclude&quot;</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>results_excl_specific <span class="ot">&lt;-</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="fu">exclude</span>(</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>    results_obj,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>    <span class="at">mask=</span>mask_exclude_cmax,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>    <span class="at">reason=</span><span class="st">&quot;Cmax was actually above the ULOQ&quot;</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  )</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co"># Without any exclusions applied, the &#39;exclude&#39; column is all NA.</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>results_obj <span class="sc">%&gt;%</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 14 × 6
 ##    Subject start   end PPTESTCD             PPORRES exclude
 ##      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt; &lt;chr&gt;  
@@ -508,10 +508,10 @@ will not be excluded.</p>
 ## 12       1     0   Inf half.life            14.3    &lt;NA&gt;   
 ## 13       1     0   Inf span.ratio            1.07   &lt;NA&gt;   
 ## 14       1     0   Inf aucinf.obs          215.     &lt;NA&gt;</code></pre>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># With exclusions applied, the &#39;exclude&#39; column has the reason for exclusion.</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>results_excl_specific <span class="sc">%&gt;%</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># With exclusions applied, the &#39;exclude&#39; column has the reason for exclusion.</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>results_excl_specific <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 14 × 6
 ##    Subject start   end PPTESTCD             PPORRES exclude                     
 ##      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt; &lt;chr&gt;                       
@@ -534,34 +534,34 @@ will not be excluded.</p>
 <h3>Multiple Exclusions</h3>
 <p>More than one exclusion can be applied sequentially to results as in
 the example below.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mask_exclude_lz <span class="ot">&lt;-</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  results_obj <span class="sc">%&gt;%</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mask_exclude=</span>Subject <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> PPTESTCD <span class="sc">==</span> <span class="st">&quot;lambda.z&quot;</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;[[&quot;</span>(<span class="st">&quot;mask_exclude&quot;</span>)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Starting from the exclusion example above where short span ratios were</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># excluded, exclude Cmax for Subject 1, too.</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>results_excl_multi <span class="ot">&lt;-</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exclude</span>(</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    results_excl_span,</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">mask=</span>mask_exclude_cmax,</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">reason=</span><span class="st">&quot;Cmax was actually above the ULOQ&quot;</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>results_excl_multi <span class="ot">&lt;-</span></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exclude</span>(</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    results_excl_multi,</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">mask=</span>mask_exclude_lz,</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">reason=</span><span class="st">&quot;Issue with lambda.z fit&quot;</span></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="co"># With exclusions applied, the &#39;exclude&#39; column has the reason for exclusion.</span></span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="co"># More than one reason may appear if more than one exclusion is applied.</span></span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>results_excl_multi <span class="sc">%&gt;%</span></span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>mask_exclude_lz <span class="ot">&lt;-</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  results_obj <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>    <span class="at">mask_exclude=</span>Subject <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> PPTESTCD <span class="sc">==</span> <span class="st">&quot;lambda.z&quot;</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="st">&quot;[[&quot;</span>(<span class="st">&quot;mask_exclude&quot;</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co"># Starting from the exclusion example above where short span ratios were</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co"># excluded, exclude Cmax for Subject 1, too.</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>results_excl_multi <span class="ot">&lt;-</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="fu">exclude</span>(</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    results_excl_span,</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>    <span class="at">mask=</span>mask_exclude_cmax,</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>    <span class="at">reason=</span><span class="st">&quot;Cmax was actually above the ULOQ&quot;</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  )</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>results_excl_multi <span class="ot">&lt;-</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>  <span class="fu">exclude</span>(</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>    results_excl_multi,</span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>    <span class="at">mask=</span>mask_exclude_lz,</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>    <span class="at">reason=</span><span class="st">&quot;Issue with lambda.z fit&quot;</span></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>  )</span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co"># With exclusions applied, the &#39;exclude&#39; column has the reason for exclusion.</span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co"># More than one reason may appear if more than one exclusion is applied.</span></span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a>results_excl_multi <span class="sc">%&gt;%</span></span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a>  <span class="fu">filter</span>(Subject <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 14 × 6
 ##    Subject start   end PPTESTCD             PPORRES exclude                     
 ##      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt; &lt;chr&gt;                       
@@ -602,31 +602,31 @@ shown in the summary.</p>
 <p>The summary will have one column for each grouping variable other
 than the subject grouping variable; one column each for the start and
 end time; and one column per parameter calculated.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results_obj)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">summary</span>(results_obj)</span></code></pre></div>
 <pre><code>##  start end  N     auclast        cmax               tmax   half.life aucinf.obs
 ##      0  24 12 74.6 [24.3]           .                  .           .          .
 ##      0 Inf 12           . 8.65 [17.0] 1.14 [0.630, 3.55] 8.18 [2.12] 115 [28.4]
 ## 
-## Caption: auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation</code></pre>
+## Caption: auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation; N: number of subjects</code></pre>
 <p>When values are excluded as described above, the excluded values are
 not included in the summary (note that half.life and aucinf.obs
 differ).</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results_excl_span)</span></code></pre></div>
-<pre><code>##  start end  N     auclast        cmax               tmax    half.life
-##      0  24 12 74.6 [24.3]           .                  .            .
-##      0 Inf 12           . 8.65 [17.0] 1.14 [0.630, 3.55] 7.36 [0.742]
-##  aucinf.obs
-##           .
-##  105 [16.4]
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">summary</span>(results_excl_span)</span></code></pre></div>
+<pre><code>##  start end  N     auclast        cmax               tmax         half.life
+##      0  24 12 74.6 [24.3]           .                  .                 .
+##      0 Inf 12           . 8.65 [17.0] 1.14 [0.630, 3.55] 7.36 [0.742], n=9
+##       aucinf.obs
+##                .
+##  105 [16.4], n=9
 ## 
-## Caption: auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation</code></pre>
+## Caption: auclast, cmax, aucinf.obs: geometric mean and geometric coefficient of variation; tmax: median and range; half.life: arithmetic mean and standard deviation; N: number of subjects; n: number of measurements included in summary</code></pre>
 </div>
 <div id="listing-of-results" class="section level2">
 <h2>Listing of Results</h2>
 <p>A listing of all calculated values is available using
 <code>as.data.frame()</code>.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(results_obj) <span class="sc">%&gt;%</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">20</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">as.data.frame</span>(results_obj) <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">20</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 20 × 6
 ##    Subject start   end PPTESTCD             PPORRES exclude
 ##      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt; &lt;chr&gt;  
@@ -651,8 +651,8 @@ differ).</p>
 ## 19       2     0   Inf clast.obs             0.9    &lt;NA&gt;   
 ## 20       2     0   Inf lambda.z              0.104  &lt;NA&gt;</code></pre>
 <p>Excluded values remain in the listing.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(results_excl_span) <span class="sc">%&gt;%</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">20</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">as.data.frame</span>(results_excl_span) <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">20</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 20 × 6
 ##    Subject start   end PPTESTCD             PPORRES exclude       
 ##      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt; &lt;chr&gt;         

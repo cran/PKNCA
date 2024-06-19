@@ -4,6 +4,8 @@ requireNamespace("pmxTools")
 library(PKNCA)
 library(dplyr)
 library(ggplot2)
+library(tidyr)
+library(purrr)
 breaks_hours <- function(n=5, Q=c(1, 6, 4, 12, 2, 24, 168), ...) {
   n_default <- n
   Q_default <- Q
@@ -61,7 +63,7 @@ pander::pander(dose_data %>% filter(Subject == 1))
 ## -----------------------------------------------------------------------------
 pander::pander(dose_data %>% filter(Subject == 2))
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 d_interval_1 <-
   data.frame(
     start=0, end=8,
@@ -83,7 +85,8 @@ d_conc <-
   filter(Subject %in% 1)
 o_conc <- PKNCAconc(conc~Time, data=d_conc)
 # Setup intervals for calculation
-d_intervals <- data.frame(start=0, end=24, cmax=TRUE, tmax=TRUE, auclast=TRUE, aucint.inf.obs=TRUE)
+d_intervals <- data.frame(start=0, end=24, cmax=TRUE, tmax=TRUE,
+                          auclast=TRUE, aucint.inf.obs=TRUE)
 # Combine concentration and dose
 o_data <- PKNCAdata(o_conc, intervals=d_intervals)
 # Calculate the results (suppressMessages() hides a message that isn't needed now)
@@ -141,7 +144,7 @@ o_result <- pk.nca(o_data)
 # Look at summarized results
 pander::pander(summary(o_result))
 
-## -----------------------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 # Look at individual results
 pander::pander(head(
   as.data.frame(o_result),
@@ -241,7 +244,8 @@ try({
 
 ## ----echo=TRUE----------------------------------------------------------------
 o_conc <- PKNCAconc(conc~Time|Treatment+Subject, data=d_conc)
-d_intervals <- data.frame(start=0, end=Inf, cmax=TRUE, tmax=TRUE, half.life=TRUE, aucinf.obs=TRUE)
+d_intervals <- data.frame(start=0, end=Inf, cmax=TRUE, tmax=TRUE,
+                          half.life=TRUE, aucinf.obs=TRUE)
 o_data_manual_intervals <- PKNCAdata(o_conc, intervals=d_intervals)
 summary(pk.nca(o_data_manual_intervals))
 
@@ -384,17 +388,17 @@ p_auc_calcs
 
 ## ----exclude-example-1, echo=TRUE---------------------------------------------
 d_before_exclude <-
-  data.frame(
-    time=0:4,
-    conc=c(0, 2, 1, 0.5, 0.25),
-    not_this=c(NA, "Not this", NA, NA, NA)
-  )
+ data.frame(
+  time=0:4,
+  conc=c(0, 2, 1, 0.5, 0.25),
+  not_this=c(NA, "Not this", rep(NA, 3))
+ )
 o_conc <-
-  PKNCAconc(
-    data=d_before_exclude,
-    conc~time,
-    exclude="not_this"
-  )
+ PKNCAconc(
+  data=d_before_exclude,
+  conc~time,
+  exclude="not_this"
+ )
 
 ## ----exclude-example-2, echo=TRUE---------------------------------------------
 pander::pander(
@@ -402,7 +406,7 @@ pander::pander(
     filter(is.na(not_this))
 )
 
-## ---- echo=TRUE, eval=FALSE---------------------------------------------------
+## ----echo=TRUE, eval=FALSE----------------------------------------------------
 #  o_conc <- PKNCAconc(data=d_before_exclude, conc~time, exclude="not_this")
 
 ## ----echo=TRUE----------------------------------------------------------------
@@ -529,7 +533,7 @@ d_first_two <-
     dose.times=c(0, 24)
   )
 
-## ---- fig.height=3, fig.width=3-----------------------------------------------
+## ----fig.height=3, fig.width=3------------------------------------------------
 ggplot(d_ss, aes(x=time, y=conc)) +
   geom_point() + geom_line() +
   scale_y_continuous(limits=c(0, NA))
@@ -558,11 +562,7 @@ d_plot <-
   mutate(
     figure=
       lapply(
-        pmap(
-          .l=list(data=data),
-          .f=ggplot,
-          aes(x=Time, y=conc)
-        ),
+        pmap(.l=list(data=data), .f=ggplot,aes(x=Time, y=conc)),
         FUN="+",
         geom_line()
       )
@@ -575,7 +575,7 @@ pander::pander(summary(o_nca))
 ## ----echo=TRUE, eval=FALSE----------------------------------------------------
 #  pander::pander(as.data.frame(o_nca))
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 d_conc <-
   datasets::Theoph %>%
   rename(time=Time) %>%
@@ -600,7 +600,7 @@ d_multidose_single_analyte <-
     Study_Part="Multiple"
   )
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 d_single_multi_conc <- bind_rows(d_singledose_single_analyte, d_multidose_single_analyte)
 d_single_multi_dose <-
   d_single_multi_conc %>%
@@ -609,7 +609,7 @@ d_single_multi_dose <-
       (Study_Part %in% "Multiple" & (time %% 24) == 0)
   )
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 o_conc <- PKNCAconc(data=d_single_multi_conc, conc~time|Study_Part+Subject)
 o_dose <- PKNCAdose(data=d_single_multi_dose, Dose~time|Study_Part+Subject)
 o_data <- PKNCAdata(o_conc, o_dose)
@@ -651,7 +651,7 @@ o_data <- PKNCAdata(o_conc, o_dose, intervals=d_intervals)
 o_nca <- pk.nca(o_data)
 summary(o_nca, drop.group=c("Subject", "end"))
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 d_single_multi_conc_multi_analyte <-
   bind_rows(
     d_single_multi_conc %>% mutate(Analyte="Parent"),

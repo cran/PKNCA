@@ -7,15 +7,14 @@
 pk.calc.ctrough(conc, time, end)
 }
 \arguments{
-\item{conc}{Observed concentrations during the interval}
+\item{conc}{Measured concentrations}
 
-\item{time}{Times of \code{conc} observations}
+\item{time}{Time of the measurement of the concentrations}
 
-\item{end}{End time of the interval}
+\item{end}{The end time of the interval}
 }
 \value{
-The concentration when \code{time == end}.  If none
-  match, then \code{NA}
+The concentration when \code{time == end}.  If none match, then \code{NA}
 }
 \description{
 Determine the trough (end of interval) concentration
@@ -24,6 +23,7 @@ Determine the trough (end of interval) concentration
 Other NCA parameters for concentrations during the intervals: 
 \code{\link{pk.calc.clast.obs}()},
 \code{\link{pk.calc.cmax}()},
+\code{\link{pk.calc.count_conc}()},
 \code{\link{pk.calc.cstart}()}
 }
 \concept{NCA parameters for concentrations during the intervals}

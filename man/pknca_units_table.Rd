@@ -4,26 +4,41 @@
 \alias{pknca_units_table}
 \title{Create a unit assignment and conversion table}
 \usage{
-pknca_units_table(concu, doseu, amountu, timeu, conversions = data.frame())
+pknca_units_table(
+  concu,
+  doseu,
+  amountu,
+  timeu,
+  concu_pref = NULL,
+  doseu_pref = NULL,
+  amountu_pref = NULL,
+  timeu_pref = NULL,
+  conversions = data.frame()
+)
 }
 \arguments{
 \item{concu, doseu, amountu, timeu}{Units for concentration, dose, amount, and
-time}
+time in the source data}
+
+\item{concu_pref, doseu_pref, amountu_pref, timeu_pref}{Preferred units for
+reporting; \code{conversions} will be automatically.}
 
 \item{conversions}{An optional data.frame with columns of c("PPORRESU",
 "PPSTRESU", "conversion_factor") for the original calculation units, the
 standardized units, and a conversion factor to multiply the initial value
-by to get a standardized value.}
+by to get a standardized value.  This argument overrides any preferred unit
+conversions from \code{concu_pref}, \code{doseu_pref}, \code{amountu_pref}, or
+\code{timeu_pref}.}
 }
 \value{
-A unit conversion table with columns for "PPTESTCD" and "PPORRESU" if
-  \code{conversions} is not given, and adding "PPSTRESU" and
-  "conversion_factor" if \code{conversions} is given.
+A unit conversion table with columns for "PPTESTCD" and "PPORRESU"
+if \code{conversions} is not given, and adding "PPSTRESU" and
+"conversion_factor" if \code{conversions} is given.
 }
 \description{
-This data.frame is typically used for the \code{units} argument for
-\code{\link{PKNCAdata}()}.  If a unit is not given, then all of the units
-derived from that unit will be \code{NA}.
+This data.frame is typically used for the \code{units} argument for \code{\link[=PKNCAdata]{PKNCAdata()}}.
+If a unit is not given, then all of the units derived from that unit will be
+\code{NA}.
 }
 \examples{
 pknca_units_table() # only parameters that are unitless
@@ -50,7 +65,14 @@ pknca_units_table(
     conversion_factor=c(1/138.121, NA, NA)
   )
 )
+
+# This will make all time-related parameters use "day" even though the
+# original units are "hr"
+pknca_units_table(
+  concu = "ng/mL", doseu = "mg/kg", timeu = "hr", amountu = "mg",
+  timeu_pref = "day"
+)
 }
 \seealso{
-The \code{units} argument for \code{\link{PKNCAdata}()}
+The \code{units} argument for \code{\link[=PKNCAdata]{PKNCAdata()}}
 }

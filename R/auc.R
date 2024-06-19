@@ -4,51 +4,42 @@
 #' (AUMC) for pharmacokinetic (PK) data.  AUC and AUMC are used for many
 #' purposes when analyzing PK in drug development.
 #'
-#' \code{pk.calc.auc.last} is simply a shortcut setting the \code{interval}
-#' parameter to \code{c(0, "last")}.
+#' `pk.calc.auc.last` is simply a shortcut setting the `interval`
+#' parameter to `c(0, "last")`.
 #'
 #' Extrapolation beyond Clast occurs using the half-life and Clast,obs;
 #' Clast,pred is not yet supported.
 #'
 #' If all conc input are zero, then the AU(M)C is zero.
 #'
-#' @param conc Concentration measured
-#' @param time Time of concentration measurement (must be monotonically
-#'   increasing and the same length as the concentration data)
-#' @param interval Numeric vector of two numbers for the start and end time of
-#'   integration
-#' @param auc.type The type of AUC to compute.  Choices are 'AUCinf', 'AUClast',
-#'   and 'AUCall'.
+#' @inheritParams assert_conc_time
+#' @inheritParams assert_intervaltime_single
+#' @inheritParams choose_interval_method
+#' @inheritParams assert_lambdaz
+#' @inheritParams PKNCA.choose.option
 #' @param clast,clast.obs,clast.pred The last concentration above the limit of
 #'   quantification; this is used for AUCinf calculations.  If provided as
 #'   clast.obs (observed clast value, default), AUCinf is AUCinf,obs. If
 #'   provided as clast.pred, AUCinf is AUCinf,pred.
-#' @param lambda.z The elimination rate (in units of inverse time) for
-#'   extrapolation
-#' @param options List of changes to the default \code{\link{PKNCA.options}} for
-#'   calculations.
-#' @param method The method for integration (either 'lin up/log down' or
-#'   'linear')
 #' @param conc.blq How to handle BLQ values in between the first and last above
-#'   LOQ concentrations. (See \code{\link{clean.conc.blq}} for usage
-#'   instructions.)
+#'   LOQ concentrations. (See [clean.conc.blq()] for usage instructions.)
 #' @param conc.na How to handle missing concentration values.  (See
-#'   \code{\link{clean.conc.na}} for usage instructions.)
-#' @param check Run \code{\link{check.conc.time}}, \code{\link{clean.conc.blq}},
-#'   and \code{\link{clean.conc.na}}?
-#' @param fun.linear The function to use for integration of the linear part of
+#'   [clean.conc.na()] for usage instructions.)
+#' @param check Run [assert_conc_time()], [clean.conc.blq()], and
+#'   [clean.conc.na()]?
+#' @param fun_linear The function to use for integration of the linear part of
 #'   the curve (not required for AUC or AUMC functions)
-#' @param fun.log The function to use for integration of the logarithmic part of
+#' @param fun_log The function to use for integration of the logarithmic part of
 #'   the curve (if log integration is used; not required for AUC or AUMC
 #'   functions)
-#' @param fun.inf The function to use for extrapolation from the final
+#' @param fun_inf The function to use for extrapolation from the final
 #'   measurement to infinite time (not required for AUC or AUMC functions.
-#' @param ... For functions other than \code{pk.calc.auxc}, these values are
-#'   passed to \code{pk.calc.auxc}
-#' @return A numeric value for the AU(M)C.
+#' @param ... For functions other than `pk.calc.auxc`, these values are passed
+#'   to `pk.calc.auxc`
+#' @returns A numeric value for the AU(M)C.
 #' @aliases pk.calc.auc pk.calc.aumc pk.calc.auc.last
 #' @family AUC calculations
-#' @seealso \code{\link{clean.conc.blq}}
+#' @seealso [clean.conc.blq()]
 #' @references
 #'
 #' Gabrielsson J, Weiner D.  "Section 2.8.1 Computation methods - Linear
@@ -75,13 +66,13 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
                          conc.blq=NULL,
                          conc.na=NULL,
                          check=TRUE,
-                         fun.linear, fun.log, fun.inf) {
+                         fun_linear, fun_log, fun_inf) {
   # Check the inputs
   method <- PKNCA.choose.option(name="auc.method", value=method, options=options)
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
   if (check) {
-    check.conc.time(conc, time)
+    assert_conc_time(conc = conc, time = time)
     data <-
       clean.conc.blq(
         conc, time,
@@ -90,7 +81,7 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
         check=FALSE
       )
   } else {
-    data <- data.frame(conc, time)
+    data <- data.frame(conc = conc, time = time)
   }
   if (nrow(data) == 0) {
     # All the data were missing
@@ -112,16 +103,10 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
     return(structure(0, exclude="DO NOT EXCLUDE"))
   }
   auc.type <- match.arg(auc.type)
-  if (interval[1] >= interval[2])
-    stop("The AUC interval must be increasing")
-  if (auc.type %in% "AUCinf" &
-        is.finite(interval[2]))
+  interval <- assert_intervaltime_single(interval = interval)
+  if (auc.type %in% "AUCinf" & is.finite(interval[2])) {
     warning("Requesting AUCinf when the end of the interval is not Inf")
-  # if (requireNamespace("units", quietly=TRUE)) {
-  #   if (inherits(time, "units") & !inherits(interval, "units")) {
-  #     interval <- units::set_units(interval, units(time), mode="standard")
-  #   }
-  # }
+  }
 
   # Subset the data to the range of interest ####
   interval_start <- interval[1]
@@ -144,12 +129,14 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
   # need to make sure that we have our starting point. Interpolation ensures
   # that (and will give the same answer if it already exists in the right form).
   conc_start <-
-    interp.extrap.conc(data$conc, data$time,
-                       time.out=interval_start,
-                       lambda.z=lambda.z,
-                       interp.method=method,
-                       extrap.method=auc.type,
-                       check=FALSE)
+    interp.extrap.conc(
+      data$conc, data$time,
+      time.out = interval_start,
+      lambda.z = lambda.z,
+      method = method,
+      auc.type = auc.type,
+      check = FALSE
+    )
   # Add that concentration and time to the vectors removing the
   # original version if it was there.
   data <- rbind(data.frame(conc=conc_start,
@@ -158,17 +145,21 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
   # * either have our ending point or the ending point is Inf
   if (is.finite(interval_end)) {
     conc_end <-
-      interp.extrap.conc(data$conc, data$time,
-                         interval_end,
-                         interp.method=method,
-                         extrap.method=auc.type,
-                         check=FALSE)
-    # !mask.end because we may be replacing an entry that is a 0.
-    data <-
-      rbind(
-        data[!(data$time %in% interval_end), ],
-        data.frame(conc=conc_end, time=interval_end)
+      interp.extrap.conc(
+        data$conc, data$time,
+        interval_end,
+        method = method,
+        auc.type = auc.type,
+        check = FALSE
       )
+    # !mask.end because we may be replacing an entry that is a 0.
+    if (!is.na(conc_end)) {
+      data <-
+        rbind(
+          data[!(data$time %in% interval_end), ],
+          data.frame(conc=conc_end, time=interval_end)
+        )
+    }
   }
   # Subset the conc and time data to the interval of interest
   data <- data[interval_start <= data$time & data$time <= interval_end, , drop=FALSE]
@@ -183,66 +174,29 @@ pk.calc.auxc <- function(conc, time, interval=c(0, Inf),
     # still true)
     stop("Unknown error with NA tlast but non-BLQ concentrations") # nocov
   } else {
-
-    # Compute the AUxC ####
-    # Compute it in linear space from the start to Tlast
-    if (auc.type %in% "AUCall" &
-        tlast != max(data$time)) {
-      # Include the first point after tlast if it exists and we are
-      # looking for AUCall
-      idx_1 <- seq_len(sum(data$time <= tlast))
-    } else {
-      idx_1 <- seq_len(sum(data$time <= tlast) - 1)
-    }
-    idx_2 <- idx_1 + 1
-    if (method %in% "linear") {
-      ret <- fun.linear(data$conc[idx_1], data$conc[idx_2],
-                        data$time[idx_1], data$time[idx_2])
-    } else if (method %in% "lin up/log down") {
-      # Compute log down if required (and if the later point is not 0)
-      mask_down <- (data$conc[idx_2] < data$conc[idx_1] &
-                      data$conc[idx_2] != 0)
-      mask_up <- !mask_down
-      idx_1_down <- idx_1[mask_down]
-      idx_2_down <- idx_2[mask_down]
-      idx_1_up <- idx_1[mask_up]
-      idx_2_up <- idx_2[mask_up]
-      ret <- rep(NA_real_, length(idx_1))
-      ret[mask_up] <-
-        fun.linear(data$conc[idx_1_up], data$conc[idx_2_up],
-                   data$time[idx_1_up], data$time[idx_2_up])
-      ret[mask_down] <-
-        fun.log(data$conc[idx_1_down], data$conc[idx_2_down],
-                data$time[idx_1_down], data$time[idx_2_down])
-    } else if (!(method %in% "linear")) { # nocov
-      # This should have already been caught, but the test exists to double-check
-      stop("Invalid AUC integration method (please report a bug)") # nocov
-    }
-    if (auc.type %in% "AUCinf") {
-      # Whether AUCinf,obs or AUCinf,pred is calculated depends on if clast,obs
-      # or clast,pred is passed in.
-      ret[length(ret)+1] <- fun.inf(clast, tlast, lambda.z)
-    }
-    ret <- sum(ret)
+    interval_method <- choose_interval_method(conc = data$conc, time = data$time, tlast = tlast, method = method, auc.type = auc.type, options = options)
+    ret <-
+      auc_integrate(
+        conc = data$conc, time = data$time,
+        clast = clast, tlast = tlast, lambda.z = lambda.z,
+        interval_method = interval_method,
+        fun_linear = fun_linear, fun_log = fun_log, fun_inf = fun_inf
+      )
   }
   ret
 }
 
-fun.auc.linear <- function(conc.1, conc.2, time.1, time.2)
-  (time.2-time.1) * (conc.2+conc.1)/2
-fun.auc.log <- function(conc.1, conc.2, time.1, time.2)
-  (time.2-time.1) * (conc.2-conc.1)/log(conc.2/conc.1)
-fun.auc.inf <- function(clast, tlast, lambda.z)
-  clast/lambda.z
-
 #' @describeIn pk.calc.auxc Compute the area under the curve
 #' @export
-pk.calc.auc <- function(conc, time, ..., options=list())
-  pk.calc.auxc(conc=conc, time=time, ...,
-               options=options,
-               fun.linear=fun.auc.linear,
-               fun.log=fun.auc.log,
-               fun.inf=fun.auc.inf)
+pk.calc.auc <- function(conc, time, ..., options=list()) {
+  pk.calc.auxc(
+    conc=conc, time=time, ...,
+    options=options,
+    fun_linear=aucintegrate_linear,
+    fun_log=aucintegrate_log,
+    fun_inf=aucintegrate_inf
+  )
+}
 
 # Note that lambda.z is set to NA for both auc.last and auc.all because all
 # interpolation should happen within given points. lambda.z should not be used,
@@ -260,8 +214,7 @@ pk.calc.auc.last <- function(conc, time, ..., options=list()) {
 
 #' @describeIn pk.calc.auxc Compute the AUCinf
 #' @export
-pk.calc.auc.inf <- function(conc, time, ..., options=list(),
-                            lambda.z) {
+pk.calc.auc.inf <- function(conc, time, ..., options=list(), lambda.z) {
   if ("auc.type" %in% names(list(...)))
     stop("auc.type cannot be changed when calling pk.calc.auc.inf, please use pk.calc.auc")
   pk.calc.auc(conc=conc, time=time, ...,
@@ -301,18 +254,13 @@ pk.calc.auc.all <- function(conc, time, ..., options=list()) {
 
 #' @describeIn pk.calc.auxc Compute the area under the moment curve
 #' @export
-pk.calc.aumc <- function(conc, time, ..., options=list())
+pk.calc.aumc <- function(conc, time, ..., options=list()) {
   pk.calc.auxc(conc=conc, time=time, ..., options=options,
-    fun.linear=function(conc.1, conc.2, time.1, time.2) {
-      (time.2-time.1) * (conc.2*time.2+conc.1*time.1)/2
-    },
-    fun.log=function(conc.1, conc.2, time.1, time.2) {
-      ((time.2-time.1) * (conc.2*time.2-conc.1*time.1) / log(conc.2/conc.1)-
-       (time.2-time.1)^2 * (conc.2-conc.1) / (log(conc.2/conc.1)^2))
-    },
-    fun.inf=function(conc.last, time.last, lambda.z) {
-      (conc.last*time.last/lambda.z) + conc.last/(lambda.z^2)
-    })
+    fun_linear = aumcintegrate_linear,
+    fun_log = aumcintegrate_log,
+    fun_inf = aumcintegrate_inf
+  )
+}
 
 #' @describeIn pk.calc.auxc Compute the AUMClast.
 #' @export
@@ -328,8 +276,9 @@ pk.calc.aumc.last <- function(conc, time, ..., options=list()) {
 #' @export
 pk.calc.aumc.inf <- function(conc, time, ..., options=list(),
                              lambda.z) {
-  if ("auc.type" %in% names(list(...)))
+  if ("auc.type" %in% names(list(...))) {
     stop("auc.type cannot be changed when calling pk.calc.aumc.inf, please use pk.calc.aumc")
+  }
   pk.calc.aumc(conc=conc, time=time, ..., options=options,
                auc.type="AUCinf",
                lambda.z=lambda.z)

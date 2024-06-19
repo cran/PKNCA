@@ -1,18 +1,15 @@
-#' Handle NA values in the concentration measurements as requested by
-#' the user.
+#' Handle NA values in the concentration measurements as requested by the user.
 #'
-#' NA concentrations (and their associated times) will be removed then
-#' the BLQ values in the middle
+#' NA concentrations (and their associated times) will be removed then the BLQ
+#' values in the middle
 #'
-#' @param conc Measured concentrations
-#' @param time Time of the concentration measurement
+#' @inheritParams assert_conc_time
+#' @inheritParams PKNCA.choose.option
 #' @param \dots Additional items to add to the data frame
-#' @param options List of changes to the default
-#'   \code{\link{PKNCA.options}} for calculations.
-#' @param conc.na How to handle NA concentrations?  Either 'drop' or a
-#'   number to impute.
-#' @param check Run \code{\link{check.conc.time}}?
-#' @return The concentration and time measurements (data frame) filtered
+#' @param conc.na How to handle NA concentrations?  Either 'drop' or a number to
+#'   impute.
+#' @param check Run [assert_conc_time()]?
+#' @returns The concentration and time measurements (data frame) filtered
 #'   and cleaned as requested relative to NA in the concentration.
 #' @family Data cleaners
 #' @export
@@ -22,7 +19,7 @@ clean.conc.na <- function(conc, time, ...,
                           check=TRUE) {
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
   if (check)
-    check.conc.time(conc, time)
+    assert_conc_time(conc, time)
   # Prep it as a data frame
   ret <- data.frame(conc, time, ..., stringsAsFactors=FALSE)
   if (conc.na %in% "drop") {
@@ -38,31 +35,27 @@ clean.conc.na <- function(conc, time, ...,
   ret
 }
 
-#' Handle BLQ values in the concentration measurements as requested by
-#' the user.
+#' Handle BLQ values in the concentration measurements as requested by the user.
 #'
-#' @param conc Measured concentrations
-#' @param time Time of the concentration measurement
+#' @inheritParams assert_conc_time
+#' @inheritParams PKNCA.choose.option
 #' @param \dots Additional arguments passed to clean.conc.na
-#' @param options List of changes to the default
-#'   \code{\link{PKNCA.options}} for calculations.
-#' @param conc.blq How to handle a BLQ value that is between above LOQ
-#'   values?  See details for description.
-#' @param conc.na How to handle NA concentrations.  (See
-#'   \code{\link{clean.conc.na}})
-#' @param check Run \code{\link{check.conc.time}}?
-#' @return The concentration and time measurements (data frame) filtered
-#'   and cleaned as requested relative to BLQ in the middle.
+#' @param conc.blq How to handle a BLQ value that is between above LOQ values?
+#'   See details for description.
+#' @param conc.na How to handle NA concentrations.  (See [clean.conc.na()])
+#' @param check Run [assert_conc_time()]?
+#' @returns The concentration and time measurements (data frame) filtered and
+#'   cleaned as requested relative to BLQ in the middle.
 #'
-#' @details NA concentrations (and their associated times) will be
-#'   handled as described in \code{\link{clean.conc.na}} before working
-#'   with the BLQ values.  The method for handling NA concentrations can
-#'   affect the output of which points are considered BLQ and which are
-#'   considered "middle".  Values are considered BLQ if they are 0.
+#' @details `NA` concentrations (and their associated times) will be handled as
+#'   described in [clean.conc.na()] before working with the BLQ values.  The
+#'   method for handling NA concentrations can affect the output of which points
+#'   are considered BLQ and which are considered "middle".  Values are
+#'   considered BLQ if they are 0.
 #'
-#' \code{conc.blq} can be set either a scalar indicating what
-#' should be done for all BLQ values or a list with elements named
-#' "first", "middle", and "last" each set to a scalar.
+#'   `conc.blq` can be set either a scalar indicating what should be done for
+#'   all BLQ values or a list with elements named "first", "middle", and "last"
+#'   each set to a scalar.
 #'
 #' The meaning of each of the list elements is:
 #' \describe{
@@ -90,8 +83,9 @@ clean.conc.blq <- function(conc, time,
                            check=TRUE) {
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
-  if (check)
-    check.conc.time(conc, time)
+  if (check) {
+    assert_conc_time(conc, time)
+  }
   # Handle NA concentrations and make the data frame
   ret <- clean.conc.na(conc, time, ..., conc.na=conc.na, check=FALSE)
   # If all data has been excluded, then don't do anything

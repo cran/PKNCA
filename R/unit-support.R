@@ -1,19 +1,23 @@
 #' Create a unit assignment and conversion table
 #'
-#' This data.frame is typically used for the \code{units} argument for
-#' \code{\link{PKNCAdata}()}.  If a unit is not given, then all of the units
-#' derived from that unit will be \code{NA}.
+#' This data.frame is typically used for the `units` argument for [PKNCAdata()].
+#' If a unit is not given, then all of the units derived from that unit will be
+#' `NA`.
 #'
 #' @param concu,doseu,amountu,timeu Units for concentration, dose, amount, and
-#'   time
+#'   time in the source data
+#' @param concu_pref,doseu_pref,amountu_pref,timeu_pref Preferred units for
+#'   reporting; `conversions` will be automatically.
 #' @param conversions An optional data.frame with columns of c("PPORRESU",
 #'   "PPSTRESU", "conversion_factor") for the original calculation units, the
 #'   standardized units, and a conversion factor to multiply the initial value
-#'   by to get a standardized value.
-#' @return A unit conversion table with columns for "PPTESTCD" and "PPORRESU" if
-#'   \code{conversions} is not given, and adding "PPSTRESU" and
-#'   "conversion_factor" if \code{conversions} is given.
-#' @seealso The \code{units} argument for \code{\link{PKNCAdata}()}
+#'   by to get a standardized value.  This argument overrides any preferred unit
+#'   conversions from `concu_pref`, `doseu_pref`, `amountu_pref`, or
+#'   `timeu_pref`.
+#' @returns A unit conversion table with columns for "PPTESTCD" and "PPORRESU"
+#'   if `conversions` is not given, and adding "PPSTRESU" and
+#'   "conversion_factor" if `conversions` is given.
+#' @seealso The `units` argument for [PKNCAdata()]
 #' @examples
 #' pknca_units_table() # only parameters that are unitless
 #' pknca_units_table(
@@ -39,42 +43,86 @@
 #'     conversion_factor=c(1/138.121, NA, NA)
 #'   )
 #' )
+#'
+#' # This will make all time-related parameters use "day" even though the
+#' # original units are "hr"
+#' pknca_units_table(
+#'   concu = "ng/mL", doseu = "mg/kg", timeu = "hr", amountu = "mg",
+#'   timeu_pref = "day"
+#' )
 #' @export
-pknca_units_table <- function(concu, doseu, amountu, timeu, conversions=data.frame()) {
-  # The unit conversions are grouped by the type of inputs required
-  ret_any <-
-    rbind(
+pknca_units_table <- function(concu, doseu, amountu, timeu,
+                              concu_pref = NULL, doseu_pref = NULL, amountu_pref = NULL, timeu_pref = NULL,
+                              conversions = data.frame()) {
+  checkmate::assert_data_frame(conversions)
+  if (nrow(conversions) > 0) {
+    checkmate::assert_names(
+      names(conversions),
+      subset.of = c("PPORRESU", "PPSTRESU", "conversion_factor"),
+      must.include = c("PPORRESU", "PPSTRESU")
     )
+    if (!("conversion_factor" %in% names(conversions))) {
+      conversions$conversion_factor <- NA_real_
+    }
+  }
+
+  # The unit conversions are grouped by the type of inputs required
   ret <-
     rbind(
       pknca_units_table_unitless(),
       pknca_units_table_time(timeu=timeu),
       pknca_units_table_conc(concu=concu),
       pknca_units_table_amount(amountu=amountu),
+      pknca_units_table_dose(doseu = doseu),
       pknca_units_table_conc_dose(concu=concu, doseu=doseu),
       pknca_units_table_conc_time(concu=concu, timeu=timeu),
       pknca_units_table_conc_time_dose(concu=concu, timeu=timeu, doseu=doseu),
       pknca_units_table_conc_time_amount(concu=concu, timeu=timeu, amountu=amountu)
     )
-  # You don't have to define parameters for everything for the parameters to be useful
-  # missing_cols <- setdiff(names(get.interval.cols()), c(ret$PPTESTCD, "start", "end"))
-  # if (length(missing_cols) > 0) {
-  #   stop("The following NCA parameters do not have units defined: ", paste(missing_cols, collapse=", "))
-  # }
+
+  # Generate preferred units and merge them into `conversions`
+  if (any(!is.null(concu_pref), !is.null(doseu_pref), !is.null(amountu_pref), !is.null(timeu_pref))) {
+    ret_pref <-
+      pknca_units_table(
+        concu = choose_first(concu_pref, concu),
+        doseu = choose_first(doseu_pref, doseu),
+        amountu = choose_first(amountu_pref, amountu),
+        timeu = choose_first(timeu_pref, timeu)
+      )
+    ret_pref <- dplyr::rename(ret_pref, PPSTRESU = "PPORRESU")
+    conversions_pref <- dplyr::left_join(ret, ret_pref, by = "PPTESTCD")
+    conversions_pref$PPTESTCD <- NULL
+    conversions_pref <- unique(conversions_pref)
+    # Drop units that are not converted
+    conversions_pref <- conversions_pref[conversions_pref$PPORRESU != conversions_pref$PPSTRESU, ]
+    # Drop units that are not provided
+    conversions_pref <- conversions_pref[!is.na(conversions_pref$PPORRESU), ]
+    conversions_pref$conversion_factor <- NA_real_
+    for (idx in seq_len(nrow(conversions))) {
+      # Use the original conversions argument over `conversions_pref`
+      mask_pref <- conversions_pref$PPORRESU %in% conversions$PPORRESU[idx]
+      if (!any(mask_pref)) {
+        stop("Cannot find PPORRESU match between conversions and preferred unit conversions.  Check PPORRESU values in 'conversions' argument.")
+      }
+      conversions_pref$PPSTRESU[mask_pref] <- conversions$PPSTRESU[idx]
+      conversions_pref$conversion_factor[mask_pref] <- conversions$conversion_factor[idx]
+    }
+    conversions <- conversions_pref
+  }
+
   extra_cols <- setdiff(ret$PPTESTCD, names(PKNCA::get.interval.cols()))
   if (length(extra_cols) > 0) {
     stop("Please report a bug.  Unknown NCA parameters have units defined: ", paste(extra_cols, collapse=", ")) # nocov
   }
+
+  # Apply conversion factors
   if (nrow(conversions) > 0) {
     stopifnot(!duplicated(conversions$PPORRESU))
     # PPSTRESU may be duplicated because some differing original units may
     # converge (e.g. cmax.dn and vss)
     stopifnot(length(setdiff(names(conversions), c("PPORRESU", "PPSTRESU", "conversion_factor"))) == 0)
-    if (!("conversion_factor" %in% names(conversions))) {
-      if (!requireNamespace("units", quietly=TRUE)) {
-        stop("The units package is required for automatic unit conversion") # nocov
-      }
-      conversions$conversion_factor <- NA_real_
+    if (any(is.na(conversions$conversion_factor)) && !requireNamespace("units", quietly=TRUE)) {
+      stop("The units package is required for automatic unit conversion") # nocov
     }
     for (idx in which(is.na(conversions$conversion_factor))) {
       conversions$conversion_factor[idx] <-
@@ -134,6 +182,16 @@ pknca_units_table_unitless <- function() {
   )
 }
 
+choose_first <- function(x, y, .default = NA) {
+  if (!useless(x)) {
+    x
+  } else if (!useless(y)) {
+    y
+  } else {
+    .default
+  }
+}
+
 useless <- function(x) {
   missing(x) || is.null(x) || is.na(x)
 }
@@ -180,6 +238,17 @@ pknca_units_table_amount <- function(amountu) {
   data.frame(
     PPORRESU=amountu,
     PPTESTCD=pknca_find_units_param(unit_type="amount"),
+    stringsAsFactors=FALSE
+  )
+}
+
+pknca_units_table_dose <- function(doseu) {
+  if (useless(doseu)) {
+    doseu <- NA_character_
+  }
+  data.frame(
+    PPORRESU=doseu,
+    PPTESTCD=pknca_find_units_param(unit_type="dose"),
     stringsAsFactors=FALSE
   )
 }
@@ -280,8 +349,8 @@ pknca_units_table_conc_time_amount <- function(concu, timeu, amountu) {
 
 #' Find NCA parameters with a given unit type
 #'
-#' @param unit_type The type of unit as assigned with \code{add.interval.col}
-#' @return A character vector of parameters with a given unit type
+#' @param unit_type The type of unit as assigned with `add.interval.col`
+#' @returns A character vector of parameters with a given unit type
 #' @keywords Internal
 pknca_find_units_param <- function(unit_type) {
   stopifnot(length(unit_type) == 1)
@@ -302,7 +371,7 @@ pknca_find_units_param <- function(unit_type) {
 #' Add parentheses to a unit value, if needed
 #'
 #' @param unit The text of the unit
-#' @return The unit with parentheses around it, if needed
+#' @returns The unit with parentheses around it, if needed
 #' @keywords Internal
 pknca_units_add_paren <- function(unit) {
   mask_paren <- grepl(x=unit, pattern="[*/]")
@@ -313,7 +382,7 @@ pknca_units_add_paren <- function(unit) {
 #'
 #' @param result The results data.frame
 #' @param units The unit conversion table
-#' @return The result table with units converted
+#' @returns The result table with units converted
 #' @keywords Internal
 pknca_unit_conversion <- function(result, units) {
   ret <- result

@@ -10,13 +10,13 @@ pk.calc.cmax(conc, check = TRUE)
 pk.calc.cmin(conc, check = TRUE)
 }
 \arguments{
-\item{conc}{Concentration measured}
+\item{conc}{Measured concentrations}
 
-\item{check}{Run \code{\link{check.conc.time}}?}
+\item{check}{Run \code{\link[=assert_conc]{assert_conc()}}?}
 }
 \value{
-a number for the maximum concentration or NA if all
-concentrations are missing
+a number for the maximum concentration or NA if all concentrations
+are missing
 }
 \description{
 Determine maximum observed PK concentration
@@ -30,11 +30,13 @@ concentration
 \seealso{
 Other NCA parameters for concentrations during the intervals: 
 \code{\link{pk.calc.clast.obs}()},
+\code{\link{pk.calc.count_conc}()},
 \code{\link{pk.calc.cstart}()},
 \code{\link{pk.calc.ctrough}()}
 
 Other NCA parameters for concentrations during the intervals: 
 \code{\link{pk.calc.clast.obs}()},
+\code{\link{pk.calc.count_conc}()},
 \code{\link{pk.calc.cstart}()},
 \code{\link{pk.calc.ctrough}()}
 }

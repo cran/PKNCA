@@ -1,23 +1,19 @@
-#' Clean up the time to steady-state parameters and return a data
-#' frame for use by the tss calculators.
+#' Clean up the time to steady-state parameters and return a data frame for use
+#' by the tss calculators.
 #'
-#' @param conc Concentration measured
-#' @param time Time of concentration measurement
-#' @param subject Subject identifiers (used as a random effect in the
-#' model)
-#' @param treatment Treatment description (if missing, all subjects
-#' are assumed to be on the same treatment)
+#' @inheritParams assert_conc_time
+#' @inheritParams PKNCA.choose.option
+#' @param subject Subject identifiers (used as a random effect in the model)
+#' @param treatment Treatment description (if missing, all subjects are assumed
+#'   to be on the same treatment)
 #' @param subject.dosing Subject number for dosing
 #' @param time.dosing Time of dosing
-#' @param options List of changes to the default
-#' \code{\link{PKNCA.options}} for calculations.
-#' @param conc.blq See \code{\link{clean.conc.blq}}
-#' @param conc.na See \code{\link{clean.conc.na}}
-#' @param check Run \code{\link{check.conc.time}}?
-#' @param \dots Discarded inputs to allow generic calls between tss
-#' methods.
-#' @return a data frame with columns for \code{conc}entration,
-#' \code{time}, \code{subject}, and \code{treatment}.
+#' @param conc.blq See [clean.conc.blq()]
+#' @param conc.na See [clean.conc.na()]
+#' @param check Run [assert_conc_time()]?
+#' @param \dots Discarded inputs to allow generic calls between tss methods.
+#' @returns a data frame with columns for `conc`entration, `time`, `subject`,
+#'   and `treatment`.
 pk.tss.data.prep <- function(conc, time, subject, treatment,
                              subject.dosing, time.dosing,
                              options=list(),
@@ -28,10 +24,10 @@ pk.tss.data.prep <- function(conc, time, subject, treatment,
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
   if (check) {
-    # When subject and time are given, then monotonicity tests for
+    # When subject and time are not given, then monotonicity tests for
     # time are not required.
-    monotonic.time <- missing(subject) & missing(treatment)
-    check.conc.time(conc, time, monotonic.time=monotonic.time)
+    sorted_time <- missing(subject) & missing(treatment)
+    assert_conc_time(conc = conc, time = time, sorted_time = sorted_time)
   }
   if (!missing(subject.dosing) & missing(subject)) {
     stop("Cannot give subject.dosing without subject")
@@ -97,13 +93,13 @@ pk.tss.data.prep <- function(conc, time, subject, treatment,
 
 #' Compute the time to steady-state (tss)
 #'
-#' @param \dots Passed to \code{\link{pk.tss.monoexponential}} or
-#' \code{\link{pk.tss.stepwise.linear}}.
-#' @param check See \code{\link{pk.tss.data.prep}}
-#' @param type The type of Tss to calculate, either
-#' \code{stepwise.linear} or \code{monoexponential}
-#' @return A data frame with columns as defined from
-#' \code{pk.tss.monoexponential} and/or \code{pk.tss.stepwise.linear}.
+#' @param \dots Passed to [pk.tss.monoexponential()] or
+#'   [pk.tss.stepwise.linear()].
+#' @param check See [pk.tss.data.prep()]
+#' @param type The type of Tss to calculate, either `stepwise.linear` or
+#'   `monoexponential`
+#' @returns A data frame with columns as defined from `pk.tss.monoexponential`
+#'   and/or `pk.tss.stepwise.linear`.
 #' @family Time to steady-state calculations
 #' @export
 pk.tss <- function(...,

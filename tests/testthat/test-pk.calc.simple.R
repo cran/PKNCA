@@ -68,12 +68,12 @@ test_that("pk.calc.tmax", {
 
   # Either concentration or time is missing, give an error
   expect_error(
-    pk.calc.tmax(conc=numeric()),
-    regexp="time must be given"
+    suppressWarnings(pk.calc.tmax(conc = numeric())),
+    regexp='argument "time" is missing, with no default'
   )
   expect_error(
     pk.calc.tmax(time=numeric()),
-    regexp="conc must be given"
+    regexp='argument "conc" is missing, with no default'
   )
 
   # It calculates tmax correctly based on the use.first option
@@ -90,12 +90,12 @@ test_that("pk.calc.tmax", {
 test_that("pk.calc.tlast", {
   # Either concentration or time is missing, give an error
   expect_error(
-    pk.calc.tlast(conc=numeric()),
-    regexp="time must be given"
+    suppressWarnings(pk.calc.tlast(conc = numeric())),
+    regexp='argument "time" is missing, with no default'
   )
   expect_error(
-    pk.calc.tlast(time=numeric()),
-    regexp="conc must be given"
+    pk.calc.tlast(time = numeric()),
+    regexp = 'argument "conc" is missing, with no default'
   )
 
   # It calculates tlast correctly
@@ -114,11 +114,11 @@ test_that("pk.calc.tlast", {
 test_that("pk.calc.tfirst", {
   expect_error(
     pk.calc.tfirst(),
-    regexp="conc must be given"
+    regexp='argument "conc" is missing, with no default'
   )
   expect_error(
-    pk.calc.tfirst(conc="A"),
-    regexp="time must be given"
+    pk.calc.tfirst(conc=1),
+    regexp='argument "time" is missing, with no default'
   )
   expect_equal(
     pk.calc.tfirst(conc=1, time=2, check=TRUE),
@@ -152,11 +152,11 @@ test_that("pk.calc.clast.obs", {
     v1 <- pk.calc.clast.obs(c1, t1),
     class = "pknca_conc_all_missing"
   )
-  expect_equal(v1, NA)
+  expect_equal(v1, NA_real_)
 
   c1 <- rep(0, 4)
   t1 <- c(0, 1, 2, 3)
-  expect_equal(pk.calc.clast.obs(c1, t1), NA)
+  expect_equal(pk.calc.clast.obs(c1, t1), 0)
 })
 
 test_that("pk.calc.thalf.eff", {
@@ -312,12 +312,16 @@ test_that("pk.calc.vz", {
                info="CL required for Vz calculation")
 
   # Ensure that length of cl and lambda.z are either 1 or the same length
-  expect_error(pk.calc.vz(cl=1:2, lambda.z=1:3),
-               regexp="'cl' and 'lambda.z' must be the same length",
-               info="CL and lambda.z must be the same length (CL shorter)")
-  expect_error(pk.calc.vz(cl=1:3, lambda.z=1:2),
-               regexp="'cl' and 'lambda.z' must be the same length",
-               info="CL and lambda.z must be the same length (lambda.z shorter)")
+  expect_error(
+    pk.calc.vz(cl=1:2, lambda.z=1:3),
+    regexp="'cl' and 'lambda.z' must be the same length",
+    info="CL and lambda.z must be the same length (CL shorter)"
+  )
+  expect_error(
+    pk.calc.vz(cl=1:3, lambda.z=1:2),
+    regexp="'cl' and 'lambda.z' must be the same length",
+    info="CL and lambda.z must be the same length (lambda.z shorter)"
+  )
 
   # Estimate a single Vz (with permutations to ensure the right math
   # is happening)
@@ -353,29 +357,6 @@ test_that("pk.calc.vss and its wrappers", {
   expect_equal(pk.calc.vss(1, 2), 2)
 })
 
-test_that("pk.calc.vd and its wrappers", {
-  expect_equal(pk.calc.vd(1, 2, 3), 1/6,
-               info="Normal Vd calculation works")
-  expect_equal(pk.calc.vd(NA, 2, 3), NA_integer_,
-               info="Vd calculation returns NA when dose is NA")
-  expect_equal(pk.calc.vd(1, NA, 3), NA_integer_,
-               info="Vd calculation returns NA when aucinf is NA")
-  expect_equal(pk.calc.vd(1, 2, NA), NA_integer_,
-               info="Vd calculation returns NA when lambda.z is NA")
-
-  expect_equal(pk.calc.vd(c(1, 2), c(2, 4), c(3, 6)), c(1/6, 1/12),
-               info="Vd calculation works with three vector inputs returning a vector")
-  expect_equal(pk.calc.vd(c(1, 2), 2, 3), 0.5,
-               info="Vd calculation works with vector dose and scalar aucinf and lambda.z inputs returning a scalar with the sum of doses used.")
-
-  expect_equal(pk.calc.vd(dose=1, aucinf=0, lambda.z=1),
-               NA_real_,
-               info="aucinf<=0 becomes NA")
-  expect_equal(pk.calc.vd(dose=1, aucinf=1, lambda.z=0),
-               NA_real_,
-               info="lambda.z<=0 becomes NA")
-})
-
 test_that("pk.calc.cav", {
   expect_equal(pk.calc.cav(2, 0, 1), 2)
   expect_equal(pk.calc.cav(NA, 0, 1), NA_real_)
@@ -390,8 +371,10 @@ test_that("pk.calc.ctrough", {
                info="Found and it's not the first time")
   expect_equal(pk.calc.ctrough(1:5, 0:4, 1.5), NA_real_,
                info="Not found")
-  expect_error(pk.calc.ctrough(1:5, c(0, 0:3), 0),
-               regexp="Time must be monotonically increasing")
+  expect_error(
+    pk.calc.ctrough(1:5, c(0, 0:3), 0),
+    regexp = "Assertion on 'time' failed: Contains duplicated values, position 2."
+  )
 })
 
 test_that("pk.calc.ptr", {
@@ -468,4 +451,16 @@ test_that("pk.calc.aucabove", {
       exclude = NA_character_
     )
   )
+})
+
+test_that("pk.calc.count_conc", {
+  expect_equal(pk.calc.count_conc(1:5), 5)
+  expect_equal(pk.calc.count_conc(c(1:2, NA)), 2)
+  expect_equal(suppressWarnings(pk.calc.count_conc(c())), 0)
+  expect_equal(suppressWarnings(pk.calc.count_conc(NA)), 0)
+})
+
+test_that("pk.calc.totdose", {
+  expect_equal(pk.calc.totdose(1), 1)
+  expect_equal(pk.calc.totdose(c(1, 1)), 2)
 })

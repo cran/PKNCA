@@ -4,6 +4,114 @@ will continue until then.  These will be especially noticeable around
 the inclusion of IV NCA parameters and additional specifications of
 the dosing including dose amount and route.
 
+# PKNCA 0.11.0
+
+* PKNCA will now indicate the number of observations included in a summary ("n")
+  when it is not the same as the number of subjects included in the summary
+  ("N") and the caption will also indicate the definition of "N" and "n".  Note
+  that counting of "n" includes all non-missing values that were not excluded
+  from summarization; this will included all zeros that are e.g. excluded from
+  geometric statistics.
+  * If `n == 1`, spread statistics are no longer calculated in the summary.
+* A new AUC integration method, "lin-log", has been added using the linear
+  method through tmax and log after tmax, with required exceptions for zeros
+  (fix #23)
+* The parameter `vd` was removed (it was not specific like `vz` or `vss`, and it
+  was effectively a duplicate of `vz`).  Use `vz`, instead.
+* The `count_conc` NCA parameter was added to assist in data quality checking.
+* Subject count ("N") previously counted the number of rows of data, but in
+  unusual circumstances, the number of subjects in an NCA result could be fewer
+  than the number of rows.  Now the number of subjects is counted (fix #223).
+* Extra column in the `intervals` argument to `PKNCAdata()` will no longer cause
+  an error (fix #238)
+* Many new `assert_*` functions were added to standardize input checking in the
+  style of the `checkmate` library.
+* Interpolation of zero concentrations in the middle of a set of concentrations
+  is now more extensively supported.
+* PKNCA has begun the process of deprecating dots in favor of underscores in
+  function and parameter names.  Functions with dots instead of underscores
+  should continue to work for the foreseeable future (until version 1.0) with
+  warnings.
+* AUCint will now extrapolate the AUC beyond Tlast using logarithmic
+  extrapolation, regardless of the method used (fix #203).
+* Imputation will now automatically search for a column named "impute" in the
+  interval definition (fix #257).
+* Imputation now can look outside the concentration-time of the interval to the
+  full concentration-time profile for the group with the `conc.group` and
+  `time.group` arguments to the imputation functions.  And,
+  `PKNCA_impute_method_start_predose()` imputation performs more reasonably when
+  the end of the interval is infinite.
+* A progress bar is now available via the `PKNCA.options(progress = )` option
+  (fix #193).
+* Additional versions of average concentration based on AUCint are now available
+  (fix #45).
+* A new option "keep_interval_cols" was added to allow keeping a column from the
+  intervals in the NCA results.  Note that these are not included in the summary
+  groups by default.
+* A new argument "filter_requested" for `as.data.frame.PKNCAresults()` allows
+  you to filter only to requested results from a PKNCAresults object.
+* `pknca_units_table()` now has four new arguments to allow for simplified
+  automatic conversion from source units to desired reporting units,
+  `concu_pref`, `doseu_pref`, `amountu_pref`, and `timeu_pref` (#197)
+* Extraction of PKNCA objects from within other PKNCA objects is now supported
+  by various `as_PKNCA*` functions like `as_PKNCAconc()` which can be used to
+  extract the concentration data from within a PKNCAdata or PKNCAresults object
+  (#278)
+* A new "totdose" parameter gives the total dose administered during an interval
+* You may exclude parameters from a summary with the new `drop_param` argument
+  to `summary()` for PKNCAresults objects.
+* The `as.data.frame()` method for `PKNCAresults` objects has a new
+  `filter_excluded` argument to remove excluded results from the extracted
+  data.frame.  The default behavior is to keep the excluded results with the
+  exclude column indicating the reason they were excluded.
+
+## Bugs fixed
+
+* `superpostion()` and the `interp.extrap.conc()` family of functions now
+  respect the interpolation and extrapolation types requested rather than using
+  default.
+* Concentration extrapolation with `extrapolate.conc()` using the "AUCall"
+  method now has decreasing instead of increasing concentrations (#249).
+* The aucint.inf.obs parameter when calculated with all zero concentrations
+  returns zero and aucint.inf.pred returns `NA_real_` (#253)
+
+## Breaking changes
+
+* The arguments `interp.method` and `extrap.method` have been replaced with
+  `method` and `auc.type` in the `interp.extrap.conc()` family of functions for
+  consistency with the rest of PKNCA (fix #244)
+* The AIC.list() function is no longer exported (it was never intended to be an
+  external function).
+* The `depends` argument to `add.interval.col()` must either be NULL or a
+  character vector.
+* The names of the `fun.linear`, `fun.log`, and `fun.inf` arguments to
+  `pk.calc.auxc` were changed to use underscores.  (If you were using those
+  directly, please reach out as they were intended to be internal arguments, and
+  I would like to know your use case for changing them.)
+* `check.conc.time()` is defunct (it was never intended to be an external
+  function).  It has been replaced by `assert_conc()`, `assert_time()` and
+  `assert_conc_time()`.
+* The clast.obs parameter is now zero when all concentrations are zero (see #253
+  for part of the reason).
+* (This is not likely to be important for most users.)  The `business...`
+  functions (e.g. `business.geomean()`) now include an attribute in non-`NA`
+  results with `n`, the number of values included in the statistic.
+
+## Changes under the hood
+
+* Multiple changes were made to speed up calculations.  These will mainly be
+  noticed when performing NCA on many subjects (for instance, following
+  simulations).  None of these should have external effects that users will
+  notice:
+  * Adding in dependent parameters required for requested parameters is now more
+    efficient (approx 40% time savings)
+  * Sorting interval dependencies happens less often (approx 5% time savings)
+  * Determining if a parameter is needed for calculation when looking across all
+    parameters is more efficient (negligible time savings)
+* An internal change was made to make AUC integration and concentration
+  interpolation simpler and simplify the ability to create new AUC integration
+  or concentration interpolation methods
+
 # PKNCA 0.10.2
 
 * A minor change to `pk.calc.aucpext()` was made so that it now returns

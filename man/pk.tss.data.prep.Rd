@@ -2,8 +2,8 @@
 % Please edit documentation in R/tss.R
 \name{pk.tss.data.prep}
 \alias{pk.tss.data.prep}
-\title{Clean up the time to steady-state parameters and return a data
-frame for use by the tss calculators.}
+\title{Clean up the time to steady-state parameters and return a data frame for use
+by the tss calculators.}
 \usage{
 pk.tss.data.prep(
   conc,
@@ -20,37 +20,35 @@ pk.tss.data.prep(
 )
 }
 \arguments{
-\item{conc}{Concentration measured}
+\item{conc}{Measured concentrations}
 
-\item{time}{Time of concentration measurement}
+\item{time}{Time of the measurement of the concentrations}
 
-\item{subject}{Subject identifiers (used as a random effect in the
-model)}
+\item{subject}{Subject identifiers (used as a random effect in the model)}
 
-\item{treatment}{Treatment description (if missing, all subjects
-are assumed to be on the same treatment)}
+\item{treatment}{Treatment description (if missing, all subjects are assumed
+to be on the same treatment)}
 
 \item{subject.dosing}{Subject number for dosing}
 
 \item{time.dosing}{Time of dosing}
 
-\item{options}{List of changes to the default
-\code{\link{PKNCA.options}} for calculations.}
+\item{options}{List of changes to the default PKNCA options (see
+\code{PKNCA.options()})}
 
-\item{conc.blq}{See \code{\link{clean.conc.blq}}}
+\item{conc.blq}{See \code{\link[=clean.conc.blq]{clean.conc.blq()}}}
 
-\item{conc.na}{See \code{\link{clean.conc.na}}}
+\item{conc.na}{See \code{\link[=clean.conc.na]{clean.conc.na()}}}
 
-\item{check}{Run \code{\link{check.conc.time}}?}
+\item{check}{Run \code{\link[=assert_conc_time]{assert_conc_time()}}?}
 
-\item{\dots}{Discarded inputs to allow generic calls between tss
-methods.}
+\item{\dots}{Discarded inputs to allow generic calls between tss methods.}
 }
 \value{
-a data frame with columns for \code{conc}entration,
-\code{time}, \code{subject}, and \code{treatment}.
+a data frame with columns for \code{conc}entration, \code{time}, \code{subject},
+and \code{treatment}.
 }
 \description{
-Clean up the time to steady-state parameters and return a data
-frame for use by the tss calculators.
+Clean up the time to steady-state parameters and return a data frame for use
+by the tss calculators.
 }

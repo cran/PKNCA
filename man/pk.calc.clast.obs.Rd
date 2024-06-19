@@ -2,28 +2,31 @@
 % Please edit documentation in R/pk.calc.simple.R
 \name{pk.calc.clast.obs}
 \alias{pk.calc.clast.obs}
-\title{Determine the last observed concentration above the limit of
-quantification (LOQ).}
+\title{Determine the last observed concentration above the limit of quantification
+(LOQ).}
 \usage{
 pk.calc.clast.obs(conc, time, check = TRUE)
 }
 \arguments{
-\item{conc}{Concentration measured}
+\item{conc}{Measured concentrations}
 
-\item{time}{Time of concentration measurement}
+\item{time}{Time of the measurement of the concentrations}
 
-\item{check}{Run \code{\link{check.conc.time}}?}
+\item{check}{Run \code{\link[=assert_conc_time]{assert_conc_time()}}?}
 }
 \value{
 The last observed concentration above the LOQ
 }
 \description{
-If Tlast is NA (due to no non-missing above LOQ measurements), this
-will return NA.
+If all concentrations are missing, \code{NA_real_} is returned.  If all
+concentrations are zero (below the limit of quantification) or missing, zero
+is returned.  If Tlast is NA (due to no non-missing above LOQ measurements),
+this will return \code{NA_real_}.
 }
 \seealso{
 Other NCA parameters for concentrations during the intervals: 
 \code{\link{pk.calc.cmax}()},
+\code{\link{pk.calc.count_conc}()},
 \code{\link{pk.calc.cstart}()},
 \code{\link{pk.calc.ctrough}()}
 }

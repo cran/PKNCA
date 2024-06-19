@@ -16,30 +16,39 @@ PKNCA_impute_method_start_predose(
   time,
   start,
   end,
+  conc.group,
+  time.group,
   ...,
   max_shift = NA_real_,
   options = list()
 )
 }
 \arguments{
-\item{conc}{Concentration measured}
+\item{conc}{Measured concentrations}
 
-\item{time}{Time of concentration measurement (must be monotonically
-increasing and the same length as the concentration data)}
+\item{time}{Time of the measurement of the concentrations}
 
-\item{start, end}{The start and end of the interval}
+\item{start}{The start time of the interval}
 
 \item{...}{ignored}
 
-\item{options}{List of changes to the default \code{\link{PKNCA.options}} for
-calculations.}
+\item{options}{List of changes to the default PKNCA options (see
+\code{PKNCA.options()})}
+
+\item{end}{The end time of the interval}
+
+\item{conc.group}{All concentrations measured for the group}
+
+\item{time.group}{Time of all concentrations measured for the group}
 
 \item{max_shift}{The maximum amount of time to shift a concentration forward
-(defaults to 5\% of the interval duration, i.e. \code{0.05*(end - start)})}
+(defaults to 5\% of the interval duration, i.e. \code{0.05*(end - start)}, if
+\code{is.finite(end)}, and when \code{is.infinite(end)}, defaults to 5\% of the time
+from start to \code{max(time)})}
 }
 \value{
 A data.frame with one column named conc with imputed concentrations
-  and one column named time with the times.
+and one column named time with the times.
 }
 \description{
 Methods for imputation of data with PKNCA

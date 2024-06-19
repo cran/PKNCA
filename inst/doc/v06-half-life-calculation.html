@@ -50,7 +50,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -427,23 +427,23 @@ fit with the most points included.</li>
 </div>
 <div id="example" class="section level2">
 <h2>Example</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform calculations for subject 1, only</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>data_conc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(datasets<span class="sc">::</span>Theoph)[datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Subject <span class="sc">==</span> <span class="dv">1</span>, ]</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep all points</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    data_conc,</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Only calculate half-life and parameters required for half-life</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>current_intervals <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">start=</span><span class="dv">0</span>, <span class="at">end=</span><span class="cn">Inf</span>, <span class="at">half.life=</span><span class="cn">TRUE</span>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, <span class="at">intervals=</span>current_intervals)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>result_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Perform calculations for subject 1, only</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>data_conc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(datasets<span class="sc">::</span>Theoph)[datasets<span class="sc">::</span>Theoph<span class="sc">$</span>Subject <span class="sc">==</span> <span class="dv">1</span>, ]</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Keep all points</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    data_conc,</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  )</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># Only calculate half-life and parameters required for half-life</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>current_intervals <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">start=</span><span class="dv">0</span>, <span class="at">end=</span><span class="cn">Inf</span>, <span class="at">half.life=</span><span class="cn">TRUE</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, <span class="at">intervals=</span>current_intervals)</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>result_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span></code></pre></div>
 <pre><code>## No dose information provided, calculations requiring dose will return NA.</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the results for subject 1 </span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(result_obj)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Extract the results for subject 1 </span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">as.data.frame</span>(result_obj)</span></code></pre></div>
 <pre><code>## # A tibble: 10 × 6
 ##    Subject start   end PPTESTCD            PPORRES exclude
 ##    &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt; &lt;chr&gt;  
@@ -471,26 +471,26 @@ stripping methods described above.</p>
 <code>exclude_half.life</code> option as the column name in the
 concentration dataset for <code>PKNCAconc()</code> as illustrated
 below.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_conc<span class="sc">$</span>exclude_hl <span class="ot">&lt;-</span> data_conc<span class="sc">$</span>Time <span class="sc">==</span> <span class="fl">12.12</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm that we will be excluding exactly one point</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">sum</span>(data_conc<span class="sc">$</span>exclude_hl) <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop one point</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>conc_obj_exclude1 <span class="ot">&lt;-</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    data_conc,</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject,</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">exclude_half.life=</span><span class="st">&quot;exclude_hl&quot;</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>data_obj_exclude1 <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj_exclude1, <span class="at">intervals=</span>current_intervals)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform the calculations</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>result_obj_exclude1 <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj_exclude1)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>data_conc<span class="sc">$</span>exclude_hl <span class="ot">&lt;-</span> data_conc<span class="sc">$</span>Time <span class="sc">==</span> <span class="fl">12.12</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># Confirm that we will be excluding exactly one point</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">sum</span>(data_conc<span class="sc">$</span>exclude_hl) <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># Drop one point</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>conc_obj_exclude1 <span class="ot">&lt;-</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>    data_conc,</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject,</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>    <span class="at">exclude_half.life=</span><span class="st">&quot;exclude_hl&quot;</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  )</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>data_obj_exclude1 <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj_exclude1, <span class="at">intervals=</span>current_intervals)</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co"># Perform the calculations</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>result_obj_exclude1 <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj_exclude1)</span></code></pre></div>
 <pre><code>## No dose information provided, calculations requiring dose will return NA.</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Results differ when excluding the 12-hour point for subject 1 (compare to</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># example in the previous section)</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(result_obj_exclude1)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Results differ when excluding the 12-hour point for subject 1 (compare to</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co"># example in the previous section)</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">as.data.frame</span>(result_obj_exclude1)</span></code></pre></div>
 <pre><code>## # A tibble: 10 × 6
 ##    Subject start   end PPTESTCD            PPORRES exclude
 ##    &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt; &lt;chr&gt;  
@@ -514,26 +514,26 @@ performed.</p>
 <code>include_half.life</code> option as the column name in the
 concentration dataset for <code>PKNCAconc()</code> as illustrated
 below.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>data_conc<span class="sc">$</span>include_hl <span class="ot">&lt;-</span> data_conc<span class="sc">$</span>Time <span class="sc">&gt;</span> <span class="dv">3</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm that we will be excluding exactly one point</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">sum</span>(data_conc<span class="sc">$</span>include_hl) <span class="sc">==</span> <span class="dv">6</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop one point</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>conc_obj_include6 <span class="ot">&lt;-</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    data_conc,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">include_half.life=</span><span class="st">&quot;include_hl&quot;</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>data_obj_include6 <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj_include6, <span class="at">intervals=</span>current_intervals)</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform the calculations</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>result_obj_include6 <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj_include6)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>data_conc<span class="sc">$</span>include_hl <span class="ot">&lt;-</span> data_conc<span class="sc">$</span>Time <span class="sc">&gt;</span> <span class="dv">3</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co"># Confirm that we will be excluding exactly one point</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">sum</span>(data_conc<span class="sc">$</span>include_hl) <span class="sc">==</span> <span class="dv">6</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co"># Drop one point</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>conc_obj_include6 <span class="ot">&lt;-</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>    data_conc,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>    <span class="at">include_half.life=</span><span class="st">&quot;include_hl&quot;</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  )</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>data_obj_include6 <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj_include6, <span class="at">intervals=</span>current_intervals)</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co"># Perform the calculations</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>result_obj_include6 <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj_include6)</span></code></pre></div>
 <pre><code>## No dose information provided, calculations requiring dose will return NA.</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Results differ when including 6 points (compare to example in the previous</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># section)</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(result_obj_include6)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Results differ when including 6 points (compare to example in the previous</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co"># section)</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="fu">as.data.frame</span>(result_obj_include6)</span></code></pre></div>
 <pre><code>## # A tibble: 10 × 6
 ##    Subject start   end PPTESTCD            PPORRES exclude
 ##    &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt; &lt;chr&gt;  

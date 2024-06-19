@@ -13,7 +13,7 @@ superposition(conc, ...)
 \method{superposition}{numeric}(
   conc,
   time,
-  dose.input,
+  dose.input = NULL,
   tau,
   dose.times = 0,
   dose.amount,
@@ -24,66 +24,64 @@ superposition(conc, ...)
   tlast,
   additional.times = numeric(),
   check.blq = TRUE,
-  interp.method = NULL,
-  extrap.method = "AUCinf",
+  method = NULL,
+  auc.type = "AUCinf",
   steady.state.tol = 0.001,
   ...
 )
 }
 \arguments{
-\item{conc}{Concentration measured}
+\item{conc}{Measured concentrations}
 
-\item{...}{Additional arguments passed to the \code{half.life}
-function if required to compute \code{lambda.z}.}
+\item{...}{Additional arguments passed to the \code{half.life} function if
+required to compute \code{lambda.z}.}
 
-\item{time}{Time of concentration measurement}
+\item{time}{Time of the measurement of the concentrations}
 
-\item{dose.input}{The dose given to generate the \code{conc} and
-\code{time} inputs.  If missing, output doses will be assumed to be
-equal to the input dose.}
+\item{dose.input}{The dose given to generate the \code{conc} and \code{time} inputs. If
+missing, output doses will be assumed to be equal to the input dose.}
 
 \item{tau}{The dosing interval}
 
-\item{dose.times}{The time of dosing within the dosing interval.
-The \code{min(dose.times)} must be >= 0, and the
-\code{max(dose.times)} must be < \code{tau}.  There may be more
-than one dose times given as a vector.}
+\item{dose.times}{The time of dosing within the dosing interval. The
+\code{min(dose.times)} must be >= 0, and the \code{max(dose.times)} must be < \code{tau}.
+There may be more than one dose times given as a vector.}
 
-\item{dose.amount}{The doses given for the output.  Linear
-proportionality will be used from the input to output if they are
-not equal.  The length of dose.amount must be either 1 or matching
-the length of \code{dose.times}.}
+\item{dose.amount}{The doses given for the output.  Linear proportionality
+will be used from the input to output if they are not equal.  The length of
+dose.amount must be either 1 or matching the length of \code{dose.times}.}
 
-\item{n.tau}{The number of tau dosing intervals to simulate or
-\code{Inf} for steady-state.}
+\item{n.tau}{The number of tau dosing intervals to simulate or \code{Inf} for
+steady-state.}
 
-\item{options}{The PKNCA.options to use for the calculation (passed
-on to subsequent functions like \code{pk.calc.half.life}).}
+\item{options}{List of changes to the default PKNCA options (see
+\code{PKNCA.options()})}
 
-\item{lambda.z}{The elimination rate (from the half life
-calculation, used to extrapolate beyond the maximum time observed).}
+\item{lambda.z}{The elimination rate (in units of inverse time) for
+extrapolation}
 
-\item{clast.pred}{To use predicted as opposed to observed Clast,
-either give the value for clast.pred here or set it to true (for
-automatic calculation from the half-life).}
+\item{clast.pred}{To use predicted as opposed to observed Clast, either give
+the value for clast.pred here or set it to true (for automatic calculation
+from the half-life).}
 
-\item{tlast}{The time of last observed concentration above the
-limit of quantification.  This is calculated if not provided.}
+\item{tlast}{The time of last observed concentration above the limit of
+quantification.  This is calculated if not provided.}
 
-\item{additional.times}{Times to include in the final outputs in
-addition to the standard times (see details).  All
-\code{min(additional.times)} must be >= 0, and the
-\code{max(additional.times)} must be <= \code{tau}.}
+\item{additional.times}{Times to include in the final outputs in addition to
+the standard times (see details).  All \code{min(additional.times)} must be >=
+0, and the \code{max(additional.times)} must be <= \code{tau}.}
 
-\item{check.blq}{Must the first concentration measurement be below
-the limit of quantification?}
+\item{check.blq}{Must the first concentration measurement be below the limit
+of quantification?}
 
-\item{interp.method}{See \code{\link{interp.extrap.conc}}}
+\item{method}{The method for integration (one of 'lin up/log down',
+'lin-log', or 'linear')}
 
-\item{extrap.method}{See \code{\link{interp.extrap.conc}}}
+\item{auc.type}{The type of AUC to compute.  Choices are 'AUCinf', 'AUClast',
+and 'AUCall'.}
 
-\item{steady.state.tol}{The tolerance for assessing if steady-state
-has been achieved (between 0 and 1, exclusive).}
+\item{steady.state.tol}{The tolerance for assessing if steady-state has been
+achieved (between 0 and 1, exclusive).}
 }
 \value{
 A data frame with columns named "conc" and "time".
@@ -92,11 +90,10 @@ A data frame with columns named "conc" and "time".
 Compute noncompartmental superposition for repeated dosing
 }
 \details{
-The returned superposition times will include all of the
-following times: 0 (zero), \code{dose.times}, \code{time modulo tau}
-(shifting \code{time} for each dose time as well),
-\code{additional.times}, and \code{tau}.
+The returned superposition times will include all of the following
+times: 0 (zero), \code{dose.times}, \verb{time modulo tau} (shifting \code{time} for each
+dose time as well), \code{additional.times}, and \code{tau}.
 }
 \seealso{
-\code{\link{interp.extrap.conc}}
+\code{\link[=interp.extrap.conc]{interp.extrap.conc()}}
 }

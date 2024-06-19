@@ -3,8 +3,8 @@
 #'
 #' @param x the value to convert
 #' @param FUN the function to use for conversion
-#' @param \dots arguments passed to \code{FUN}
-#' @return \code{FUN(x, ...)} or an error if the set of NAs change.
+#' @param \dots arguments passed to `FUN`
+#' @return `FUN(x, ...)` or an error if the set of NAs change.
 #' @export
 check.conversion <- function(x, FUN, ...) {
   ret <- FUN(x, ...)
@@ -17,90 +17,21 @@ check.conversion <- function(x, FUN, ...) {
   ret
 }
 
-#' Verify that the concentration and time are valid
-#'
-#' If the concentrations or times are invalid, will provide an error.
-#' Reasons for being invalid are
-#' \itemize{
-#'   \item \code{time} is not a number
-#'   \item \code{conc} is not a number
-#'   \item Any \code{time} value is NA
-#'   \item \code{time} is not monotonically increasing
-#'   \item \code{conc} and \code{time} are not the same length
-#' }
-#'
-#' Some cases may generate warnings but allow the data to proceed.
-#' \itemize{
-#'   \item A negative concentration is often but not always an
-#'     error; it will generate a warning.
-#' }
-#'
-#' @param conc Measured concentrations
-#' @param time Time of the measurement of the concentrations
-#' @param monotonic.time Must the time be unique and monotonically
-#' increasing?
-#' @return None
-#' @export
-check.conc.time <- function(conc, time, monotonic.time=TRUE) {
-  if (!missing(conc)) {
-    if (length(conc) == 0) {
-      rlang::warn(
-        message = "No concentration data given",
-        class = "pknca_conc_none"
-      )
-    } else if ((!is.numeric(conc) | is.factor(conc)) &
-                   !(is.logical(conc) & all(is.na(conc)))) {
-      stop("Concentration data must be numeric and not a factor")
-    } else if (all(is.na(conc))) {
-      rlang::warn(
-        message = "All concentration data are missing",
-        class = "pknca_conc_all_missing"
-      )
-    } else if (any(!is.na(conc) & as.numeric(conc) < 0)) {
-      # as.numeric(conc) is required for compatibility with units
-      warning("Negative concentrations found")
-    }
-  }
-  if (!missing(time)) {
-    if (length(time) == 0) {
-      rlang::warn(
-        message = "No time data given",
-        class = "pknca_time_none"
-      )
-    } else if (any(is.na(time))) {
-      stop("Time may not be NA")
-    } else if (!is.numeric(time) | is.factor(time)) {
-      stop("Time data must be numeric and not a factor")
-    }
-    if (monotonic.time) {
-      if (!all(time[-1] > time[-length(time)])) {
-        stop("Time must be monotonically increasing")
-      } else if (!(length(time) == length(unique(time)))) {
-        stop("All time values must be unique") # nocov
-      }
-    }
-  }
-  if (!missing(conc) & !missing(time)) {
-    if (length(conc) != length(time))
-      stop("Conc and time must be the same length")
-  }
-}
-
 #' Round a value to a defined number of digits printing out trailing zeros, if
 #' applicable.
 #'
 #' @param x The number to round
 #' @param digits integer indicating the number of decimal places
-#' @param sci_range See help for \code{\link{signifString}} (and you likely want
-#'   to round with \code{signifString} if you want to use this argument)
+#' @param sci_range See help for [signifString()] (and you likely want
+#'   to round with `signifString` if you want to use this argument)
 #' @param sci_sep The separator to use for scientific notation strings
 #'   (typically this will be either "e" or "x10^" for computer- or
 #'   human-readable output).
-#' @param si_range Deprecated, please use \code{sci_range}
+#' @param si_range Deprecated, please use `sci_range`
 #' @return A string with the value
-#' @details Values that are not standard numbers like \code{Inf}, \code{NA}, and
-#'   \code{NaN} are returned as \code{"Inf"}, \code{"NA"}, and \code{NaN}.
-#' @seealso \code{\link{round}}, \code{\link{signifString}}
+#' @details Values that are not standard numbers like `Inf`, `NA`, and
+#'   `NaN` are returned as `"Inf"`, `"NA"`, and `NaN`.
+#' @seealso [round()], [signifString()]
 #' @export
 roundString <- function(x, digits=0, sci_range=Inf, sci_sep="e", si_range) {
   if (!missing(si_range)) {
@@ -157,19 +88,19 @@ roundString <- function(x, digits=0, sci_range=Inf, sci_sep="e", si_range) {
 #'
 #' @param x The number to round
 #' @param digits integer indicating the number of significant digits
-#' @param sci_range integer (or \code{Inf}) indicating when to switch to
+#' @param sci_range integer (or `Inf`) indicating when to switch to
 #'   scientific notation instead of floating point. Zero indicates always use
-#'   scientific; \code{Inf} indicates to never use scientific notation;
-#'   otherwise, scientific notation is used when \code{abs(log10(x)) > si_range}.
+#'   scientific; `Inf` indicates to never use scientific notation;
+#'   otherwise, scientific notation is used when `abs(log10(x)) > si_range`.
 #' @param sci_sep The separator to use for scientific notation strings
 #'   (typically this will be either "e" or "x10^" for computer- or
 #'   human-readable output).
-#' @param si_range Deprecated, please use \code{sci_range}
+#' @param si_range Deprecated, please use `sci_range`
 #' @param ... Arguments passed to methods.
 #' @return A string with the value
-#' @details Values that are not standard numbers like \code{Inf}, \code{NA}, and
-#'   \code{NaN} are returned as \code{"Inf"}, \code{"NA"}, and \code{NaN}.
-#' @seealso \code{\link{signif}}, \code{\link{roundString}}
+#' @details Values that are not standard numbers like `Inf`, `NA`, and
+#'   `NaN` are returned as `"Inf"`, `"NA"`, and `NaN`.
+#' @seealso [signif()], [roundString()]
 #' @export
 signifString <- function(x, ...)
   UseMethod("signifString")

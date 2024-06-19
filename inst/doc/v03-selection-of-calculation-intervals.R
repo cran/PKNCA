@@ -76,8 +76,8 @@ print(d_conc)
 
 ## ----infinity_interval_plot-visualization, eval=requireNamespace("ggplot2")----
 # Use superposition to simulate multiple doses
-ggplot(d_conc$data[d_conc$data$time <= 48,], aes(x=time, y=conc)) +
-  geom_ribbon(data=d_conc$data,
+ggplot(as.data.frame(d_conc)[as.data.frame(d_conc)$time <= 48,], aes(x=time, y=conc)) +
+  geom_ribbon(data=as.data.frame(d_conc),
               aes(ymax=conc, ymin=0),
               fill="skyblue") +
   geom_point() + geom_line() +
@@ -158,12 +158,12 @@ print(d_conc)
 
 ## ----overlapping_intervals_plot-visualization, eval=requireNamespace("ggplot2")----
 # Use superposition to simulate multiple doses
-ggplot(d_conc$data, aes(x=time, y=conc)) +
-  geom_ribbon(data=d_conc$data,
+ggplot(as.data.frame(d_conc), aes(x=time, y=conc)) +
+  geom_ribbon(data=as.data.frame(d_conc),
               aes(ymax=conc, ymin=0),
               fill="lightgreen",
               alpha=0.5) +
-  geom_ribbon(data=d_conc$data[d_conc$data$time <= 24,],
+  geom_ribbon(data=as.data.frame(d_conc)[as.data.frame(d_conc)$time <= 24,],
               aes(ymax=conc, ymin=0),
               fill="skyblue",
               alpha=0.5) +

@@ -1,26 +1,26 @@
 #' Combine PKNCAconc and PKNCAdose objects
 #'
-#' The function is inspired by \code{dplyr::full_join}, but it has different
+#' The function is inspired by `dplyr::full_join`, but it has different
 #' semantics.
 #'
-#' @param conc a PKNCAconc object
-#' @param dose a PKNCAdose object or \code{NA}
-#' @return A tibble with columns for the groups, "data_conc" (the concentration
-#'   data), and "data_dose" (the dosing data).  If \code{is.na(dose)},
-#'   "data_dose" will be \code{NA}.
+#' @param o_conc a PKNCAconc object
+#' @param o_dose a PKNCAdose object or `NA`
+#' @returns A tibble with columns for the groups, "data_conc" (the concentration
+#'   data), and "data_dose" (the dosing data).  If `is.na(o_dose)`, "data_dose"
+#'   will be `NA`.
 #' @family Combine PKNCA objects
 #' @keywords Internal
 #' @noRd
-full_join_PKNCAconc_PKNCAdose <- function(conc, dose) {
-  stopifnot(inherits(x=conc, what="PKNCAconc"))
-  if (identical(dose, NA)) {
+full_join_PKNCAconc_PKNCAdose <- function(o_conc, o_dose) {
+  stopifnot(inherits(x=o_conc, what="PKNCAconc"))
+  if (identical(o_dose, NA)) {
     message("No dose information provided, calculations requiring dose will return NA.")
     n_dose <- tibble::tibble(data_dose=list(NA))
   } else {
-    stopifnot(inherits(x=dose, what="PKNCAdose"))
-    n_dose <- prepare_PKNCAdose(dose, sparse=is_sparse_pk(conc), subject_col=conc$columns$subject)
+    stopifnot(inherits(x=o_dose, what="PKNCAdose"))
+    n_dose <- prepare_PKNCAdose(o_dose, sparse=is_sparse_pk(o_conc), subject_col=o_conc$columns$subject)
   }
-  n_conc <- prepare_PKNCAconc(conc)
+  n_conc <- prepare_PKNCAconc(o_conc)
   shared_groups <- intersect(names(n_conc), names(n_dose))
   if (length(shared_groups) > 0) {
     dplyr::full_join(n_conc, n_dose, by=shared_groups)
@@ -31,18 +31,18 @@ full_join_PKNCAconc_PKNCAdose <- function(conc, dose) {
 
 #' Convert a PKNCAdata object into a data.frame for analysis
 #'
-#' The function is inspired by \code{dplyr::full_join}, but it has different
+#' The function is inspired by `dplyr::full_join`, but it has different
 #' semantics.
 #'
 #' @param x The PKNCAdata object
-#' @return A tibble with columns the grouping variables, "data_conc" for
+#' @returns A tibble with columns the grouping variables, "data_conc" for
 #'   concentration data, "data_dose" for dosing data, and "data_intervals" for
 #'   intervals data.
 #' @family Combine PKNCA objects
 #' @keywords Internal
 #' @noRd
 full_join_PKNCAdata <- function(x) {
-  conc_dose <- full_join_PKNCAconc_PKNCAdose(x$conc, x$dose)
+  conc_dose <- full_join_PKNCAconc_PKNCAdose(o_conc = x$conc, o_dose = x$dose)
   n_i <-
     prepare_PKNCAintervals(
       .dat=x$intervals,
@@ -61,7 +61,8 @@ full_join_PKNCAdata <- function(x) {
 #'
 #' @param .dat The PKNCA object to prepare as a nested tibble
 #' @param ...,.names_sep,.key Ignored
-#' @return A nested tibble with a column named "data_conc" containing the concentration data and a column
+#' @return A nested tibble with a column named "data_conc" containing the
+#'   concentration data and a column
 #' @family Combine PKNCA objects
 #' @keywords Internal
 #' @noRd
@@ -280,11 +281,14 @@ check_reserved_column_names <- function(x) {
   }
 }
 
-#' Standardize column names and drop unnecessary columns from a data.frame or tibble
+#' Standardize column names and drop unnecessary columns from a data.frame or
+#' tibble
 #'
 #' @param x The data.frame or tibble
-#' @param cols A named list where the names are the standardized column names and the values are the original column names
-#' @return A data.frame or tibble with columns cleaned of unlisted columns and with names set to the expected names.
+#' @param cols A named list where the names are the standardized column names
+#'   and the values are the original column names
+#' @returns A data.frame or tibble with columns cleaned of unlisted columns and
+#'   with names set to the expected names.
 #' @noRd
 #' @keywords Internal
 standardize_column_names <- function(x, cols, group_cols=NULL, insert_if_missing=list()) {

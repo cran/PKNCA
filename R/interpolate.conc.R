@@ -1,52 +1,47 @@
 #' Interpolate concentrations between measurements or extrapolate concentrations
 #' after the last measurement.
 #'
-#' \code{interpolate.conc()} and \code{extrapolate.conc()} returns an
-#' interpolated (or extrapolated) concentration. \code{interp.extrap.conc()}
-#' will choose whether interpolation or extrapolation is required and will also
-#' operate on many concentrations.  These will typically be used to estimate the
-#' concentration between two measured concentrations or after the last measured
-#' concentration. Of note, these functions will not extrapolate prior to the
-#' first point.
+#' `interpolate.conc()` and `extrapolate.conc()` returns an interpolated (or
+#' extrapolated) concentration. `interp.extrap.conc()` will choose whether
+#' interpolation or extrapolation is required and will also operate on many
+#' concentrations.  These will typically be used to estimate the concentration
+#' between two measured concentrations or after the last measured concentration.
+#' Of note, these functions will not extrapolate prior to the first point.
 #'
-#' @param conc Measured concentrations
-#' @param time Time of the concentration measurement
+#' An `NA` value for the `lambda.z` parameter will prevent extrapolation.
+#'
+#' @inheritParams assert_conc_time
+#' @inheritParams assert_lambdaz
+#' @inheritParams PKNCA.choose.option
+#' @inheritParams choose_interval_method
+#' @param interp.method,extrap.method deprecated in favor of method and auc.type
 #' @param time.dose Time of the dose
 #' @param time.out Time when interpolation is requested (vector for
-#'   \code{interp.extrap.conc()}, scalar otherwise)
-#' @param lambda.z The elimination rate constant.  \code{NA} will prevent
-#'   extrapolation.
+#'   `interp.extrap.conc()`, scalar otherwise)
 #' @param clast The last observed concentration above the limit of
-#'   quantification.  If not given, \code{clast} is calculated from
-#'   \code{\link{pk.calc.clast.obs}()}
+#'   quantification.  If not given, `clast` is calculated from
+#'   [pk.calc.clast.obs()]
 #' @param conc.origin The concentration before the first measurement.
-#'   \code{conc.origin} is typically used to set predose values to zero
-#'   (default), set a predose concentration for endogenous compounds, or set
-#'   predose concentrations to \code{NA} if otherwise unknown.
-#' @param options List of changes to the default \code{\link{PKNCA.options}()}
-#'   for calculations.
-#' @param interp.method The method for interpolation (either "lin up/log down"
-#'   or "linear")
-#' @param extrap.method The method for extrapolation: "AUCinf", "AUClast", or
-#'   "AUCall".  See details for usage.
-#' @param conc.blq How to handle BLQ values. (See \code{\link{clean.conc.blq}()}
-#'   for usage instructions.)
-#' @param conc.na How to handle NA concentrations.  (See
-#'   \code{\link{clean.conc.na}()})
+#'   `conc.origin` is typically used to set predose values to zero (default),
+#'   set a predose concentration for endogenous compounds, or set predose
+#'   concentrations to `NA` if otherwise unknown.
+#' @param conc.blq How to handle BLQ values. (See [clean.conc.blq()] for usage
+#'   instructions.)
+#' @param conc.na How to handle NA concentrations.  (See [clean.conc.na()])
 #' @param route.dose What is the route of administration ("intravascular" or
 #'   "extravascular").  See the details for how this parameter is used.
 #' @param duration.dose What is the duration of administration? See the details
 #'   for how this parameter is used.
-#' @param out.after Should interpolation occur from the data before
-#'   (\code{FALSE}) or after (\code{TRUE}) the interpolated point?  See the
-#'   details for how this parameter is used.  It only has a meaningful effect at
-#'   the instant of an IV bolus dose.
-#' @param check Run \code{\link{check.conc.time}()},
-#'   \code{\link{clean.conc.blq}()}, and \code{\link{clean.conc.na}()}?
-#' @param ... Additional arguments passed to \code{interpolate.conc()} or
-#'   \code{extrapolate.conc()}.
-#' @return The interpolated or extrapolated concentration value as a scalar
-#'   double (or vector for \code{interp.extrap.conc()}).
+#' @param out.after Should interpolation occur from the data before (`FALSE`) or
+#'   after (`TRUE`) the interpolated point?  See the details for how this
+#'   parameter is used.  It only has a meaningful effect at the instant of an IV
+#'   bolus dose.
+#' @param check Run [assert_conc_time()], [clean.conc.blq()], and
+#'   [clean.conc.na()]?
+#' @param ... Additional arguments passed to `interpolate.conc()` or
+#'   `extrapolate.conc()`.
+#' @returns The interpolated or extrapolated concentration value as a scalar
+#'   double (or vector for `interp.extrap.conc()`).
 #'
 #' @details
 #' \describe{
@@ -59,43 +54,49 @@
 #'   }
 #' }
 #'
-#' \code{duration.dose} and \code{direction.out} are ignored if \code{route.dose
-#' == "extravascular"}.  \code{direction.out} is ignored if \code{duration.dose
-#' > 0}.
+#' `duration.dose` and `direction.out` are ignored if `route.dose ==
+#' "extravascular"`.  `direction.out` is ignored if `duration.dose > 0`.
 #'
-#' \code{route.dose} and \code{duration.dose} affect how
-#' interpolation/extrapolation of the concentration occurs at the time of
-#' dosing.  If \code{route.dose == "intravascular"} and \code{duration.dose ==
-#' 0} then extrapolation occurs for an IV bolus using \code{\link{pk.calc.c0}()}
-#' with the data after dosing.  Otherwise (either \code{route.dose ==
-#' "extravascular"} or \code{duration.dose > 0}), extrapolation occurs using the
-#' concentrations before dosing and estimating the half-life (or more precisely,
-#' estimating \code{lambda.z}).  Finally, \code{direction.out} can change the
-#' direction of interpolation in cases with \code{route.dose == "intravascular"}
-#' and \code{duration.dose == 0}.  When \code{direction.out == "before"}
-#' interpolation occurs only with data before the dose (as is the case for
-#' \code{route.dose == "extravascular"}), but if \code{direction.out == "after"}
-#' interpolation occurs from the data after dosing.
+#' `route.dose` and `duration.dose` affect how interpolation/extrapolation of
+#' the concentration occurs at the time of dosing.  If `route.dose ==
+#' "intravascular"` and `duration.dose == 0` then extrapolation occurs for an IV
+#' bolus using [pk.calc.c0()] with the data after dosing.  Otherwise (either
+#' `route.dose == "extravascular"` or `duration.dose > 0`), extrapolation occurs
+#' using the concentrations before dosing and estimating the half-life (or more
+#' precisely, estimating `lambda.z`).  Finally, `direction.out` can change the
+#' direction of interpolation in cases with `route.dose == "intravascular"` and
+#' `duration.dose == 0`.  When `direction.out == "before"` interpolation occurs
+#' only with data before the dose (as is the case for `route.dose ==
+#' "extravascular"`), but if `direction.out == "after"` interpolation occurs
+#' from the data after dosing.
 #'
-#' @seealso \code{\link{pk.calc.clast.obs}()},
-#'   \code{\link{pk.calc.half.life}()}, \code{\link{pk.calc.c0}()}
+#' @seealso [pk.calc.clast.obs()], [pk.calc.half.life()], [pk.calc.c0()]
 #' @export
 interp.extrap.conc <- function(conc, time, time.out,
                                lambda.z=NA,
                                clast=pk.calc.clast.obs(conc, time),
                                options=list(),
-                               interp.method=NULL,
-                               extrap.method="AUCinf",
+                               method = NULL,
+                               auc.type = "AUCinf",
+                               interp.method,
+                               extrap.method,
                                ...,
                                conc.blq=NULL,
                                conc.na=NULL,
                                check=TRUE) {
+  # Defunct inputs
+  if (!missing(interp.method)) {
+    .Defunct(msg = "the `interp.method` has been replaced by the `method` argument for consistency with the rest of PKNCA") # nocov
+  } else if (!missing(extrap.method)) {
+    .Defunct(msg = "the `extrap.method` has been replaced by the `auc.type` argument for consistency with the rest of PKNCA") # nocov
+  }
+
   # Check inputs
-  interp.method <- PKNCA.choose.option(name="auc.method", value=interp.method, options=options)
+  method <- PKNCA.choose.option(name="auc.method", value=method, options=options)
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
   if (check) {
-    check.conc.time(conc, time)
+    assert_conc_time(conc = conc, time = time)
     data <-
       clean.conc.blq(
         conc, time,
@@ -126,7 +127,7 @@ interp.extrap.conc <- function(conc, time, time.out,
           interpolate.conc(
             conc=data$conc, time=data$time,
             time.out=time.out[i],
-            interp.method=interp.method,
+            method=method,
             conc.blq=conc.blq,
             conc.na=conc.na,
             check=FALSE
@@ -138,7 +139,7 @@ interp.extrap.conc <- function(conc, time, time.out,
             time.out=time.out[i],
             lambda.z=lambda.z,
             clast=clast,
-            extrap.method=extrap.method,
+            auc.type=auc.type,
             check=FALSE
           )
       }
@@ -150,21 +151,26 @@ interp.extrap.conc <- function(conc, time, time.out,
 #' @export
 interpolate.conc <- function(conc, time, time.out,
                              options=list(),
-                             interp.method=NULL,
+                             method = NULL,
+                             interp.method,
                              conc.blq=NULL,
                              conc.na=NULL,
                              conc.origin=0,
                              ...,
                              check=TRUE) {
+  # Defunct inputs
+  if (!missing(interp.method)) {
+    .Defunct(msg = "the `interp.method` has been replaced by the `method` argument for consistency with the rest of PKNCA") # nocov
+  }
   # Check the inputs
-  interp.method <-
+  method <-
     tolower(PKNCA.choose.option(
-      name="auc.method", value=interp.method, options=options
+      name="auc.method", value=method, options=options
     ))
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
   if (check) {
-    check.conc.time(conc, time)
+    assert_conc_time(conc, time)
     data <-
       clean.conc.blq(
         conc=conc, time=time,
@@ -195,12 +201,13 @@ interpolate.conc <- function(conc, time, time.out,
     ret <- data$conc[time.out == data$time]
   } else {
     interp_methods_all <-
-      choose_interp_extrap_method(
-        conc=data$conc,
-        time=data$time,
-        interp_method=interp.method,
-        # auclast because it doesn't affect the output for interpolation
-        extrap_method="auclast"
+      choose_interval_method(
+        conc = data$conc,
+        time = data$time,
+        method = method,
+        # AUClast because it doesn't affect the output for interpolation
+        auc.type = "AUClast",
+        options = options
       )
     # Find the last time before and the first time after the output
     # time, then interpolate.
@@ -217,11 +224,7 @@ interpolate.conc <- function(conc, time, time.out,
       } else if (interp_method == "log") {
         interpolate_conc_log(conc_1=conc_1, conc_2=conc_2, time_1=time_1, time_2=time_2, time_out=time.out)
       } else if (interp_method == "zero") {
-        # interp_method == "zero" would not happen in practice because
-        # interpolation does not occur after tlast and linear interpolation
-        # would be used.  But, the rationale is sound in case that changes.
-        stop("The zero method of interpolation should not be used, please report a bug") # nocov
-        0 # nocov
+        0
       } else {
         stop("Please report a bug: invalid interp_method") # nocov
       }
@@ -233,16 +236,21 @@ interpolate.conc <- function(conc, time, time.out,
 #' @export
 extrapolate.conc <- function(conc, time, time.out,
                              lambda.z=NA, clast=pk.calc.clast.obs(conc, time),
-                             extrap.method="AUCinf",
+                             auc.type = "AUCinf",
+                             extrap.method,
                              options=list(),
                              conc.na=NULL,
                              conc.blq=NULL,
                              ...,
                              check=TRUE) {
+  if (!missing(extrap.method)) {
+    .Defunct(msg = "the `extrap.method` has been replaced by the `auc.type` argument for consistency with the rest of PKNCA") # nocov
+  }
+  assert_lambdaz(lambda.z)
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   if (check) {
-    check.conc.time(conc, time)
+    assert_conc_time(conc, time)
     data <-
       clean.conc.blq(
         conc=conc, time=time,
@@ -252,9 +260,9 @@ extrapolate.conc <- function(conc, time, time.out,
   } else {
     data <- data.frame(conc, time)
   }
-  extrap.method <- tolower(extrap.method)
-  if (!(extrap.method %in% c("aucinf", "aucall", "auclast")))
-    stop("extrap.method must be one of 'AUCinf', 'AUClast', or 'AUCall'")
+  auc.type <- tolower(auc.type)
+  if (!(auc.type %in% c("aucinf", "aucall", "auclast")))
+    stop("`auc.type` must be one of 'AUCinf', 'AUClast', or 'AUCall'")
   if (length(time.out) != 1)
     stop("Only one time.out value may be estimated at once.")
   tlast <- pk.calc.tlast(conc=data$conc, time=data$time, check=FALSE)
@@ -265,17 +273,17 @@ extrapolate.conc <- function(conc, time, time.out,
     stop("extrapolate.conc can only work beyond Tlast, please use interp.extrap.conc to combine both interpolation and extrapolation.")
   } else {
     # Start the interpolation
-    if (extrap.method %in% "aucinf") {
+    if (auc.type %in% "aucinf") {
       # If AUCinf is requested, extrapolate using the half-life
       ret <- extrapolate_conc_lambdaz(clast=clast, lambda.z=lambda.z, tlast=tlast, time_out=time.out)
-    } else if (extrap.method %in% "auclast" |
-                 (extrap.method %in% "aucall" &
+    } else if (auc.type %in% "auclast" |
+                 (auc.type %in% "aucall" &
                     tlast == max(data$time))) {
       # If AUClast is requested or AUCall is requested and there are
       # no BLQ at the end, we are already certain that we are after
       # Tlast, so the answer is 0.
       ret <- 0
-    } else if (extrap.method %in% "aucall") {
+    } else if (auc.type %in% "aucall") {
       # If the last non-missing concentration is below the limit of
       # quantification, extrapolate with the triangle method of
       # AUCall.
@@ -293,16 +301,22 @@ extrapolate.conc <- function(conc, time, time.out,
         # If we are not already BLQ, then we have confirmed that we
         # are in the triangle extrapolation region and need to draw
         # a line.
-        ret <- (time.out - time_prev)/(time_next - time_prev)*conc_prev
+        ret <-
+          interpolate_conc_linear(
+            conc_1 = conc_prev, conc_2 = 0,
+            time_1 = time_prev, time_2 = time_next,
+            time_out = time.out
+          )
       }
     } else {
-      stop("Invalid extrap.method caught too late (seeing this error indicates a software bug)") # nocov
+      stop("Invalid auc.type caught too late (seeing this error indicates a software bug)") # nocov
     }
   }
   ret
 }
 
-# Choices for events in interp.extrap.conc.dose.  This is included here to assist with testing later.
+# Choices for events in interp.extrap.conc.dose.  This is included here to
+# assist with testing later.
 event_choices_interp.extrap.conc.dose <-
   list(conc_dose_iv_bolus_after="conc_dose_iv_bolus_after",
        conc_dose="conc_dose",
@@ -312,8 +326,8 @@ event_choices_interp.extrap.conc.dose <-
        output_only="output_only",
        none="none")
 
-#' @describeIn interp.extrap.conc Interpolate and extrapolate
-#'   concentrations without interpolating or extrapolating beyond doses.
+#' @describeIn interp.extrap.conc Interpolate and extrapolate concentrations
+#'   without interpolating or extrapolating beyond doses.
 #' @export
 interp.extrap.conc.dose <- function(conc, time,
                                     time.dose, route.dose="extravascular", duration.dose=NA,
@@ -327,7 +341,7 @@ interp.extrap.conc.dose <- function(conc, time,
   conc.na <- PKNCA.choose.option(name="conc.na", value=conc.na, options=options)
   conc.blq <- PKNCA.choose.option(name="conc.blq", value=conc.blq, options=options)
   if (check) {
-    check.conc.time(conc, time)
+    assert_conc_time(conc = conc, time = time)
     data_conc <-
       clean.conc.blq(conc, time,
                      conc.blq=conc.blq, conc.na=conc.na,
@@ -718,4 +732,5 @@ interp.extrap.conc.dose.select <-
     "Dose before, concentration after without a dose"=list(
       select="iecd_dose_conc_select",
       value="iecd_dose_conc_value",
-      description="If the concentration at the dose is estimable, interpolate.  Otherwise, NA."))
+      description="If the concentration at the dose is estimable, interpolate.  Otherwise, NA.")
+  )

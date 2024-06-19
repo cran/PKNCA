@@ -1,7 +1,7 @@
 ---
 title: "PKNCA Training Sessions"
 author: "William Denney"
-date: "19 November 2021"
+date: "18 October 2023"
 output:
   ioslides_presentation:
     widescreen: true
@@ -17,6 +17,8 @@ requireNamespace("pmxTools")
 library(PKNCA)
 library(dplyr)
 library(ggplot2)
+library(tidyr)
+library(purrr)
 breaks_hours <- function(n=5, Q=c(1, 6, 4, 12, 2, 24, 168), ...) {
   n_default <- n
   Q_default <- Q
@@ -197,7 +199,7 @@ scale_x_hours <- function(..., breaks=breaks_hours()) {
 
 # Introduction to PKNCA and Basics of Its Use
 
-Creation of these materials were supported by funding from the Metrum Research Group.
+Creation of these materials were partially supported by funding from the Metrum Research Group.
 
 ## Introduction to PKNCA {.build .smaller}
 
@@ -248,7 +250,7 @@ CDISC has NCA tidied, and PKNCA follows that model:
 
 ## Dataset Basics: Minimum data
 
-PKNCA requires at minimum concentration, time, and what you want to calculate.
+PKNCA requires at least the concentration, time, and what you want to calculate.
 
 ```{r fig.width=6, fig.height=4}
 conc <-
@@ -353,7 +355,8 @@ d_conc <-
   filter(Subject %in% 1)
 o_conc <- PKNCAconc(conc~Time, data=d_conc)
 # Setup intervals for calculation
-d_intervals <- data.frame(start=0, end=24, cmax=TRUE, tmax=TRUE, auclast=TRUE, aucint.inf.obs=TRUE)
+d_intervals <- data.frame(start=0, end=24, cmax=TRUE, tmax=TRUE,
+                          auclast=TRUE, aucint.inf.obs=TRUE)
 # Combine concentration and dose
 o_data <- PKNCAdata(o_conc, intervals=d_intervals)
 # Calculate the results (suppressMessages() hides a message that isn't needed now)
@@ -453,7 +456,9 @@ pander::pander(summary(o_result))
 
 ## How do I do a simple calculation?  Get individual results {.smaller}
 
-```{r}
+Use `as.data.frame()` to get the individual NCA parameter results.
+
+```{r echo=TRUE}
 # Look at individual results
 pander::pander(head(
   as.data.frame(o_result),
@@ -669,7 +674,8 @@ Whoops!  Without dosing, we need intervals.
 
 ```{r echo=TRUE}
 o_conc <- PKNCAconc(conc~Time|Treatment+Subject, data=d_conc)
-d_intervals <- data.frame(start=0, end=Inf, cmax=TRUE, tmax=TRUE, half.life=TRUE, aucinf.obs=TRUE)
+d_intervals <- data.frame(start=0, end=Inf, cmax=TRUE, tmax=TRUE,
+                          half.life=TRUE, aucinf.obs=TRUE)
 o_data_manual_intervals <- PKNCAdata(o_conc, intervals=d_intervals)
 summary(pk.nca(o_data_manual_intervals))
 ```
@@ -883,17 +889,17 @@ When you use `exclude`, this is how you give your data to PKNCA:
 
 ```{r exclude-example-1, echo=TRUE}
 d_before_exclude <-
-  data.frame(
-    time=0:4,
-    conc=c(0, 2, 1, 0.5, 0.25),
-    not_this=c(NA, "Not this", NA, NA, NA)
-  )
+ data.frame(
+  time=0:4,
+  conc=c(0, 2, 1, 0.5, 0.25),
+  not_this=c(NA, "Not this", rep(NA, 3))
+ )
 o_conc <-
-  PKNCAconc(
-    data=d_before_exclude,
-    conc~time,
-    exclude="not_this"
-  )
+ PKNCAconc(
+  data=d_before_exclude,
+  conc~time,
+  exclude="not_this"
+ )
 ```
 
 <p class="forceBreak"></p>
@@ -1190,11 +1196,7 @@ d_plot <-
   mutate(
     figure=
       lapply(
-        pmap(
-          .l=list(data=data),
-          .f=ggplot,
-          aes(x=Time, y=conc)
-        ),
+        pmap(.l=list(data=data), .f=ggplot,aes(x=Time, y=conc)),
         FUN="+",
         geom_line()
       )
@@ -1216,11 +1218,15 @@ Make an NCA data listing using the `as.data.frame()` function on the NCA results
 pander::pander(as.data.frame(o_nca))
 ```
 
-# Limitations
-
 ## Units (especially clearance)
 
-PKNCA does not (yet) support units.  The most common place where that becomes an issue is with clearance which ends up having unusual units like "mg/(hr*ng/mL)" (with units of mg for dosing, hr for time, and ng/mL for concentration).
+PKNCA supports units with the `pknca_units_table()` function.  See the
+[Unit Assignment and Conversion with PKNCA](http://billdenney.github.io/pknca/articles/v07-unit-conversion.html)
+vignette for more information.
+
+When units are not specified, The most common place where that becomes an issue
+is with clearance which ends up having unusual units like "mg/(hr*ng/mL)" (with
+units of mg for dosing, hr for time, and ng/mL for concentration).
 
 ## Data imputation
 
@@ -1232,15 +1238,27 @@ Some data points are required for inputs such as:
 
 ## IV bolus AUC (need to add C0)
 
-PKNCA does not have an IV-aware AUC calculation (yet).  So, C0 must be separately imputed.
+Due to the need for back-extrapolation to C~0~, AUCs for IV bolus dosing need to
+use different AUC parameters such as `"aucivlast"` instead of `"auclast"`.
 
 ## Combined, multi-subject data (e.g. sparse animal sampling)
 
-Averaging the concentration at a time point will allow for the mean sparse sampling result.  But general sparse sampling methods are not (yet) implemented.
+Sparse NCA calculations are supported in PKNCA.  See the
+[Sparse NCA Calculations](http://billdenney.github.io/pknca/articles/v04-sparse.html)
+vignette for more information.
+
+# Limitations
 
 ## Secondary parameters (e.g. bioavailability and renal clearance)
 
-PKNCA does not (yet) have the ability to calculate secondary PK parameters that require looking at more than one group/interval at a time.  (If you have good ideas for how to define the intervals for that, please let me know.)
+PKNCA does not (yet) have the ability to calculate secondary PK parameters that require looking at more than one group/interval at a time.
+
+## Validation of PKNCA
+
+PKNCA has an extensive testing and validation suite built-in.  To run the
+testing and validation suite of tests with a full report generated, see the
+[PKNCA Validation](http://billdenney.github.io/pknca/articles/v60-PKNCA-validation.html)
+vignette.
 
 # Hands-on
 

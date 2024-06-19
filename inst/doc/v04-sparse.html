@@ -12,7 +12,7 @@
 
 <meta name="author" content="Bill Denney" />
 
-<meta name="date" content="2023-04-29" />
+<meta name="date" content="2024-06-19" />
 
 <title>Sparse NCA Calculations</title>
 
@@ -51,7 +51,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Sparse NCA Calculations</h1>
 <h4 class="author">Bill Denney</h4>
-<h4 class="date">2023-04-29</h4>
+<h4 class="date">2024-06-19</h4>
 
 
 
@@ -367,21 +367,21 @@ the animals in a group.</p>
 Dixit R. and Soper K. (1999). A method for estimating and testing area
 under the curve in serial sacrifice, batch, and complete data designs.
 Journal of Biopharmaceutical Statistics, 9(3):451-464.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Setup the data</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>d_sparse <span class="ot">&lt;-</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">id =</span> <span class="fu">c</span>(1L, 2L, 3L, 1L, 2L, 3L, 1L, 2L, 3L, 4L, 5L, 6L, 4L, 5L, 6L, 7L, 8L, 9L, 7L, 8L, 9L),</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">conc =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,  <span class="fl">1.75</span>, <span class="fl">2.2</span>, <span class="fl">1.58</span>, <span class="fl">4.63</span>, <span class="fl">2.99</span>, <span class="fl">1.52</span>, <span class="fl">3.03</span>, <span class="fl">1.98</span>, <span class="fl">2.22</span>, <span class="fl">3.34</span>, <span class="fl">1.3</span>, <span class="fl">1.22</span>, <span class="fl">3.54</span>, <span class="fl">2.84</span>, <span class="fl">2.55</span>, <span class="fl">0.3</span>, <span class="fl">0.0421</span>, <span class="fl">0.231</span>),</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">time =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">24</span>, <span class="dv">24</span>, <span class="dv">24</span>),</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">dose =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Setup the data</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>d_sparse <span class="ot">&lt;-</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>      <span class="at">id =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="dt">L</span>, <span class="dv">2</span><span class="dt">L</span>, <span class="dv">3</span><span class="dt">L</span>, <span class="dv">1</span><span class="dt">L</span>, <span class="dv">2</span><span class="dt">L</span>, <span class="dv">3</span><span class="dt">L</span>, <span class="dv">1</span><span class="dt">L</span>, <span class="dv">2</span><span class="dt">L</span>, <span class="dv">3</span><span class="dt">L</span>, <span class="dv">4</span><span class="dt">L</span>, <span class="dv">5</span><span class="dt">L</span>, <span class="dv">6</span><span class="dt">L</span>, <span class="dv">4</span><span class="dt">L</span>, <span class="dv">5</span><span class="dt">L</span>, <span class="dv">6</span><span class="dt">L</span>, <span class="dv">7</span><span class="dt">L</span>, <span class="dv">8</span><span class="dt">L</span>, <span class="dv">9</span><span class="dt">L</span>, <span class="dv">7</span><span class="dt">L</span>, <span class="dv">8</span><span class="dt">L</span>, <span class="dv">9</span><span class="dt">L</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>      <span class="at">conc =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,  <span class="fl">1.75</span>, <span class="fl">2.2</span>, <span class="fl">1.58</span>, <span class="fl">4.63</span>, <span class="fl">2.99</span>, <span class="fl">1.52</span>, <span class="fl">3.03</span>, <span class="fl">1.98</span>, <span class="fl">2.22</span>, <span class="fl">3.34</span>, <span class="fl">1.3</span>, <span class="fl">1.22</span>, <span class="fl">3.54</span>, <span class="fl">2.84</span>, <span class="fl">2.55</span>, <span class="fl">0.3</span>, <span class="fl">0.0421</span>, <span class="fl">0.231</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>      <span class="at">time =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">24</span>, <span class="dv">24</span>, <span class="dv">24</span>),</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>      <span class="at">dose =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    )</span></code></pre></div>
 <p>Look at your data. (This is not technically a required step, but it’s
 good practice.)</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(d_sparse, <span class="fu">aes</span>(<span class="at">x=</span>time, <span class="at">y=</span>conc, <span class="at">group=</span>id)) <span class="sc">+</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">24</span>, <span class="at">by=</span><span class="dv">6</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">ggplot</span>(d_sparse, <span class="fu">aes</span>(<span class="at">x=</span>time, <span class="at">y=</span>conc, <span class="at">group=</span>id)) <span class="sc">+</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">24</span>, <span class="at">by=</span><span class="dv">6</span>))</span></code></pre></div>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAq1BMVEUAAAAAADoAAGYAOpAAZrYzMzM6AAA6ADo6kNtNTU1NTW5NTY5NbqtNjshmAABmtv9uTU1uTW5uTY5ubo5ubqtuq+SOTU2OTW6OTY6Obk2ObquOyP+QOgCQtpCQ2/+rbk2rbm6rjk2ryKur5OSr5P+2ZgC22/+2///Ijk3I///bkDrb///kq27k///r6+v/tmb/yI7/25D/27b/5Kv//7b//8j//9v//+T////X/QjtAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAMvklEQVR4nO2diXrUNhCAVUopSylJD+gRWnoD6WJClxC//5M1tte2jtEcstbW2jPfR9jsZCzp37GOGclrahVUzNIVKF0UECEKiBAFRIgCIkQBEcIFVI1iv/YEUc1rNv2KCohQKSBCpYAIlQIiVAqIUCkgQqWACJUCIlSzAzLGpJhtBpAxCCEFpIBIlQKiVNoHESqjoxiuUkC4yqx9HjRVzjZyqR4UUc0MyOhSA1cpIEKlgHCVSTNLLC3LFRUQoVJAhGpWQCbNLLG0PFdUQIRqTkAmzSyxtExXVECESgERqhkBmTSzxNJyXVEBESoFRKjmA2QQHa1SQIRKARGq9QMyiI6hKhvQ3asrBYQB2u8UEAbo8N1PkwEZRMdRlQzo7rc/u1vsi3vBHA2Ts0339II0YP88Qx+0Yg86fP9uOiCD6FiqggHtd408V0CIqAedGpBBdDxV2YAsSauXAiLKVkB42QbRMVUKiFApIEK1akAG0XFVCohQrRmQQXRslQIiVAqIUK0YkH/yQAFVCkhULwWEFQCc7VFAlgo6HaaAKgXELmCDgITSEjrNpWeWU41iptK1GFaAsX6K6iXRnT8gDblGCzDe/+x6SXRnDGjkMg5mvMEvsTkCVWGAJDvMwIcPrB8Qf5frdgB5rWTstDeDpDVHoCoQEH7ax8KymT4oaKaBz6z2bLY2ikFPMQnOzdu3kwKqnGd3BH2NAhrehR8jtDFAkecEIY9Y2jygLvgRRbcxQC6F0W9CXcbm5L/iDIC8ewq5/TYIKBpyBQltChC8YBjNIN2ZArrZ7b56ywFkLxUYzwJcyzB/+PZtvf+aAchaaCIjlWUmWZAWDKiHxAPUq6J8bN8SZIQKB9R5EHHax0nxxK7n5oHOKCOEnhe7fPJX/xr7BEbniHuQ1z2tZS12+0NPiFkAdoe5UJgJj8IB1W/6wxrMApgO1L7FumLBgG6evsvmQWBUjHXWrmBAzYExXh80CsIHMLO6Llad86gWnUnb67DxzXjQnk54rBSQ3eWgbkImPNYFaAir2pkK3Ix6vNnqAZE98aayGmNgvuFj3PlgzMygDwpeFSC/pdzpMvaw8pUDYk6Xo/Nv3OzcAXm78JJWKKsC5KaX+06atz8oTmitgMLgD16vaCRypYCAHVRUveQpofkBfXr5+P7fwzRA1oTGcwdDzQbr4QKpzRGopgD6+2FLCSJEFzACAlKrrHpJU0KzA/r47KL57/2D1wmARi9pR6/QiRj1QrJFRHMEqsUBHfkE8TFOvUrfYXbdoPn47HHKLXYEZKK7XHjfDlX4HsX3TcMgPiSgY9wCySAikx37ioKUUFHDPCXGvVqT4wmP+7AKKywllGse1PU8dfimYxa5zdLWuAt40IdH7b2R0Ekf112+Kgx3sIZy5hp3dkCROSITEDzXCdZirN0dzDVukmr6MJ8GKDpbDtZinKGclRJawINSARkkcxFmNThDOS8IkKKa0geBU0QWILxsfzu9f5uBjsdc44pVk24xk9ZJ0xlAf6nhEkKmnkUBwgQrgBUU86YAnGgsLwggVc0OyBhWhxHcV5yEB7s5AtUkQNfypYYTecbr5a/w6SoDU6toRbiqmRerbmyDqhcUSEPNgsl5pDkC1Xzhjn5F6uxRJAqHnQi9M1nNEahmAzRwkQDyEZHRWCwlVPgtlggouM9IM1aUhK+arZN2AIn2sQRORJglnKIqYph3N3CIDp96iOiui7wiXzXjPMjb4IKPycDsAP4FNMuY8JgCSJgX83cAoWMyML8cVXS8Ol/CYwogYV7MB4QG5okVCtkTc8JILFW+Yf5wuUO/uibkgw05VBCA7Ilnfq4eDajZI334BtknDQKS7UJwQkVkT5wn4ZFtHnTTHGTBdtqb/oe31BANyvbgR/bEjDASrZo0ivl5sW6nfeS0jzn+cA/yNO+JMjfWH5OGC6SEiO/V6L+YBfMgYCYtGnPswY+KV2fICGWcB92+GPjEAA2LVW8mLUuyh9vyo2acfbO4Kh+gw+XV+AtwlSES1OIJ4s6iesWPI4azA94Vk3QiQA4fFFD/u7uo4kTmLVWMUGg2MeGRDVD37VD4KOZHUaFYBrde419T8WpGeK6ItVgIqPLDqozIvKWyEOFmWBaOLGxhQN7nb2Q9BuBEkekT94oyXVZAAJ9+Suwc3xXVK3SiiFl6wqMAQBU4cDObM54zw++j5ITHfICAx1DYw7w/LLGb4zpRfH55DoDQWZ03LPGb4xxWjJuJYis83byA7M5IeEOMT0tBzZISHiUBquymym6IgSw+ARdckaObsw8axPIGSZV5ZpLgE0OXeRTjLkjNsQ8Sft59UhE1EwWfSN1CgKq+M5EmuI6dNOom8DWLACQLo5shACkwO3bS+O5hUfAJ1y3SBw26404HWZWD0+WAmeyTKmwUc3Rd4EjYnCMhzEwUnZsL0PjkMl6MbzCT5W/GAAFGQfpJMVSZAFkvAV62GGvcljYn0n85SzjZFWnVdEB+eGxQGQiYjS6gyHI8IkYpvSKlygKIVzbkWy4iTnMAJ4qscblXxFVSQIFAx52wP5+WPOsNMKvTJM2meJDowwlvSNb26iCCggwJvPDljJ20qGxwRUoHl8OOBqMgRY6oigDUd9d8syEDF7kiI+FxVoCOfb3EzJprgshTK+KrSgHUzRxFscHBieAxM7UinqoYQF1wOY4I7LqwaKzwpo2ppgICp0GJ9RpmgRD0yNQKuzPx+O4ZAhoW+oIAgcGisTmeipYBkKxsol4DIa4ZsKSzlOsDdOysJSv9+MI4OSWUE5A08kXXCx7O0DsTicYmpYTKBiT1oKqOO1Edj2RvClCsHp0quSLty5UAwqLc8pRQ4YDEfdBgFlGJU0KlA0o1i/udsJJZAQlbc0pASDRWNpvNBygywC4GKB6NTbppqxUCiu6NlXf73UsOoPGbawJAhd1ilVen2nk/5YocQDfxb4cqEVA8ys1OCckAvXnyx1l5UGVVy3cu+RUltxhwHMqIszYzSaRi6bVdUR/USSQNwNtAkLOTlrZmLkAdIujuk11xxYAi0U7hGZg1A2q21CKEFFAVcyIyJZRxJl04oBrcqCXZ8j8NEBLIS2pOdrO6Ag/bUCmhTQEaM7COcM/AbACQu9NhEOaZiKmAxFVeAFCfbfN0vIzQNgAFe65aHWsjwEYAQU5UsxIemwHUP/vA1dH13w6gYJd17f4aMdsQIN+J6vE9xGxTgHoncpYaxPadbQHqHcbduYcmPCYBio6T5QKynMgd4WJmmwM0OJE9k/bbsW1APQ678vFTNVsE1O8edqofS3hsElA1HBM27luAmRSQI6XmfBjSV91+9h5uwLywg/l8Pagawh1WG8CM9XYBjU+9GFoBHY+ZBiilXsUAGjvpwIkU0FEHOJFvtm1AIxnXmzIBEh3NydGcU1wx6IC8jNDmAYUdkLsLWQGFo5hDSAFVjhN1oWsF5Onc2WI+QFPrdXoz9hUdJ8rWB02v16nN+Fe0nUg9CNRZfbUCAnXjpFEBwTozzoTGv1JAtuRdrK4QUPgshwmAkBPF5wso51qMt79GoisCUCWeB92+2D19tyFA0lHs7tVVvf86BIQ9q2VTgG5/fGttlIavkqVe5wro8P076MuPgqe1rUiglsXbevO0B9QIjDnLB1eMBwlHsdGDHEAr7oOEgCJ90MwtLRhQ8+Vi0CimgAYXisyDFBAkc9Urk5kCOvkVFRChUkCESgERKikgS6DvXC3NLF9hCogwU0CEmQIizNYaucgmCogQBUSIAiJEAREiBeTEQPhy92r35C/6zzxp43WHy/Ebp0VW4wPYOEZ9KU0yxxYhIDcXxJc3V22MWybtQ+aaqO/hGwHcwWovKHAsZb+bBMiNw4rMxNI9ZO6m+Tje8F2os2oD6oJCh1IO3/00CZAbyReY/Z58i9W1sMTGSupBfSl3v/057RZzc0FsOVxetWylZh2gJjoutZL3lW0p++cT+6BkD0ozawHdvhDxaa2a/uRG1Eu3pdzXcyKg1D7o53RAjfeJrcSe3pWy3zXifB7iUex56iiWeIuJ+SR50FjKRA9KnQfdm4kcvpOmqd2HKoHU+t3NTjQqjKVMBbQ5UUCEKCBCFBAhCogQBURIiYD++6f+8OWvS9fiKAUCKgdOIwqIkPIAfXhkzON7SB++/KV9df/joq4/vTTmwesFqlMeoNaDGkCPPv+3vjbNjwevP718WNfX969nl5IBXTTudNG+8b7xno/PLuavTcGAmq6o/3HdfYXm4/lrcy6Alri7WjkTQO8/W2pkKxBQ09X4gD69vHehRSgVCKj+2zz0AbXD/CJeVCKgokQBEaKACFFAhCggQhQQIQqIEAVEiAIiRAER8j9n6XLvr60u3gAAAABJRU5ErkJggg==" /><!-- --></p>
 </div>
 <div id="data-setup-note" class="section level2">
@@ -393,24 +393,24 @@ point changes the standard error calculation. If all individuals
 contribute a single sample, a simple way to handle this is by setting a
 column with sequential numbers and giving that as the subject
 identifier:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>d_sparse<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(d_sparse)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>d_sparse<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(d_sparse)</span></code></pre></div>
 </div>
 </div>
 <div id="calculate" class="section level1">
 <h1>Calculate!</h1>
 <p>Setup PKNCA for calculations and then calculate!</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>o_conc_sparse <span class="ot">&lt;-</span> <span class="fu">PKNCAconc</span>(d_sparse, conc<span class="sc">~</span>time<span class="sc">|</span>id, <span class="at">sparse=</span><span class="cn">TRUE</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>d_intervals <span class="ot">&lt;-</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">start=</span><span class="dv">0</span>,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">end=</span><span class="dv">24</span>,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">aucinf.obs=</span><span class="cn">TRUE</span>,</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">cmax=</span><span class="cn">TRUE</span>,</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">sparse_auclast=</span><span class="cn">TRUE</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>o_data_sparse <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(o_conc_sparse, <span class="at">intervals=</span>d_intervals)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>o_nca <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(o_data_sparse)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>o_conc_sparse <span class="ot">&lt;-</span> <span class="fu">PKNCAconc</span>(d_sparse, conc<span class="sc">~</span>time<span class="sc">|</span>id, <span class="at">sparse=</span><span class="cn">TRUE</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>d_intervals <span class="ot">&lt;-</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">start=</span><span class="dv">0</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="at">end=</span><span class="dv">24</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    <span class="at">aucinf.obs=</span><span class="cn">TRUE</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>    <span class="at">cmax=</span><span class="cn">TRUE</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    <span class="at">sparse_auclast=</span><span class="cn">TRUE</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  )</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>o_data_sparse <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(o_conc_sparse, <span class="at">intervals=</span>d_intervals)</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>o_nca <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(o_data_sparse)</span></code></pre></div>
 <pre><code>## No dose information provided, calculations requiring dose will return NA.</code></pre>
 <pre><code>## Warning: Too few points for half-life calculation (min.hl.points=3 with only 2
 ## points)</code></pre>
@@ -421,14 +421,14 @@ identifier:</p>
 <h1>Results</h1>
 <p>As with any other PKNCA result, the data are available through the
 <code>summary()</code> function:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(o_nca)</span></code></pre></div>
-<pre><code>##  start end N      cmax sparse_auclast aucinf.obs
-##      0  24 1 3.05 [NC]      39.5 [NC]         NC
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">summary</span>(o_nca)</span></code></pre></div>
+<pre><code>##  start end cmax sparse_auclast aucinf.obs
+##      0  24 3.05           39.5         NC
 ## 
 ## Caption: cmax, sparse_auclast, aucinf.obs: geometric mean and geometric coefficient of variation</code></pre>
 <p>or individual results are available through the
 <code>as.data.frame()</code> function:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(o_nca)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">as.data.frame</span>(o_nca)</span></code></pre></div>
 <pre><code>## # A tibble: 16 × 5
 ##    start   end PPTESTCD            PPORRES exclude                              
 ##    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt; &lt;chr&gt;                                
