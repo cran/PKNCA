@@ -61,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -461,6 +461,12 @@ fit with the most points included.</li>
 </div>
 <div id="manual-point-selection" class="section level1">
 <h1>Manual Point Selection</h1>
+<p>For both exclusion and inclusion methods below, the same
+<code>NA</code> handling rules apply on a per-interval basis. If all
+values are <code>NA</code>, then no inclusion or exclusion is applied
+(the interval is treated as-is, like the argument had not been given).
+If some values are <code>NA</code> for the interval, those are treated
+as <code>FALSE</code>.</p>
 <div id="exclusion-of-specific-points-with-curve-stripping" class="section level2">
 <h2>Exclusion of Specific Points with Curve Stripping</h2>
 <p>In some cases, specific points will be known outliers, or there may

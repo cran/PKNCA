@@ -14,16 +14,17 @@
 #' @returns A PKNCAresults object with each of the above within.
 #' @family PKNCA objects
 #' @export
-PKNCAresults <- function(result, data, exclude) {
-  result <- pknca_unit_conversion(result=result, units=data$units)
+PKNCAresults <- function(result, data, exclude = NULL) {
+  result <-
+    pknca_unit_conversion(
+      result = result,
+      units = data$units,
+      allow_partial_missing_units = data$options$allow_partial_missing_units
+    )
   # Add all the parts into the object
   ret <- list(result=result,
               data=data)
-  if (missing(exclude)) {
-    ret <- setExcludeColumn(ret, dataname="result")
-  } else {
-    ret <- setExcludeColumn(ret, exclude=exclude, dataname="result")
-  }
+  ret <- setExcludeColumn(ret, exclude = exclude, dataname = "result")
   class(ret) <- c("PKNCAresults", class(ret))
   addProvenance(ret)
 }
@@ -131,4 +132,11 @@ getGroups.PKNCAresults <- function(object,
       }
     }
   data[, grpnames, drop=FALSE]
+}
+
+#' @describeIn group_vars.PKNCAconc Get group_vars for a PKNCAresults object
+#'   from the PKNCAconc object within
+#' @exportS3Method dplyr::group_vars
+group_vars.PKNCAresults <- function(x) {
+  group_vars.PKNCAconc(as_PKNCAconc(x))
 }

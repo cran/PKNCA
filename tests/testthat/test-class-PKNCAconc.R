@@ -1,5 +1,3 @@
-source("generate.data.R")
-
 test_that("PKNCAconc expected errors", {
   tmp.conc <- generate.conc(nsub=1, ntreat=1, time.points=0:24)
   tmp.conc$foo <- "A"
@@ -228,24 +226,29 @@ test_that("PKNCAconc with exclusions", {
   expect_equal(
     myconc,
     structure(
-      list(data=cbind(tmp.conc,
-                      volume=NA_real_,
-                      duration=0),
-           formula=conc~time|treatment+ID,
-           columns=
-             list(
-               concentration="conc",
-               time="time",
-               groups=
-                 list(
-                   group_vars=c("treatment", "ID"),
-                   group_analyte=character()
-                 ),
-               subject="ID",
-               exclude="excl",
-               volume="volume",
-               duration="duration"
-             )
+      list(
+        data=
+          cbind(
+            tmp.conc,
+            volume=NA_real_,
+            duration=0
+          ),
+        formula=conc~time|treatment+ID,
+        columns=
+          list(
+            concentration="conc",
+            time="time",
+            groups=
+              list(
+                group_vars=c("treatment", "ID"),
+                group_analyte=character()
+              ),
+            subject="ID",
+            exclude="excl",
+            volume="volume",
+            duration="duration"
+          ),
+        units = list()
       ),
       class=c("PKNCAconc", "list")
     )
@@ -261,25 +264,32 @@ test_that("PKNCAconc with duration", {
   expect_equal(
     myconc,
     structure(
-      list(data=cbind(tmp.conc,
-                      data.frame(exclude=NA_character_,
-                                 volume=NA_real_,
-                                 stringsAsFactors=FALSE)),
-           formula=conc~time|treatment+ID,
-           columns=
-             list(
-               concentration="conc",
-               time="time",
-               groups=
-                 list(
-                   group_vars=c("treatment", "ID"),
-                   group_analyte=character()
-                 ),
-               subject="ID",
-               exclude="exclude",
-               volume="volume",
-               duration="duration_test"
-             )
+      list(
+        data=
+          cbind(
+            tmp.conc,
+            data.frame(
+              exclude=NA_character_,
+              volume=NA_real_,
+              stringsAsFactors=FALSE
+            )
+          ),
+        formula=conc~time|treatment+ID,
+        columns=
+          list(
+            concentration="conc",
+            time="time",
+            groups=
+              list(
+                group_vars=c("treatment", "ID"),
+                group_analyte=character()
+              ),
+            subject="ID",
+            exclude="exclude",
+            volume="volume",
+            duration="duration_test"
+          ),
+        units = list()
       ),
       class=c("PKNCAconc", "list")
     )
@@ -293,26 +303,35 @@ test_that("PKNCAconc with nominal time added", {
   expect_equal(
     myconc,
     structure(
-      list(data=cbind(tmp.conc,
-                      data.frame(exclude=NA_character_,
-                                 volume=NA_real_,
-                                 duration=0,
-                                 stringsAsFactors=FALSE)),
-           formula=conc~time|treatment+ID,
-           columns=
-             list(
-               concentration="conc",
-               time="time",
-               groups=
-                 list(
-                   group_vars=c("treatment", "ID"),
-                   group_analyte=character()
-                 ),
-               subject="ID",
-               exclude="exclude",
-               volume="volume",
-               duration="duration",
-               time.nominal="tnom")),
+      list(
+        data=
+          cbind(
+            tmp.conc,
+            data.frame(
+              exclude=NA_character_,
+              volume=NA_real_,
+              duration=0,
+              stringsAsFactors=FALSE
+            )
+          ),
+        formula=conc~time|treatment+ID,
+        columns=
+          list(
+            concentration="conc",
+            time="time",
+            groups=
+              list(
+                group_vars=c("treatment", "ID"),
+                group_analyte=character()
+              ),
+            subject="ID",
+            exclude="exclude",
+            volume="volume",
+            duration="duration",
+            time.nominal="tnom"
+          ),
+        units = list()
+      ),
       class=c("PKNCAconc", "list")
     )
   )
@@ -340,7 +359,8 @@ test_that("PKNCAconc with nominal time added", {
                volume="volume",
                duration="duration",
                time.nominal="foo"
-             )
+             ),
+           units = list()
       ),
       class=c("PKNCAconc", "list"))
   )
@@ -370,7 +390,8 @@ test_that("PKNCAconc with volume added", {
              exclude="exclude",
              volume="vol",
              duration="duration"
-           )
+           ),
+           units = list()
       ),
       class=c("PKNCAconc", "list"))
   )
@@ -397,7 +418,8 @@ test_that("PKNCAconc with volume added", {
                exclude="exclude",
                volume="volume",
                duration="duration"
-             )
+             ),
+           units = list()
       ),
       class=c("PKNCAconc", "list")
     )
@@ -430,7 +452,8 @@ test_that("PKNCAconc with volume added", {
             exclude="exclude",
             volume="volume",
             duration="duration"
-          )
+          ),
+        units = list()
       ),
       class=c("PKNCAconc", "list")
     )
@@ -495,5 +518,114 @@ First 6 rows of concentration data:
   1 1.75    1  100    <NA>     NA        0
   2 2.20    1  100    <NA>     NA        0
   3 1.58    1  100    <NA>     NA        0"
+  )
+})
+
+test_that("Test uniqueness after excluding rows (#298)", {
+  repeated_with_exclusion <-
+    data.frame(
+      conc = 1,
+      time = c(0, 0),
+      id = 1,
+      exclude = c(NA, "duplicate")
+    )
+
+  expect_error(
+    PKNCAconc(repeated_with_exclusion, conc~time|id),
+    regexp="Rows that are not unique per group and time.*concentration"
+  )
+  expect_s3_class(
+    PKNCAconc(repeated_with_exclusion, conc~time|id, exclude = "exclude"),
+    class = "PKNCAconc"
+  )
+})
+
+test_that("PKNCAconc units (#336)", {
+  d <- data.frame(conc = 1, time = 0, concu_x = "A", timeu_x = "B", amountu_x = "C")
+
+  # No units
+  o_conc <- PKNCAconc(data = d, conc~time)
+  expect_equal(o_conc$units, list())
+  expect_null(o_conc$columns$concu)
+  expect_null(o_conc$columns$timeu)
+  expect_null(o_conc$columns$amountu)
+
+  # Each unit column individually
+  o_conc <- PKNCAconc(data = d, conc~time, concu = "concu_x")
+  expect_equal(o_conc$units, list())
+  expect_equal(o_conc$columns$concu, structure("concu_x", unit_type = "column"))
+  expect_null(o_conc$columns$timeu)
+  expect_null(o_conc$columns$amountu)
+
+  o_conc <- PKNCAconc(data = d, conc~time, timeu = "timeu_x")
+  expect_equal(o_conc$units, list())
+  expect_null(o_conc$columns$concu)
+  expect_equal(o_conc$columns$timeu, structure("timeu_x", unit_type = "column"))
+  expect_null(o_conc$columns$amountu)
+
+  o_conc <- PKNCAconc(data = d, conc~time, amountu = "amountu_x")
+  expect_equal(o_conc$units, list())
+  expect_null(o_conc$columns$concu)
+  expect_null(o_conc$columns$timeu)
+  expect_equal(o_conc$columns$amountu, structure("amountu_x", unit_type = "column"))
+
+  # Each unit as a value, not a column
+  o_conc <- PKNCAconc(data = d, conc~time, concu = "concu_y")
+  expect_equal(o_conc$units, list(concu = structure("concu_y", unit_type = "value")))
+  expect_null(o_conc$columns$concu)
+  expect_null(o_conc$columns$timeu)
+  expect_null(o_conc$columns$amountu)
+
+  o_conc <- PKNCAconc(data = d, conc~time, timeu = "timeu_y")
+  expect_equal(o_conc$units, list(timeu = structure("timeu_y", unit_type = "value")))
+  expect_null(o_conc$columns$concu)
+  expect_null(o_conc$columns$timeu)
+  expect_null(o_conc$columns$amountu)
+
+  o_conc <- PKNCAconc(data = d, conc~time, amountu = "amountu_y")
+  expect_equal(o_conc$units, list(amountu = structure("amountu_y", unit_type = "value")))
+  expect_null(o_conc$columns$concu)
+  expect_null(o_conc$columns$timeu)
+  expect_null(o_conc$columns$amountu)
+
+  # Preferred units
+  expect_error(
+    PKNCAconc(data = d, conc~time, concu_pref = "concu_z"),
+    regexp = "Preferred units may not be set unless original units are set: concu_pref"
+  )
+  o_conc <- PKNCAconc(data = d, conc~time, concu = "concu_y", concu_pref = "concu_z")
+  expect_equal(
+    o_conc$units,
+    list(
+      concu = structure("concu_y", unit_type = "value"),
+      concu_pref = structure("concu_z", unit_type = "value")
+    )
+  )
+  expect_null(o_conc$columns$concu)
+  expect_null(o_conc$columns$timeu)
+  expect_null(o_conc$columns$amountu)
+
+  o_conc <- PKNCAconc(data = d, conc~time, concu = "concu_x", concu_pref = "concu_z")
+  expect_equal(o_conc$units, list(concu_pref = structure("concu_z", unit_type = "value")))
+  expect_equal(
+    o_conc$columns$concu,
+    structure("concu_x", unit_type = "column")
+  )
+  expect_null(o_conc$columns$timeu)
+  expect_null(o_conc$columns$amountu)
+
+  o_conc <- PKNCAconc(data = d, conc~time, timeu = "timeu_x", timeu_pref = "timeu_z")
+  expect_equal(o_conc$units, list(timeu_pref = structure("timeu_z", unit_type = "value")))
+  expect_null(o_conc$columns$concu)
+  expect_equal(o_conc$columns$timeu, structure("timeu_x", unit_type = "column"))
+  expect_null(o_conc$columns$amountu)
+
+  o_conc <- PKNCAconc(data = d, conc~time, amountu = "amountu_x", amountu_pref = "amountu_z")
+  expect_equal(o_conc$units, list(amountu_pref = structure("amountu_z", unit_type = "value")))
+  expect_null(o_conc$columns$concu)
+  expect_null(o_conc$columns$timeu)
+  expect_equal(
+    o_conc$columns$amountu,
+    structure("amountu_x", unit_type = "column")
   )
 })

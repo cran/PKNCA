@@ -263,11 +263,11 @@ get_summary_PKNCAresults_count_N <- function(data, result_group, subject_col, su
     # R CMD Check hack
     N <- NULL
     ret <-
-      data |>
-      dplyr::grouped_df(vars = names(result_group)) |>
+      data %>%
+      dplyr::grouped_df(vars = names(result_group)) %>%
       dplyr::summarize(
         N = length(unique(.data[[subject_col]]))
-      ) |>
+      ) %>%
       dplyr::ungroup()
     # Reorder the return value to be in the same order as the original groups
     key_col <- paste0(max(names(ret)), "X")
@@ -285,9 +285,7 @@ get_summary_PKNCAresults_count_N <- function(data, result_group, subject_col, su
 
     ret$N <- as.character(ret$N)
     if (any(is.na(ret$N))) {
-      # If N is requested, but it is not provided, then it should be set to not
-      # calculated.
-      ret$N[is.na(ret$N)] <- not_calculated
+      stop("Please report a bug. If N is requested, but it is not provided, then it should be set to not calculated.") # nocov
     }
   } else {
     ret <- result_group

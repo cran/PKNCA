@@ -260,6 +260,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="#progress" id="toc-progress">progress</a></li>
 <li><a href="#tau.choices" id="toc-tau.choices">tau.choices</a></li>
 <li><a href="#single.dose.aucs" id="toc-single.dose.aucs">single.dose.aucs</a></li>
+<li><a href="#allow_partial_missing_units" id="toc-allow_partial_missing_units">allow_partial_missing_units</a></li>
 </ul></li>
 </ul>
 </div>
@@ -270,7 +271,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 effects throughout the package. The options are controlled using either
 the <code>PKNCA.options</code> function or by passing the
 <code>options</code> argument to any of the functions with that as an
-argument. All options supported by the current version of PKNCA (0.11.0)
+argument. All options supported by the current version of PKNCA (0.12.0)
 are listed below with their descriptions.</p>
 </div>
 <div id="options" class="section level1">
@@ -370,7 +371,7 @@ interval.</p>
 <div id="single.dose.aucs" class="section level2">
 <h2>single.dose.aucs</h2>
 <p>When data is single-dose, what intervals should be used?</p>
-<table>
+<table style="width:100%;">
 <colgroup>
 <col width="0%" />
 <col width="0%" />
@@ -409,6 +410,7 @@ interval.</p>
 <col width="1%" />
 <col width="1%" />
 <col width="0%" />
+<col width="1%" />
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
@@ -533,6 +535,7 @@ interval.</p>
 <th align="left">aucabove.predose.all</th>
 <th align="left">aucabove.trough.all</th>
 <th align="left">count_conc</th>
+<th align="left">count_conc_measured</th>
 <th align="left">totdose</th>
 <th align="left">ae</th>
 <th align="left">clr.last</th>
@@ -742,6 +745,7 @@ interval.</p>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="right">0</td>
@@ -758,6 +762,7 @@ interval.</p>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -868,6 +873,12 @@ interval.</p>
 </tr>
 </tbody>
 </table>
+</div>
+<div id="allow_partial_missing_units" class="section level2">
+<h2>allow_partial_missing_units</h2>
+<p>When using unit assignment and conversions, should some units be
+allowed to be missing?</p>
+<p>The default value is: FALSE</p>
 </div>
 </div>
 

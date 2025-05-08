@@ -16,7 +16,7 @@ ggplot(d_sparse, aes(x=time, y=conc, group=id)) +
   scale_x_continuous(breaks=seq(0, 24, by=6))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  d_sparse$id <- 1:nrow(d_sparse)
+# d_sparse$id <- 1:nrow(d_sparse)
 
 ## -----------------------------------------------------------------------------
 library(PKNCA)

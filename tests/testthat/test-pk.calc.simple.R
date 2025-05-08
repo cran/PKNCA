@@ -429,6 +429,11 @@ test_that("pk.calc.aucabove", {
     pk.calc.auc.all(conc = c(0, 0, 0, 1:3, 0), time = 0:6)
   )
 
+  expect_equal(
+  pk.calc.aucabove(conc = c(0:5, 1), time = 0:6, conc_above = NA_real_),
+  structure(NA_real_, exclude = "Missing concentration to be above")
+  )
+
   # Confirm that it works through NCA calculations
   d_conc <- data.frame(conc = c(2, 1:5, 3), time = 0:6)
   d_intervals <- data.frame(start = 0, end = 6, aucabove.trough.all = TRUE, aucabove.predose.all = TRUE)
@@ -456,11 +461,32 @@ test_that("pk.calc.aucabove", {
 test_that("pk.calc.count_conc", {
   expect_equal(pk.calc.count_conc(1:5), 5)
   expect_equal(pk.calc.count_conc(c(1:2, NA)), 2)
-  expect_equal(suppressWarnings(pk.calc.count_conc(c())), 0)
+  expect_equal(pk.calc.count_conc(c(1:2, NA, 0)), 3)
+  expect_equal(suppressWarnings(pk.calc.count_conc(numeric())), 0)
   expect_equal(suppressWarnings(pk.calc.count_conc(NA)), 0)
+})
+
+test_that("pk.calc.count_conc_measured", {
+  expect_equal(pk.calc.count_conc_measured(1:5), 5)
+  expect_equal(pk.calc.count_conc_measured(c(1:2, NA)), 2)
+  # including BLQ
+  expect_equal(pk.calc.count_conc_measured(c(1:2, NA, 0)), 2)
+  # Other
+  expect_equal(suppressWarnings(pk.calc.count_conc_measured(numeric())), 0)
+  expect_equal(suppressWarnings(pk.calc.count_conc_measured(NA)), 0)
 })
 
 test_that("pk.calc.totdose", {
   expect_equal(pk.calc.totdose(1), 1)
   expect_equal(pk.calc.totdose(c(1, 1)), 2)
+})
+
+test_that("pk.calc.cstart", {
+  expect_equal(pk.calc.cstart(1:5, 0:4, 0), 1)
+  expect_equal(pk.calc.cstart(1:5, 0:4, 1), 2)
+  expect_equal(pk.calc.cstart(1:5, 0:4, 1.5), NA_real_)
+  expect_error(
+    pk.calc.cstart(1:5, c(0, 0:3), 0),
+    regexp = "Assertion on 'time' failed: Contains duplicated values, position 2."
+  )
 })

@@ -1,7 +1,7 @@
 Package: PKNCA
 Type: Package
 Title: Perform Pharmacokinetic Non-Compartmental Analysis
-Version: 0.11.0
+Version: 0.12.0
 Authors@R: c(
     person("Bill", "Denney", email="wdenney@humanpredictions.com", role=c("aut", "cre"), comment=c(ORCID="0000-0002-5759-428X")),
     person("Clare", "Buckeridge", email="clare.buckeridge@pfizer.com", role="aut"),
@@ -19,14 +19,14 @@ URL: https://billdenney.github.io/pknca/,
 BugReports: https://github.com/billdenney/pknca/issues
 NeedsCompilation: no
 VignetteBuilder: knitr
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
-Packaged: 2024-06-19 12:11:59 UTC; bill
-Author: Bill Denney [aut, cre] (<https://orcid.org/0000-0002-5759-428X>),
+Packaged: 2025-05-08 18:12:13 UTC; bill
+Author: Bill Denney [aut, cre] (ORCID: <https://orcid.org/0000-0002-5759-428X>),
   Clare Buckeridge [aut],
   Sridhar Duvvuri [ctb]
 Maintainer: Bill Denney <wdenney@humanpredictions.com>
 Repository: CRAN
-Date/Publication: 2024-06-19 13:00:06 UTC
+Date/Publication: 2025-05-08 18:50:02 UTC

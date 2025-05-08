@@ -370,21 +370,21 @@ p_auc_calcs
 p_auc_calcs
 
 ## ----eval=FALSE, echo=TRUE----------------------------------------------------
-#  library(PKNCA)
-#  
-#  d_conc <- read.csv("c:/tmp/whale_conc.csv")
-#  d_dose <- read.csv("c:/tmp/whale_dose.csv")
-#  head(d_conc)
-#  head(d_dose)
-#  
-#  o_conc <- PKNCAconc(concentration~time|Animal, data=d_conc)
-#  o_dose <- PKNCAdose(dose~time|Animal, data=d_dose)
-#  o_data <- PKNCAdata(o_conc, o_dose)
-#  o_data$intervals
-#  o_nca <- pk.nca(o_data)
-#  summary(o_nca)
-#  summary(o_nca, drop.group=c())
-#  as.data.frame(o_nca)
+# library(PKNCA)
+# 
+# d_conc <- read.csv("c:/tmp/whale_conc.csv")
+# d_dose <- read.csv("c:/tmp/whale_dose.csv")
+# head(d_conc)
+# head(d_dose)
+# 
+# o_conc <- PKNCAconc(concentration~time|Animal, data=d_conc)
+# o_dose <- PKNCAdose(dose~time|Animal, data=d_dose)
+# o_data <- PKNCAdata(o_conc, o_dose)
+# o_data$intervals
+# o_nca <- pk.nca(o_data)
+# summary(o_nca)
+# summary(o_nca, drop.group=c())
+# as.data.frame(o_nca)
 
 ## ----exclude-example-1, echo=TRUE---------------------------------------------
 d_before_exclude <-
@@ -407,7 +407,7 @@ pander::pander(
 )
 
 ## ----echo=TRUE, eval=FALSE----------------------------------------------------
-#  o_conc <- PKNCAconc(data=d_before_exclude, conc~time, exclude="not_this")
+# o_conc <- PKNCAconc(data=d_before_exclude, conc~time, exclude="not_this")
 
 ## ----echo=TRUE----------------------------------------------------------------
 d_urine <-
@@ -573,7 +573,7 @@ d_plot <-
 pander::pander(summary(o_nca))
 
 ## ----echo=TRUE, eval=FALSE----------------------------------------------------
-#  pander::pander(as.data.frame(o_nca))
+# pander::pander(as.data.frame(o_nca))
 
 ## ----echo=TRUE----------------------------------------------------------------
 d_conc <-

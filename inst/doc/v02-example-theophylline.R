@@ -39,7 +39,7 @@ results_obj_automatic <- pk.nca(data_obj_automatic)
 knitr::kable(head(as.data.frame(results_obj_automatic)))
 
 ## ----calculationautoshow, eval=FALSE------------------------------------------
-#  summary(results_obj_automatic)
+# summary(results_obj_automatic)
 
 ## ----calculationautoshowpretty, echo=FALSE------------------------------------
 ## Make a pretty table instead of the data.frame preformatted printout
@@ -50,7 +50,7 @@ results_obj_manual <- pk.nca(data_obj_manual)
 knitr::kable(head(as.data.frame(results_obj_manual)))
 
 ## ----calculationmanualshow, eval=FALSE----------------------------------------
-#  summary(results_obj_manual)
+# summary(results_obj_manual)
 
 ## ----calculationmanualshowpretty, echo=FALSE----------------------------------
 ## Make a pretty table instead of the data.frame preformatted printout

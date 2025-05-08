@@ -100,6 +100,10 @@ PKNCAdata.default <- function(data.conc, data.dose, ...,
     }
   }
   ret$options <- options
+
+  # Assign the class and give it all back to the user.
+  class(ret) <- c("PKNCAdata", class(ret))
+
   # Check the intervals
   if (missing(intervals) & identical(ret$dose, NA)) {
     stop("If data.dose is not given, intervals must be given")
@@ -158,13 +162,43 @@ PKNCAdata.default <- function(data.conc, data.dose, ...,
         cols="data_intervals"
       )
   }
+  ret <- set_intervals(data = ret, intervals = intervals)
   ret$intervals <- check.interval.specification(intervals)
   # Verify that either everything or nothing is using units
   units_interval_start <- inherits(ret$intervals$start, "units")
   units_interval_end <- inherits(ret$intervals$end, "units")
 
   # Insert the unit conversion table
-  if (!missing(units)) {
+  if (missing(units)) {
+    # What unit types are recognized?
+    possible_units <-
+      setdiff(
+        grep(x = names(formals(pknca_units_table)), pattern = "_", invert = TRUE, value = TRUE),
+        "conversions"
+      )
+    possible_units_pref <- paste0(possible_units, "_pref")
+    # Accumulate available units
+    conc_units_values <- ret$conc$units
+    conc_units_cols <- ret$conc$columns[names(ret$conc$columns) %in% possible_units]
+
+    unit_args <- conc_units_values
+    for (nm in names(conc_units_cols)) {
+      unit_args[[nm]] <- unique(stats::na.omit(ret$conc$data[[conc_units_cols[[nm]]]]))
+    }
+
+    if (!identical(ret$dose, NA)) {
+      unit_args <- append(unit_args, ret$dose$units)
+      dose_units_cols <- ret$dose$columns[names(ret$dose$columns) %in% possible_units]
+      for (nm in names(dose_units_cols)) {
+        unit_args[[nm]] <- unique(stats::na.omit(ret$dose$data[[dose_units_cols[[nm]]]]))
+      }
+    }
+    # If there are any units to set, set them here
+    if (length(unit_args) > 0) {
+      unit_args <- lapply(X = unit_args, FUN = drop_attributes)
+      ret$units <- do.call(pknca_units_table, args = unit_args)
+    }
+  } else {
     stopifnot("`units` must be a data.frame"=is.data.frame(units))
     stopifnot(
       "`units` data.frame must have at least names 'PPTESTCD' and 'PPORRESU'"=
@@ -180,9 +214,12 @@ PKNCAdata.default <- function(data.conc, data.dose, ...,
     ret$impute <- impute
   }
 
-  # Assign the class and give it all back to the user.
-  class(ret) <- c("PKNCAdata", class(ret))
   ret
+}
+
+drop_attributes <- function(x) {
+  attributes(x) <- NULL
+  x
 }
 
 #' @rdname is_sparse_pk
@@ -225,4 +262,23 @@ print.PKNCAdata <- function(x, ...) {
 #' @export
 summary.PKNCAdata <- function(object, ...) {
   print.PKNCAdata(object, summarize=TRUE, ...)
+}
+
+#' Get the groups (right hand side after the `|` from a PKNCA
+#' object).
+#'
+#' @rdname getGroups.PKNCAconc
+#' @param object The object to extract the data from
+#' @param ... Arguments passed to other getGroups functions
+#' @returns A data frame with the (selected) group columns.
+#' @export
+getGroups.PKNCAdata <- function(object, ...) {
+  getGroups(as_PKNCAconc(object), ...)
+}
+
+#' @describeIn group_vars.PKNCAconc Get group_vars for a PKNCAdata object
+#'   from the PKNCAconc object within
+#' @exportS3Method dplyr::group_vars
+group_vars.PKNCAdata <- function(x) {
+  group_vars.PKNCAconc(as_PKNCAconc(x))
 }

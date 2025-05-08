@@ -56,10 +56,16 @@ PKNCAconc.tbl_df <- function(data, ...) {
 }
 
 #' @rdname PKNCAconc
+#' @param concu,amountu,timeu Either unit values (e.g. "ng/mL") or column names
+#'   within the data where units are provided.
+#' @param concu_pref,amountu_pref,timeu_pref Preferred units for reporting (not
+#'   column names)
 #' @export
 PKNCAconc.data.frame <- function(data, formula, subject,
-                                 time.nominal, exclude, duration, volume,
-                                 exclude_half.life, include_half.life, sparse=FALSE, ...) {
+                                 time.nominal, exclude = NULL, duration, volume,
+                                 exclude_half.life, include_half.life, sparse = FALSE, ...,
+                                 concu = NULL, amountu = NULL, timeu = NULL,
+                                 concu_pref = NULL, amountu_pref = NULL, timeu_pref = NULL) {
   # The data must have... data
   if (nrow(data) == 0) {
     stop("data must have at least one row.")
@@ -102,15 +108,6 @@ PKNCAconc.data.frame <- function(data, formula, subject,
     time = data[[parsed_form$time]],
     sorted_time = FALSE
   )
-  # Values must be unique (one value per measurement)
-  key_cols <- c(parsed_form$time, unlist(parsed_form$groups))
-  mask_dup <- duplicated(data[,key_cols])
-  if (any(mask_dup)) {
-    stop("Rows that are not unique per group and time (column names: ",
-         paste(key_cols, collapse=", "),
-         ") found within concentration data.  Row numbers: ",
-         paste(seq_along(mask_dup)[mask_dup], collapse=", "))
-  }
   # Assign the subject
   if (missing(subject)) {
     subject <- parsed_form$groups$group_vars[length(parsed_form$groups$group_vars)]
@@ -141,11 +138,12 @@ PKNCAconc.data.frame <- function(data, formula, subject,
       )
   }
   class(ret) <- c("PKNCAconc", class(ret))
-  if (missing(exclude)) {
-    ret <- setExcludeColumn(ret, dataname=getDataName.PKNCAconc(ret))
-  } else {
-    ret <- setExcludeColumn(ret, exclude=exclude, dataname=getDataName.PKNCAconc(ret))
-  }
+  ret <- setExcludeColumn(ret, exclude = exclude, dataname = getDataName.PKNCAconc(ret))
+  # Values must be unique (one value per measurement), check after the exclusion
+  # column has been added to the object so that exclusions can be accounted for
+  # in duplicate checking.
+  duplicate_check(object = ret, data_type = "concentration")
+
   if (missing(volume)) {
     ret <- setAttributeColumn(ret, attr_name="volume", default_value=NA_real_)
   } else {
@@ -177,6 +175,14 @@ PKNCAconc.data.frame <- function(data, formula, subject,
                          attr_name="include_half.life",
                          col_name=include_half.life)
   }
+
+  # Unit handling
+  ret <-
+    pknca_set_units(
+      ret,
+      units_orig = list(concu = concu, amountu = amountu, timeu = timeu),
+      units_pref = list(concu_pref = concu_pref, amountu_pref = amountu_pref, timeu_pref = timeu_pref)
+    )
   ret
 }
 

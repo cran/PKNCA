@@ -1,5 +1,3 @@
-source("generate.data.R")
-
 test_that("PKNCAdata", {
   tmp.conc <- generate.conc(nsub=5, ntreat=2, time.points=0:24)
   tmp.conc.analyte <- generate.conc(nsub=5, ntreat=2, time.points=0:24,
@@ -150,6 +148,9 @@ test_that("print.PKNCAdata", {
               intervals=data.frame(start=0, end=24, aucinf.obs=TRUE),
               options=list(min.hl.r.squared=0.95))
   obj.data.dose <- PKNCAdata(obj.conc, data.dose=obj.dose)
+  obj.data.units <- PKNCAdata(obj.conc,
+                               intervals=data.frame(start=0, end=24, aucinf.obs=TRUE))
+  obj.data.units$units <- "mg"
 
   expect_output(print.PKNCAdata(obj.data.nodose),
                 regexp="Formula for concentration:
@@ -219,6 +220,25 @@ Options changed from default are:
 $min.hl.r.squared
 [1] 0.95",
                 info="Generic print.PKNCAdata works with no dosing and with options changed")
+  expect_output(print.PKNCAdata(obj.data.units),
+                regexp="Formula for concentration:
+ conc ~ time | treatment + ID
+With 2 subjects defined in the 'ID' column.
+Nominal time column is not specified.
+
+First 6 rows of concentration data:
+ treatment ID time      conc exclude
+     Trt 1  1    0 0.0000000    <NA>
+     Trt 1  1    1 0.7052248    <NA>
+     Trt 1  1    2 0.7144320    <NA>
+     Trt 1  1    3 0.8596094    <NA>
+     Trt 1  1    4 0.9998126    <NA>
+     Trt 1  1    5 0.7651474    <NA>
+No dosing information.
+With units
+With 1 rows of interval specifications.
+No options are set differently than default.",
+                info="Generic print.PKNCAdata works with no dosing")
 })
 
 test_that("summary.PKNCAdata", {
@@ -336,4 +356,74 @@ test_that("intervals may be a tibble", {
     as.data.frame(pk.nca(mydata_tibble)),
     as.data.frame(pk.nca(mydata))
   )
+})
+
+test_that("PKNCAdata units (#336)", {
+  # Typical use
+  d_conc <- data.frame(conc = 1, time = 0, concu_x = "A", timeu_x = "B", amountu_x = "C")
+  d_dose <- data.frame(dose = 1, time = 0, doseu_x = "D")
+
+  o_conc <- PKNCAconc(data = d_conc, conc~time, concu = "concu_x", timeu = "timeu_x")
+  o_dose <- PKNCAdose(data = d_dose, dose~time, doseu = "doseu_x")
+  o_data <- PKNCAdata(o_conc, o_dose)
+  expect_equal(
+    o_data$units,
+    pknca_units_table(concu = "A", doseu = "D", timeu = "B")
+  )
+  suppressWarnings(o_nca <- pk.nca(o_data))
+  expect_true("Cmax (A)" %in% names(summary(o_nca)))
+
+  # NA unit values are ignored
+  d_conc <- data.frame(conc = 1, time = 0:1, concu_x = c("A", NA), timeu_x = "B", amountu_x = "C")
+  d_dose <- data.frame(dose = 1, time = 0, doseu_x = "D")
+
+  o_conc <- PKNCAconc(data = d_conc, conc~time, concu = "concu_x", timeu = "timeu_x")
+  o_dose <- PKNCAdose(data = d_dose, dose~time, doseu = "doseu_x")
+  o_data <- PKNCAdata(o_conc, o_dose)
+  expect_equal(
+    o_data$units,
+    pknca_units_table(concu = "A", doseu = "D", timeu = "B")
+  )
+  suppressWarnings(o_nca <- pk.nca(o_data))
+  expect_true("Cmax (A)" %in% names(summary(o_nca)))
+
+  # multiple unit values cause an error
+  d_conc <- data.frame(conc = 1, time = 0:1, concu_x = c("A", "C"), timeu_x = "B", amountu_x = "C")
+  d_dose <- data.frame(dose = 1, time = 0, doseu_x = "B")
+
+  o_conc <- PKNCAconc(data = d_conc, conc~time, concu = "concu_x")
+  o_dose <- PKNCAdose(data = d_dose, dose~time, doseu = "doseu_x")
+  expect_error(
+    PKNCAdata(o_conc, o_dose),
+    regexp = "Only one unit may be provided at a time: A, C"
+  )
+})
+
+test_that("getGroups works", {
+  # Check that it works with grouping [contains only the grouping column(s)]
+  o_conc_group <- PKNCAconc(as.data.frame(datasets::Theoph), conc~Time|Subject)
+  data_group <- as.data.frame(datasets::Theoph)
+  expected_group <- data.frame(Subject = data_group$Subject)
+  o_data_group <- PKNCAdata(o_conc_group, intervals = data.frame(start = 0, end = 1, cmax = TRUE))
+  expect_equal(getGroups(o_data_group), expected_group)
+
+  # Check that it works without groupings as expected [empty]
+  o_conc_nongroup <- PKNCAconc(as.data.frame(datasets::Theoph)[datasets::Theoph$Subject == 1,], conc~Time)
+  o_data_nogroup <- PKNCAdata(o_conc_nongroup, intervals = data.frame(start = 0, end = 1, cmax = TRUE))
+
+  # It should be an empty data.frame with 11 rows
+  expect_equal(getGroups(o_data_nogroup), data.frame(A = 1:11)[, -1])
+})
+
+test_that("group_vars.PKNCAdata", {
+  o_conc_group <- PKNCAconc(as.data.frame(datasets::Theoph), conc~Time|Subject)
+  o_data_group <- PKNCAdata(o_conc_group, intervals = data.frame(start = 0, end = 1, cmax = TRUE))
+
+  expect_equal(dplyr::group_vars(o_data_group), "Subject")
+
+  # Check that it works without groupings as expected [empty]
+  o_conc_nongroup <- PKNCAconc(as.data.frame(datasets::Theoph)[datasets::Theoph$Subject == 1,], conc~Time)
+  o_data_nogroup <- PKNCAdata(o_conc_nongroup, intervals = data.frame(start = 0, end = 1, cmax = TRUE))
+
+  expect_equal(dplyr::group_vars(o_data_nogroup), character(0))
 })

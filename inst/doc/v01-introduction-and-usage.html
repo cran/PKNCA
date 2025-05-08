@@ -61,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -375,22 +375,25 @@ intervals</a></li>
 
 <p>PKNCA provides functions to complete noncompartmental analysis (NCA)
 for pharmacokinetic (PK) data. Its intent is to provide a complete
-R-based solution enabling data provenance for NCA including tracking
-data cleaning, enabling calculations, exporting results, and reporting.
-The library is designed to give a reasonable answer without user
-intervention (load, calculate, and summarize), but it allows the user to
-override the automatic selections at any point.</p>
+R-based solution-enabling data provenance for NCA. This will include the
+tracking of data cleaning, enabling of calculations, exporting of
+results, and general reporting. The library is designed to give a
+reasonable answer without user intervention (load, calculate, and
+summarize), but it allows the user to override the automatic selections
+at any point.</p>
 <p>The library design is modular to allow expansion based on needs
 unforseen by the authors including new NCA parameters, novel data
 cleaning methods, and modular summarization decisions. Expanding the
 library will be discussed in a separate vignette.</p>
 <div id="quick-start" class="section level1">
 <h1>Quick Start</h1>
-<p>The simplest analysis requires concentration and dosing data, then
-five function calls can provide summarized results. (Please note that
-this and the other examples in this document are intended to show the
-typical workflow, but they are not intended to run directly. For an
-example to run directly, please see <a href="v02-example-theophylline.html">the theophylline example</a>.)</p>
+<p>The simplest analysis requires concentration and dosing data at a
+minimum. Given this, it then takes five function calls to provide
+summarized results. (Please note that this and the other examples in
+this document are intended to show the typical workflow, but they are
+not intended to run directly. For an example to run directly, please see
+<a href="v02-example-theophylline.html">the theophylline
+example</a>.)</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(PKNCA)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr, <span class="at">quietly=</span><span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## 
@@ -526,51 +529,57 @@ no arguments:</p>
 ##   cav.int.last cav.int.all ctrough cstart   ptr  tlag deg.fluc swing  ceoi
 ## 1        FALSE       FALSE   FALSE  FALSE FALSE FALSE    FALSE FALSE FALSE
 ## 2        FALSE       FALSE   FALSE  FALSE FALSE FALSE    FALSE FALSE FALSE
-##   aucabove.predose.all aucabove.trough.all count_conc totdose    ae clr.last
-## 1                FALSE               FALSE      FALSE   FALSE FALSE    FALSE
-## 2                FALSE               FALSE      FALSE   FALSE FALSE    FALSE
-##   clr.obs clr.pred    fe sparse_auclast sparse_auc_se sparse_auc_df time_above
-## 1   FALSE    FALSE FALSE          FALSE         FALSE         FALSE      FALSE
-## 2   FALSE    FALSE FALSE          FALSE         FALSE         FALSE      FALSE
-##   aucivlast aucivall aucivint.last aucivint.all aucivpbextlast aucivpbextall
-## 1     FALSE    FALSE         FALSE        FALSE          FALSE         FALSE
-## 2     FALSE    FALSE         FALSE        FALSE          FALSE         FALSE
-##   aucivpbextint.last aucivpbextint.all half.life r.squared adj.r.squared
-## 1              FALSE             FALSE     FALSE     FALSE         FALSE
-## 2              FALSE             FALSE      TRUE     FALSE         FALSE
-##   lambda.z lambda.z.time.first lambda.z.n.points clast.pred span.ratio
-## 1    FALSE               FALSE             FALSE      FALSE      FALSE
-## 2    FALSE               FALSE             FALSE      FALSE      FALSE
-##   thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last aucinf.obs aucinf.pred
-## 1          FALSE             FALSE    FALSE       FALSE      FALSE       FALSE
-## 2          FALSE             FALSE    FALSE       FALSE       TRUE       FALSE
-##   aumcinf.obs aumcinf.pred aucint.inf.obs aucint.inf.obs.dose aucint.inf.pred
-## 1       FALSE        FALSE          FALSE               FALSE           FALSE
-## 2       FALSE        FALSE          FALSE               FALSE           FALSE
-##   aucint.inf.pred.dose aucivinf.obs aucivinf.pred aucivpbextinf.obs
-## 1                FALSE        FALSE         FALSE             FALSE
-## 2                FALSE        FALSE         FALSE             FALSE
-##   aucivpbextinf.pred aucpext.obs aucpext.pred cl.obs cl.pred mrt.obs mrt.pred
-## 1              FALSE       FALSE        FALSE  FALSE   FALSE   FALSE    FALSE
-## 2              FALSE       FALSE        FALSE  FALSE   FALSE   FALSE    FALSE
-##   mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred vz.obs vz.pred vss.obs vss.pred
-## 1      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE
-## 2      FALSE       FALSE      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE
-##   vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred cav.int.inf.obs
-## 1      FALSE       FALSE      FALSE       FALSE           FALSE
-## 2      FALSE       FALSE      FALSE       FALSE           FALSE
-##   cav.int.inf.pred thalf.eff.obs thalf.eff.pred thalf.eff.iv.obs
-## 1            FALSE         FALSE          FALSE            FALSE
-## 2            FALSE         FALSE          FALSE            FALSE
-##   thalf.eff.iv.pred kel.obs kel.pred kel.iv.obs kel.iv.pred auclast.dn
-## 1             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
-## 2             FALSE   FALSE    FALSE      FALSE       FALSE      FALSE
-##   aucall.dn aucinf.obs.dn aucinf.pred.dn aumclast.dn aumcall.dn aumcinf.obs.dn
-## 1     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
-## 2     FALSE         FALSE          FALSE       FALSE      FALSE          FALSE
-##   aumcinf.pred.dn cmax.dn cmin.dn clast.obs.dn clast.pred.dn cav.dn ctrough.dn
-## 1           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE
-## 2           FALSE   FALSE   FALSE        FALSE         FALSE  FALSE      FALSE</code></pre>
+##   aucabove.predose.all aucabove.trough.all count_conc count_conc_measured
+## 1                FALSE               FALSE      FALSE               FALSE
+## 2                FALSE               FALSE      FALSE               FALSE
+##   totdose    ae clr.last clr.obs clr.pred    fe sparse_auclast sparse_auc_se
+## 1   FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE         FALSE
+## 2   FALSE FALSE    FALSE   FALSE    FALSE FALSE          FALSE         FALSE
+##   sparse_auc_df time_above aucivlast aucivall aucivint.last aucivint.all
+## 1         FALSE      FALSE     FALSE    FALSE         FALSE        FALSE
+## 2         FALSE      FALSE     FALSE    FALSE         FALSE        FALSE
+##   aucivpbextlast aucivpbextall aucivpbextint.last aucivpbextint.all half.life
+## 1          FALSE         FALSE              FALSE             FALSE     FALSE
+## 2          FALSE         FALSE              FALSE             FALSE      TRUE
+##   r.squared adj.r.squared lambda.z lambda.z.time.first lambda.z.n.points
+## 1     FALSE         FALSE    FALSE               FALSE             FALSE
+## 2     FALSE         FALSE    FALSE               FALSE             FALSE
+##   clast.pred span.ratio thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last
+## 1      FALSE      FALSE          FALSE             FALSE    FALSE       FALSE
+## 2      FALSE      FALSE          FALSE             FALSE    FALSE       FALSE
+##   aucinf.obs aucinf.pred aumcinf.obs aumcinf.pred aucint.inf.obs
+## 1      FALSE       FALSE       FALSE        FALSE          FALSE
+## 2       TRUE       FALSE       FALSE        FALSE          FALSE
+##   aucint.inf.obs.dose aucint.inf.pred aucint.inf.pred.dose aucivinf.obs
+## 1               FALSE           FALSE                FALSE        FALSE
+## 2               FALSE           FALSE                FALSE        FALSE
+##   aucivinf.pred aucivpbextinf.obs aucivpbextinf.pred aucpext.obs aucpext.pred
+## 1         FALSE             FALSE              FALSE       FALSE        FALSE
+## 2         FALSE             FALSE              FALSE       FALSE        FALSE
+##   cl.obs cl.pred mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred
+## 1  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
+## 2  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
+##   vz.obs vz.pred vss.obs vss.pred vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred
+## 1  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
+## 2  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
+##   cav.int.inf.obs cav.int.inf.pred thalf.eff.obs thalf.eff.pred
+## 1           FALSE            FALSE         FALSE          FALSE
+## 2           FALSE            FALSE         FALSE          FALSE
+##   thalf.eff.iv.obs thalf.eff.iv.pred kel.obs kel.pred kel.iv.obs kel.iv.pred
+## 1            FALSE             FALSE   FALSE    FALSE      FALSE       FALSE
+## 2            FALSE             FALSE   FALSE    FALSE      FALSE       FALSE
+##   auclast.dn aucall.dn aucinf.obs.dn aucinf.pred.dn aumclast.dn aumcall.dn
+## 1      FALSE     FALSE         FALSE          FALSE       FALSE      FALSE
+## 2      FALSE     FALSE         FALSE          FALSE       FALSE      FALSE
+##   aumcinf.obs.dn aumcinf.pred.dn cmax.dn cmin.dn clast.obs.dn clast.pred.dn
+## 1          FALSE           FALSE   FALSE   FALSE        FALSE         FALSE
+## 2          FALSE           FALSE   FALSE   FALSE        FALSE         FALSE
+##   cav.dn ctrough.dn
+## 1  FALSE      FALSE
+## 2  FALSE      FALSE
+## 
+## $allow_partial_missing_units
+## [1] FALSE</code></pre>
 <p>And, to reset the current values to the library defaults, run the
 function with the default argument set to <code>TRUE</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">PKNCA.options</span>(<span class="at">default=</span><span class="cn">TRUE</span>)</span></code></pre></div>
@@ -709,10 +718,10 @@ a data.frame as requested.</p>
 <span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>    <span class="at">auclast=</span><span class="cn">TRUE</span>,</span>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>    <span class="at">aucinf.obs=</span><span class="fu">c</span>(<span class="cn">FALSE</span>, <span class="cn">TRUE</span>)</span>
 <span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>  )</span></code></pre></div>
-<p>Intervals like the above is sufficient for designs with a single type
-of treatment– like single doses. For more complex treatments in a single
-analysis, like the combination of single and multiple doses, include a
-treatment column matching the treatment column name from the
+<p>Intervals like the one above are sufficient for designs with a single
+type of treatment– such as single doses. For more complex treatments in
+a single analysis, like the combination of single and multiple doses,
+include a treatment column matching the treatment column name from the
 concentration data set. See the <a href="#manual-interval-specification">Manual Interval Specification</a>
 section below for more details.</p>
 <div id="selection-of-data-used-for-calculation" class="section level2">
@@ -731,9 +740,9 @@ the half-life or AUC<sub>inf</sub> calculations.</p>
 <p>A few functions look at data outside of a single interval, but these
 functions do not look at data outside of a single group, and these
 functions are typically used during preparation for NCA calculations not
-for the calculations themselves. Functions that look a group as a whole
-include <code>choose.auc.intervals</code>, <code>find.tau</code>, and
-<code>pk.tss</code>.</p>
+for the calculations themselves. Functions that look at a group as a
+whole include <code>choose.auc.intervals</code>, <code>find.tau</code>,
+and <code>pk.tss</code>.</p>
 </div>
 <div id="automatic-interval-determination" class="section level2">
 <h2>Automatic Interval Determination</h2>
@@ -743,7 +752,7 @@ dosing data.</p>
 <p>Single dose data has a simple interval selection: the option
 <code>single.dose.aucs</code> is used from the
 <code>PKNCA.options</code>.</p>
-<table>
+<table style="width:100%;">
 <colgroup>
 <col width="0%" />
 <col width="0%" />
@@ -782,6 +791,7 @@ dosing data.</p>
 <col width="1%" />
 <col width="1%" />
 <col width="0%" />
+<col width="1%" />
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
@@ -906,6 +916,7 @@ dosing data.</p>
 <th align="left">aucabove.predose.all</th>
 <th align="left">aucabove.trough.all</th>
 <th align="left">count_conc</th>
+<th align="left">count_conc_measured</th>
 <th align="left">totdose</th>
 <th align="left">ae</th>
 <th align="left">clr.last</th>
@@ -1115,6 +1126,7 @@ dosing data.</p>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="right">0</td>
@@ -1131,6 +1143,7 @@ dosing data.</p>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>

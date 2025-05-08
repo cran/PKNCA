@@ -281,15 +281,18 @@ pk.nca.intervals <- function(data_conc, data_dose, data_intervals, sparse,
           }
         )
       # Add all the new data into the output
-      ret <-
-        rbind(
-          ret,
-          cbind(
-            current_interval[, c("start", "end", options$keep_interval_cols)],
-            calculated_interval,
-            row.names=NULL
-          )
+      new_ret <-
+        cbind(
+          # The rep(1, ...) is to fix #381 where attributes on an interval
+          # column cause cbind to fail
+          current_interval[
+            rep(1, nrow(calculated_interval)),
+            c("start", "end", options$keep_interval_cols)
+          ],
+          calculated_interval,
+          row.names=NULL
         )
+      ret <- rbind(ret, new_ret)
     }
   }
   ret
@@ -376,9 +379,7 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
   all_intervals <- get.interval.cols()
   # Set the dose to NA if its length is zero
   if (length(dose) == 0) {
-    dose <- NA
-    time.dose <- NA
-    duration.dose <- NA
+    stop("Please report a bug. Length of dose should not be zero.") # nocov
   }
   # Make sure that we calculate all of the dependencies.  Do this in
   # reverse order for dependencies of dependencies.
@@ -462,28 +463,30 @@ pk.nca.interval <- function(conc, time, volume, duration.conc,
         } else {
           # Give an error if there is not a default argument.
           if (inherits(formals(get(all_intervals[[n]]$FUN))[[arg_formal]], "name")) {
-            arg_text <-
+            arg_text <- # nocov start
               if (arg_formal == arg_mapped) {
                 sprintf("'%s'", arg_formal)
               } else {
                 sprintf("'%s' mapped to '%s'", arg_formal, arg_mapped)
               }
-            stop(sprintf( # nocov
-              "Cannot find argument %s for NCA function '%s'", # nocov
-              arg_text, all_intervals[[n]]$FUN) # nocov
-            ) # nocov
+            stop(sprintf(
+              "Cannot find argument %s for NCA function '%s'",
+              arg_text, all_intervals[[n]]$FUN)
+            ) # nocov end
           }
         }
       }
       # Apply manual inclusion and exclusion
       if (n %in% "half.life") {
-        if (!is.null(include_half.life)) {
-          call_args$conc <- call_args$conc[include_half.life]
-          call_args$time <- call_args$time[include_half.life]
+        if (!is.null(include_half.life) && !all(is.na(include_half.life))) {
+          include_tf <- include_half.life %in% TRUE
+          call_args$conc <- call_args$conc[include_tf]
+          call_args$time <- call_args$time[include_tf]
           call_args$manually.selected.points <- TRUE
-        } else if (!is.null(exclude_half.life)) {
-          call_args$conc <- call_args$conc[!exclude_half.life]
-          call_args$time <- call_args$time[!exclude_half.life]
+        } else if (!is.null(exclude_half.life) && !all(is.na(exclude_half.life))) {
+          exclude_tf <- exclude_half.life %in% TRUE
+          call_args$conc <- call_args$conc[!exclude_tf]
+          call_args$time <- call_args$time[!exclude_tf]
         }
       }
       # Do the calculation

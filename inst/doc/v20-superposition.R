@@ -19,7 +19,9 @@ knitr::kable(head(datasets::Theoph))
 conc_obj <- PKNCAconc(as.data.frame(datasets::Theoph), conc~Time|Subject)
 
 ## ----superposition, error=TRUE------------------------------------------------
+try({
 steady_state <- superposition(conc_obj, tau=24)
+})
 
 ## ----findnonzero--------------------------------------------------------------
 knitr::kable(subset(datasets::Theoph, Time == 0 & conc > 0),

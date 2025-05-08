@@ -55,9 +55,13 @@ PKNCAdose.tbl_df <- function(data, ...) {
 }
 
 #' @rdname PKNCAdose
+#' @param doseu Either unit values (e.g. "mg") or column names within the data
+#'   where units are provided.
+#' @param doseu_pref Preferred units for reporting (not column names)
 #' @export
 PKNCAdose.data.frame <- function(data, formula, route, rate, duration,
-                                 time.nominal, exclude, ...) {
+                                 time.nominal, exclude = NULL, ...,
+                                 doseu = NULL, doseu_pref = NULL) {
   # The data must have... data
   if (nrow(data) == 0) {
     stop("data must have at least one row.")
@@ -108,13 +112,6 @@ PKNCAdose.data.frame <- function(data, formula, route, rate, duration,
   if (!all(unlist(parsed_form$groups) %in% names(data))) {
     stop("All of the variables in the groups must be in the data")
   }
-  # Values must be unique (one value per measurement)
-  key_cols <- c(parsed_form$time, unlist(parsed_form$groups))
-  if (any(mask_dup <- duplicated(data[,key_cols])))
-    stop("Rows that are not unique per group and time (column names: ",
-         paste(key_cols, collapse=", "),
-         ") found within dosing data.  Row numbers: ",
-         paste(seq_along(mask_dup)[mask_dup], collapse=", "))
   ret <-
     list(
       data = data,
@@ -122,11 +119,12 @@ PKNCAdose.data.frame <- function(data, formula, route, rate, duration,
       columns = parsed_form
     )
   class(ret) <- c("PKNCAdose", class(ret))
-  if (missing(exclude)) {
-    ret <- setExcludeColumn(ret)
-  } else {
-    ret <- setExcludeColumn(ret, exclude=exclude)
-  }
+  ret <- setExcludeColumn(ret, exclude = exclude)
+  # Values must be unique (one value per measurement), check after the exclusion
+  # column has been added to the object so that exclusions can be accounted for
+  # in duplicate checking.
+  duplicate_check(object = ret, data_type = "dosing")
+
   mask.indep <- is.na(getIndepVar.PKNCAdose(ret))
   if (any(mask.indep) & !all(mask.indep)) {
     stop("Some but not all values are missing for the independent variable, please see the help for PKNCAdose for how to specify the formula and confirm that your data has dose times for all doses.")
@@ -144,6 +142,15 @@ PKNCAdose.data.frame <- function(data, formula, route, rate, duration,
                          attr_name="time.nominal",
                          col_name=time.nominal)
   }
+
+  # Unit handling
+  ret <-
+    pknca_set_units(
+      ret,
+      units_orig = list(doseu = doseu),
+      units_pref = list(doseu_pref = doseu_pref)
+    )
+
   ret
 }
 

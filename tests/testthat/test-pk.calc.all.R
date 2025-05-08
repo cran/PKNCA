@@ -1,5 +1,3 @@
-source("generate.data.R")
-
 test_that("pk.nca", {
   # Note that generate.conc sets the random seed, so it doesn't have to happen
   # here.
@@ -295,6 +293,22 @@ test_that("pk.calc.all with duration.dose required", {
                info="duration.dose is used when requested")
 })
 
+test_that("pk.calc.all with duration.conc required", {
+  tmpconc <- generate.conc(2, 1, 0:24)
+  tmpdose <- generate.dose(tmpconc)
+  tmpconc$duration_conc <- 0.1
+  myconc <- PKNCAconc(tmpconc, formula=conc~time|treatment+ID, duration="duration_conc")
+  mydose <- PKNCAdose(tmpdose, formula=dose~time|treatment+ID, route="intravascular")
+  mydata <- PKNCAdata(myconc, mydose,
+                      intervals=data.frame(start=0, end=24,
+                                           mrt.iv.last=TRUE))
+  myresult <- pk.nca(mydata)
+  expect_equal(myresult$result$PPORRES[myresult$result$PPTESTCD %in% "mrt.iv.last"],
+               c(10.41263, 10.17515),
+               tolerance=1e-5,
+               info="duration.conc is used when requested")
+})
+
 test_that("half life inclusion and exclusion", {
   tmpconc <- generate.conc(2, 1, 0:24)
   tmpdose <- generate.dose(tmpconc)
@@ -317,6 +331,53 @@ test_that("half life inclusion and exclusion", {
   myresult_excl <- pk.nca(mydata_excl)
   expect_false(identical(myresult$result, myresult_excl$result))
   expect_false(identical(myresult$result, myresult_incl$result))
+})
+
+test_that("include_half.life and exclude_half.life work with NAs treated as missing for all NA and as FALSE for partial NA (#372)", {
+  # Partial NA include_hl is used
+  d_conc_incl <- data.frame(conc = c(1, 0.6, 0.3, 0.25, 0.15, 0.1), time = 0:5, include_hl = c(FALSE, NA, TRUE, TRUE, TRUE, TRUE))
+  o_conc_incl <- PKNCAconc(d_conc_incl, conc~time, include_half.life = "include_hl")
+  o_data_incl <- PKNCAdata(o_conc_incl, intervals = data.frame(start = 0, end = Inf, half.life = TRUE))
+  suppressMessages(o_nca_incl <- pk.nca(o_data_incl))
+  expect_equal(as.data.frame(o_nca_incl, out_format = "wide")$half.life, 1.820879, tolerance = 0.00001)
+
+  # All FALSE include_hl is used
+  d_conc_false <- data.frame(conc = c(1, 0.6, 0.3, 0.25, 0.15, 0.1), time = 0:5, include_hl = FALSE)
+  o_conc_false <- PKNCAconc(d_conc_false, conc~time, include_half.life = "include_hl")
+  o_data_false <- PKNCAdata(o_conc_false, intervals = data.frame(start = 0, end = Inf, half.life = TRUE))
+  suppressWarnings(suppressMessages(o_nca_false <- pk.nca(o_data_false)))
+  d_nca_false <- as.data.frame(o_nca_false)
+  expect_equal(d_nca_false$PPORRES[d_nca_false$PPTESTCD %in% "half.life"], NA_real_)
+
+  # All NA include_hl is ignored
+  d_conc <- data.frame(conc = c(1, 0.6, 0.3, 0.25, 0.15, 0.1), time = 0:5, include_hl = NA)
+  o_conc <- PKNCAconc(d_conc, conc~time, include_half.life = "include_hl")
+  o_data <- PKNCAdata(o_conc, intervals = data.frame(start = 0, end = Inf, half.life = TRUE))
+  suppressMessages(o_nca <- pk.nca(o_data))
+  expect_equal(as.data.frame(o_nca, out_format = "wide")$half.life, 1.512942, tolerance = 0.00001)
+
+  # Partial NA include_hl is used
+  d_conc_excl <- data.frame(conc = c(1, 0.6, 0.3, 0.25, 0.15, 0.1), time = 0:5, exclude_hl = c(FALSE, NA, TRUE, TRUE, TRUE, TRUE))
+  o_conc_excl <- PKNCAconc(d_conc_excl, conc~time, exclude_half.life = "exclude_hl")
+  o_data_excl <- PKNCAdata(o_conc_excl, intervals = data.frame(start = 0, end = Inf, half.life = TRUE))
+  suppressWarnings(suppressMessages(o_nca_excl <- pk.nca(o_data_excl)))
+  d_nca_excl <- as.data.frame(o_nca_excl)
+  expect_equal(d_nca_excl$PPORRES[d_nca_excl$PPTESTCD %in% "half.life"], NA_real_)
+
+  # All NA exclude_hl is ignored
+  d_conc <- data.frame(conc = c(1, 0.6, 0.3, 0.25, 0.15, 0.1), time = 0:5, exclude_hl = NA)
+  o_conc <- PKNCAconc(d_conc, conc~time, exclude_half.life = "exclude_hl")
+  o_data <- PKNCAdata(o_conc, intervals = data.frame(start = 0, end = Inf, half.life = TRUE))
+  suppressMessages(o_nca <- pk.nca(o_data))
+  expect_equal(as.data.frame(o_nca, out_format = "wide")$half.life, 1.512942, tolerance = 0.00001)
+
+  # All FALSE exclude_hl is used
+  d_conc_false <- data.frame(conc = c(1, 0.6, 0.3, 0.25, 0.15, 0.1), time = 0:5, exclude_hl = FALSE)
+  o_conc_false <- PKNCAconc(d_conc_false, conc~time, exclude_half.life = "exclude_hl")
+  o_data_false <- PKNCAdata(o_conc_false, intervals = data.frame(start = 0, end = Inf, half.life = TRUE))
+  suppressWarnings(suppressMessages(o_nca_false <- pk.nca(o_data_false)))
+  d_nca_false <- as.data.frame(o_nca_false)
+  expect_equal(d_nca_false$PPORRES[d_nca_false$PPTESTCD %in% "half.life"], 1.512942, tolerance = 0.00001)
 })
 
 test_that("No interval requested (e.g. for placebo)", {
@@ -589,7 +650,7 @@ test_that("calculate with sparse data", {
   # Correct detection of mixed doses within a sparse dose group when there are no groups
 })
 
-test_that("Unexpected interval columns do not cause an error (#238)", {
+test_that("Unexpected interval columns now not cause an error (#238)", {
   d_conc <-
     data.frame(
       ID = 1L,
@@ -600,8 +661,9 @@ test_that("Unexpected interval columns do not cause an error (#238)", {
   d_intervals <- data.frame(start = 0, end = 6, cmax = TRUE, aucinf = TRUE)
   o_conc <- PKNCAconc(d_conc, formula = conc~time|ID)
   o_dose <- PKNCAdose(d_dose, formula = dose~.)
-  o_data <- PKNCAdata(o_conc, o_dose, intervals = d_intervals)
-  expect_s3_class(pk.nca(o_data), "PKNCAresults")
+  expect_error(PKNCAdata(o_conc, o_dose, intervals = d_intervals),
+               "The following columns in 'intervals' are not allowed:"
+  )
 })
 
 test_that("aucint works within pk.calc.all for all zero concentrations with interpolated or extrapolated concentrations", {
@@ -643,12 +705,8 @@ test_that("The option keep_interval_cols is respected", {
   d_interval <- data.frame(start = 0, end = 4, cmax = TRUE, foo = "A")
   d_conctime <- data.frame(conc = c(0, 0, 0, 0), time = 0:3)
   o_conc <- PKNCAconc(d_conctime, conc~time)
-  o_data <- PKNCAdata(o_conc, intervals = d_interval)
-  suppressWarnings(suppressMessages(
-    o_nca <- pk.nca(o_data)
-  ))
-  expect_false("foo" %in% names(o_nca$result))
-  expect_false("foo" %in% names(summary(o_nca)))
+ expect_error(PKNCAdata(o_conc, intervals = d_interval),
+              "The following columns in 'intervals' are not allowed:")
 
   o_data <- PKNCAdata(o_conc, intervals = d_interval, options = list(keep_interval_cols = "foo"))
   suppressWarnings(suppressMessages(
@@ -684,4 +742,19 @@ test_that("dose is calculable", {
   myresult <- pk.nca(mydata)
   expect_equal(as.data.frame(myresult)$PPORRES, rep(2, 2))
   expect_equal(as.data.frame(myresult)$PPTESTCD, rep("totdose", 2))
+})
+
+test_that("do not give rbind error when interval columns have attributes (#381)", {
+  o_conc <- PKNCAconc(data = data.frame(conc = 1, time = 0), conc~time)
+  d_interval <- data.frame(start = 0, end = Inf, cmax = TRUE)
+
+  d_interval <- data.frame(start = 0, end = Inf, cmax = TRUE, tmax = TRUE)
+  attr(d_interval$start, "label") <- "start"
+  o_data <- PKNCAdata(o_conc, intervals = d_interval)
+  suppressMessages(o_nca <- pk.nca(o_data))
+  # interval attributes are preserved
+  expect_equal(
+    attributes(as.data.frame(o_nca)$start),
+    list(label = "start")
+  )
 })

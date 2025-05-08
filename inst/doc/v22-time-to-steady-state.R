@@ -12,6 +12,7 @@ scale_colour_ordinal <- scale_colour_hue
 scale_fill_ordinal <- scale_fill_hue
 
 ## ----superposition, error=TRUE------------------------------------------------
+try({
 library(PKNCA)
 theoph_corrected <- as.data.frame(datasets::Theoph)
 theoph_corrected$conc[theoph_corrected$Time == 0] <- 0
@@ -24,6 +25,7 @@ steady_state_noise$conc <-
     seed = 5,
     steady_state_noise$conc*exp(rnorm(nrow(steady_state_noise), mean = 0, sd = 0.1))
   )
+})
 
 ## ----superposition-fig--------------------------------------------------------
 library(ggplot2)

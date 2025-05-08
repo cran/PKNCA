@@ -4,6 +4,53 @@ will continue until then.  These will be especially noticeable around
 the inclusion of IV NCA parameters and additional specifications of
 the dosing including dose amount and route.
 
+# PKNCA 0.12.0
+
+## Breaking changes
+
+* PKNCA will now give an error when there are unexpected interval columns.
+  The `keep_interval_cols` option can be used to mitigate this error.
+* `NA` results from calculating `c0` will now add an exclusion reason.
+* AUC for intravenous dosing (all the `auciv*` parameters) now more robustly
+  calculate `c0` and does not raise an error when `is.na(c0)` (#353).
+* Manual calculation of half.life no longer allows negative half-live values
+  (#373).
+
+## New Features
+
+* `PKNCAconc()` and `PKNCAdose()` can now accept unit specifications as either
+  column names or units to use (#336).
+* PKNCA options can now use `tmax` as a reference for BLQ handling by using new
+  names in the `conc.blq` argument (`before.tmax`,`after.tmax`)
+* A new parameter `count_conc_measured` was added to enable quality checks,
+  typically on AUC measurements. An associated exclusion function,
+  `exclude_nca_count_conc_measured()` was also added.
+* The `PKNCAconc()` arguments of `include_half.life` and `exclude_half.life` now
+  allow `NA` values. If all values are `NA`, then no inclusion or exclusion is
+  applied (the interval is treated as-is, like the argument had not been given).
+  If some values are `NA` for the interval, those are treated as `FALSE`.
+* `group_vars()` methods were added for `PKNCAdata` and `PKNCAresults` objects.
+* If intervals have attributes on the columns, there will no longer be an error
+  during parameter calculation, and the attributes are preserved (#381)
+* When adding units, if some but not all units are provided, then an error will
+  be raised. This error can be converted to a warning using the option
+  `allow_partial_missing_units = TRUE`. (#398)
+* A new function `get_halflife_points()` lets users know which points were used
+  for half-life calculation. (#387)
+
+## Minor changes (unlikely to affect PKNCA use)
+
+* PKNCA will now verify the `intervals` data.frame when creating PKNCAdata. The
+  checking includes confirming intended column naming and ensuring the correct
+  data types.
+* PKNCA now contains a `getGroups.PKNCAdata` function to capture grouping columns.
+* Duplicate data checks now account for excluded rows.  So, if a row is
+  duplicated and all but one of the duplicated rows is excluded, it is not an
+  error.  (#298)
+* Removed native pipes (`|>`) so that PKNCA will work with older versions of R
+  (#304).
+* Missing dosing times to `pk.calc.c0()` will not cause an error (#344)
+
 # PKNCA 0.11.0
 
 * PKNCA will now indicate the number of observations included in a summary ("n")

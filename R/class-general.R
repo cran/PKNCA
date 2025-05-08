@@ -174,3 +174,87 @@ getAttributeColumn <- function(object, attr_name, warn_missing=c("attr", "column
     object[[dataname]][, columns, drop=FALSE]
   }
 }
+
+#' Check for duplicate values in a dataset
+#'
+#' @param object A PKNCAconc or PKNCAdose object to check for duplicates
+#' @param data_type The name of the type of data for error reporting
+#' @returns `object` unmodified, or an error
+#'
+#' @keywords Internal
+#' @noRd
+duplicate_check <- function(object, data_type) {
+  mask_excluded <- !is.na(object$data[[object$columns$exclude]])
+  mask_dup <- rep(FALSE, nrow(object$data))
+  key_cols <- unique(c(object$columns$time, unlist(object$columns$groups)))
+  if (length(key_cols) == 0) {
+    # If there are no key columns, then there can only be one data row that is
+    # not excluded.
+    mask_dup[!mask_excluded] <- duplicated(mask_dup[!mask_excluded])
+  } else {
+    # In case an excluded row is the first row of the duplicated set, do not
+    # report duplication.
+    mask_dup[!mask_excluded] <- duplicated(object$data[!mask_excluded, key_cols])
+  }
+  if (any(mask_dup)) {
+    stop(
+      "Rows that are not unique per group and time (column names: ",
+      paste(key_cols, collapse=", "),
+      ") found within ", data_type, " data.  Row numbers: ",
+      paste(which(mask_dup), collapse=", ")
+    )
+  }
+  object
+}
+
+#' Set units for a PKNCAconc or PKNCAdose object
+#'
+#' @param object a PKNCAconc or PKNCAdose object
+#' @param units_orig unit specification that may be columns or values
+#' @param units_pref unit specification that must be values
+#' @returns The object with the units columns definitions optionally added an a
+#'   "units" value list added.
+#' @noRd
+pknca_set_units <- function(object, units_orig = list(), units_pref = list()) {
+  all_units <-
+    list(
+      orig = lapply(X = units_orig, FUN = assert_unit, data = object$data),
+      pref = lapply(X = units_pref, FUN = assert_unit_value)
+    )
+
+  object$units <- list()
+  for (col_units in names(all_units$orig)) {
+    current_unit_type <- attr(all_units$orig[[col_units]], "unit_type")
+    if (is.null(current_unit_type)) {
+      # do nothing
+    } else if (current_unit_type %in% "column") {
+      object <-
+        setAttributeColumn(
+          object = object,
+          attr_name = col_units,
+          col_name = all_units$orig[[col_units]]
+        )
+    } else if (current_unit_type %in% "value") {
+      object$units[[col_units]] <- all_units$orig[[col_units]]
+    } else {
+      stop(paste("Please report a bug. Unit setting for", col_units)) # nocov
+    }
+  }
+  for (pref_units in names(all_units$pref)) {
+    current_unit_type <- attr(all_units$pref[[pref_units]], "unit_type")
+    if (is.null(current_unit_type)) {
+      # do nothing
+    } else if (current_unit_type %in% "value") {
+      # you can only set preferred units if you set original units
+      original_unit_col <- gsub(x = pref_units, pattern = "_pref", replacement = "")
+      if (!(original_unit_col %in% c(names(object$columns), names(object$units)))) {
+        stop("Preferred units may not be set unless original units are set: ", pref_units)
+      }
+      object$units[[pref_units]] <- all_units$pref[[pref_units]]
+    } else {
+      stop(paste("Please report a bug. Preferred unit setting for", pref_units)) # nocov
+    }
+  }
+
+  object
+}
