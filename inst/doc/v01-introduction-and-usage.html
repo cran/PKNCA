@@ -405,41 +405,38 @@ example</a>.)</p>
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="do">## Load the PK concentration data</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>d_conc <span class="ot">&lt;-</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="fu">as.data.frame</span>(datasets<span class="sc">::</span>Theoph) <span class="sc">%&gt;%</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Subject=</span><span class="fu">as.numeric</span>(<span class="fu">as.character</span>(Subject)))</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="do">## Generate the dosing data</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>d_dose <span class="ot">&lt;-</span> d_conc[d_conc<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>,]</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>d_dose<span class="sc">$</span>Time <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="do">## Create a concentration object specifying the concentration, time, and</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="do">## subject columns.  (Note that any number of grouping levels is</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="do">## supported; you are not restricted to just grouping by subject.)</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>    d_conc,</span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  )</span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="do">## Create a dosing object specifying the dose, time, and subject</span></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="do">## columns.  (Note that the grouping factors should be the same as or a</span></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="do">## subset of the grouping factors for concentration, and the grouping</span></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="do">## columns must have the same names between concentration and dose</span></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="do">## objects.)</span></span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>dose_obj <span class="ot">&lt;-</span></span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  <span class="fu">PKNCAdose</span>(</span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>    d_dose,</span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>    Dose<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>  )</span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="do">## Combine the concentration and dosing information both to</span></span>
-<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="do">## automatically define the intervals for NCA calculation and provide</span></span>
-<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="do">## doses for calculations requiring dose.</span></span>
-<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>d_conc <span class="ot">&lt;-</span> datasets<span class="sc">::</span>Theoph</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">## Generate the dosing data</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>d_dose <span class="ot">&lt;-</span> d_conc[d_conc<span class="sc">$</span>Time <span class="sc">==</span> <span class="dv">0</span>,]</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">## Create a concentration object specifying the concentration, time, and</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="do">## subject columns.  (Note that any number of grouping levels is</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="do">## supported; you are not restricted to just grouping by subject.)</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>conc_obj <span class="ot">&lt;-</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="fu">PKNCAconc</span>(</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    d_conc,</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    conc<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  )</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="do">## Create a dosing object specifying the dose, time, and subject</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="do">## columns.  (Note that the grouping factors should be the same as or a</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="do">## subset of the grouping factors for concentration, and the grouping</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="do">## columns must have the same names between concentration and dose</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="do">## objects.)</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>dose_obj <span class="ot">&lt;-</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  <span class="fu">PKNCAdose</span>(</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>    d_dose,</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>    Dose<span class="sc">~</span>Time<span class="sc">|</span>Subject</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  )</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="do">## Combine the concentration and dosing information both to</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="do">## automatically define the intervals for NCA calculation and provide</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="do">## doses for calculations requiring dose.</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>data_obj <span class="ot">&lt;-</span> <span class="fu">PKNCAdata</span>(conc_obj, dose_obj)</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="do">## Calculate the NCA parameters</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>results_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span>
 <span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a></span>
-<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="do">## Calculate the NCA parameters</span></span>
-<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>results_obj <span class="ot">&lt;-</span> <span class="fu">pk.nca</span>(data_obj)</span>
-<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a></span>
-<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="do">## Summarize the results</span></span>
-<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="fu">summary</span>(results_obj)</span></code></pre></div>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="do">## Summarize the results</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="fu">summary</span>(results_obj)</span></code></pre></div>
 <pre><code>##  start end  N     auclast        cmax               tmax   half.life aucinf.obs
 ##      0  24 12 74.6 [24.3]           .                  .           .          .
 ##      0 Inf 12           . 8.65 [17.0] 1.14 [0.630, 3.55] 8.18 [2.12] 115 [28.4]
@@ -488,6 +485,9 @@ no arguments:</p>
 ## $conc.blq$last
 ## [1] &quot;keep&quot;
 ## 
+## 
+## $debug
+## NULL
 ## 
 ## $first.tmax
 ## [1] TRUE
@@ -541,42 +541,42 @@ no arguments:</p>
 ##   aucivpbextlast aucivpbextall aucivpbextint.last aucivpbextint.all half.life
 ## 1          FALSE         FALSE              FALSE             FALSE     FALSE
 ## 2          FALSE         FALSE              FALSE             FALSE      TRUE
-##   r.squared adj.r.squared lambda.z lambda.z.time.first lambda.z.n.points
-## 1     FALSE         FALSE    FALSE               FALSE             FALSE
-## 2     FALSE         FALSE    FALSE               FALSE             FALSE
-##   clast.pred span.ratio thalf.eff.last thalf.eff.iv.last kel.last kel.iv.last
-## 1      FALSE      FALSE          FALSE             FALSE    FALSE       FALSE
-## 2      FALSE      FALSE          FALSE             FALSE    FALSE       FALSE
-##   aucinf.obs aucinf.pred aumcinf.obs aumcinf.pred aucint.inf.obs
-## 1      FALSE       FALSE       FALSE        FALSE          FALSE
-## 2       TRUE       FALSE       FALSE        FALSE          FALSE
-##   aucint.inf.obs.dose aucint.inf.pred aucint.inf.pred.dose aucivinf.obs
-## 1               FALSE           FALSE                FALSE        FALSE
-## 2               FALSE           FALSE                FALSE        FALSE
-##   aucivinf.pred aucivpbextinf.obs aucivpbextinf.pred aucpext.obs aucpext.pred
-## 1         FALSE             FALSE              FALSE       FALSE        FALSE
-## 2         FALSE             FALSE              FALSE       FALSE        FALSE
-##   cl.obs cl.pred mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred mrt.md.obs mrt.md.pred
-## 1  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-## 2  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-##   vz.obs vz.pred vss.obs vss.pred vss.iv.obs vss.iv.pred vss.md.obs vss.md.pred
-## 1  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-## 2  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE      FALSE       FALSE
-##   cav.int.inf.obs cav.int.inf.pred thalf.eff.obs thalf.eff.pred
-## 1           FALSE            FALSE         FALSE          FALSE
-## 2           FALSE            FALSE         FALSE          FALSE
-##   thalf.eff.iv.obs thalf.eff.iv.pred kel.obs kel.pred kel.iv.obs kel.iv.pred
-## 1            FALSE             FALSE   FALSE    FALSE      FALSE       FALSE
-## 2            FALSE             FALSE   FALSE    FALSE      FALSE       FALSE
-##   auclast.dn aucall.dn aucinf.obs.dn aucinf.pred.dn aumclast.dn aumcall.dn
-## 1      FALSE     FALSE         FALSE          FALSE       FALSE      FALSE
-## 2      FALSE     FALSE         FALSE          FALSE       FALSE      FALSE
-##   aumcinf.obs.dn aumcinf.pred.dn cmax.dn cmin.dn clast.obs.dn clast.pred.dn
-## 1          FALSE           FALSE   FALSE   FALSE        FALSE         FALSE
-## 2          FALSE           FALSE   FALSE   FALSE        FALSE         FALSE
-##   cav.dn ctrough.dn
-## 1  FALSE      FALSE
-## 2  FALSE      FALSE
+##   r.squared adj.r.squared lambda.z lambda.z.time.first lambda.z.time.last
+## 1     FALSE         FALSE    FALSE               FALSE              FALSE
+## 2     FALSE         FALSE    FALSE               FALSE              FALSE
+##   lambda.z.n.points clast.pred span.ratio thalf.eff.last thalf.eff.iv.last
+## 1             FALSE      FALSE      FALSE          FALSE             FALSE
+## 2             FALSE      FALSE      FALSE          FALSE             FALSE
+##   kel.last kel.iv.last aucinf.obs aucinf.pred aumcinf.obs aumcinf.pred
+## 1    FALSE       FALSE      FALSE       FALSE       FALSE        FALSE
+## 2    FALSE       FALSE       TRUE       FALSE       FALSE        FALSE
+##   aucint.inf.obs aucint.inf.obs.dose aucint.inf.pred aucint.inf.pred.dose
+## 1          FALSE               FALSE           FALSE                FALSE
+## 2          FALSE               FALSE           FALSE                FALSE
+##   aucivinf.obs aucivinf.pred aucivpbextinf.obs aucivpbextinf.pred aucpext.obs
+## 1        FALSE         FALSE             FALSE              FALSE       FALSE
+## 2        FALSE         FALSE             FALSE              FALSE       FALSE
+##   aucpext.pred cl.obs cl.pred mrt.obs mrt.pred mrt.iv.obs mrt.iv.pred
+## 1        FALSE  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE
+## 2        FALSE  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE
+##   mrt.md.obs mrt.md.pred vz.obs vz.pred vss.obs vss.pred vss.iv.obs vss.iv.pred
+## 1      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE
+## 2      FALSE       FALSE  FALSE   FALSE   FALSE    FALSE      FALSE       FALSE
+##   vss.md.obs vss.md.pred cav.int.inf.obs cav.int.inf.pred thalf.eff.obs
+## 1      FALSE       FALSE           FALSE            FALSE         FALSE
+## 2      FALSE       FALSE           FALSE            FALSE         FALSE
+##   thalf.eff.pred thalf.eff.iv.obs thalf.eff.iv.pred kel.obs kel.pred kel.iv.obs
+## 1          FALSE            FALSE             FALSE   FALSE    FALSE      FALSE
+## 2          FALSE            FALSE             FALSE   FALSE    FALSE      FALSE
+##   kel.iv.pred auclast.dn aucall.dn aucinf.obs.dn aucinf.pred.dn aumclast.dn
+## 1       FALSE      FALSE     FALSE         FALSE          FALSE       FALSE
+## 2       FALSE      FALSE     FALSE         FALSE          FALSE       FALSE
+##   aumcall.dn aumcinf.obs.dn aumcinf.pred.dn cmax.dn cmin.dn clast.obs.dn
+## 1      FALSE          FALSE           FALSE   FALSE   FALSE        FALSE
+## 2      FALSE          FALSE           FALSE   FALSE   FALSE        FALSE
+##   clast.pred.dn cav.dn ctrough.dn
+## 1         FALSE  FALSE      FALSE
+## 2         FALSE  FALSE      FALSE
 ## 
 ## $allow_partial_missing_units
 ## [1] FALSE</code></pre>
@@ -799,52 +799,6 @@ dosing data.</p>
 <col width="0%" />
 <col width="0%" />
 <col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="1%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="1%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
@@ -853,9 +807,18 @@ dosing data.</p>
 <col width="0%" />
 <col width="0%" />
 <col width="1%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
 <col width="1%" />
 <col width="1%" />
 <col width="1%" />
+<col width="0%" />
+<col width="0%" />
 <col width="1%" />
 <col width="1%" />
 <col width="0%" />
@@ -866,6 +829,8 @@ dosing data.</p>
 <col width="0%" />
 <col width="1%" />
 <col width="1%" />
+<col width="1%" />
+<col width="1%" />
 <col width="0%" />
 <col width="0%" />
 <col width="1%" />
@@ -873,7 +838,43 @@ dosing data.</p>
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
 <col width="1%" />
+<col width="1%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
+<col width="1%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="1%" />
+<col width="0%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
 <col width="0%" />
 <col width="0%" />
 </colgroup>
@@ -940,6 +941,7 @@ dosing data.</p>
 <th align="left">adj.r.squared</th>
 <th align="left">lambda.z</th>
 <th align="left">lambda.z.time.first</th>
+<th align="left">lambda.z.time.last</th>
 <th align="left">lambda.z.n.points</th>
 <th align="left">clast.pred</th>
 <th align="left">span.ratio</th>
@@ -1127,6 +1129,7 @@ dosing data.</p>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="right">0</td>
@@ -1186,6 +1189,7 @@ dosing data.</p>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>

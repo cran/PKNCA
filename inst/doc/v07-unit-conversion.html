@@ -471,10 +471,10 @@ automatically generates the units for each NCA parameter.</p>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co"># Show a selection of the units generated</span></span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>d_units_auto[d_units_auto<span class="sc">$</span>PPTESTCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;cmax&quot;</span>, <span class="st">&quot;tmax&quot;</span>, <span class="st">&quot;auclast&quot;</span>, <span class="st">&quot;cl.obs&quot;</span>, <span class="st">&quot;vd.obs&quot;</span>), ]</span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt;          PPORRESU PPTESTCD</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; 23             hr     tmax</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; 22             hr     tmax</span></span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; 52          ng/mL     cmax</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; 82       hr*ng/mL  auclast</span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; 118 mg/(hr*ng/mL)   cl.obs</span></span></code></pre></div>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; 83       hr*ng/mL  auclast</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; 119 mg/(hr*ng/mL)   cl.obs</span></span></code></pre></div>
 <p>As you see above, the default units table has a column for the
 <code>PPTESTCD</code> indicating the parameter. And, the column
 <code>PPORRESU</code> indicates what the default units are.</p>
@@ -485,22 +485,25 @@ to work, the units must always be convertible (by the <code>units</code>
 library). Notably for automatic conversion, you cannot go from mass to
 molar units since there is not a unique conversion from mass to
 moles.</p>
+<p>Loading the PKNCA package adds a unit of <code>&quot;fraction&quot;</code> so
+that it is usable for fraction excreted (<code>fe</code>).</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>d_units_clean <span class="ot">&lt;-</span></span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">pknca_units_table</span>(</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>    <span class="at">concu=</span><span class="st">&quot;ng/mL&quot;</span>, <span class="at">doseu=</span><span class="st">&quot;mg&quot;</span>, <span class="at">amountu=</span><span class="st">&quot;mg&quot;</span>, <span class="at">timeu=</span><span class="st">&quot;hr&quot;</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>    <span class="at">concu=</span><span class="st">&quot;ng/mL&quot;</span>, <span class="at">doseu=</span><span class="st">&quot;mg&quot;</span>, <span class="at">amountu=</span><span class="st">&quot;ng&quot;</span>, <span class="at">timeu=</span><span class="st">&quot;hr&quot;</span>,</span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    <span class="at">conversions=</span></span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>      <span class="fu">data.frame</span>(</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>        <span class="at">PPORRESU=</span><span class="fu">c</span>(<span class="st">&quot;mg/(hr*ng/mL)&quot;</span>, <span class="st">&quot;mg/(ng/mL)&quot;</span>, <span class="st">&quot;hr&quot;</span>),</span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>        <span class="at">PPSTRESU=</span><span class="fu">c</span>(<span class="st">&quot;L/hr&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;day&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>        <span class="at">PPORRESU=</span><span class="fu">c</span>(<span class="st">&quot;mg/(hr*ng/mL)&quot;</span>, <span class="st">&quot;mg/(ng/mL)&quot;</span>, <span class="st">&quot;hr&quot;</span>, <span class="st">&quot;ng/mg&quot;</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>        <span class="at">PPSTRESU=</span><span class="fu">c</span>(<span class="st">&quot;L/hr&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;day&quot;</span>, <span class="st">&quot;fraction&quot;</span>)</span>
 <span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>      )</span>
 <span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  )</span>
 <span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co"># Show a selection of the units generated</span></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>d_units_clean[d_units_clean<span class="sc">$</span>PPTESTCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;cmax&quot;</span>, <span class="st">&quot;tmax&quot;</span>, <span class="st">&quot;auclast&quot;</span>, <span class="st">&quot;cl.obs&quot;</span>, <span class="st">&quot;vd.obs&quot;</span>), ]</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>d_units_clean[d_units_clean<span class="sc">$</span>PPTESTCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;cmax&quot;</span>, <span class="st">&quot;tmax&quot;</span>, <span class="st">&quot;auclast&quot;</span>, <span class="st">&quot;cl.obs&quot;</span>, <span class="st">&quot;vd.obs&quot;</span>, <span class="st">&quot;fe&quot;</span>), ]</span>
 <span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt;          PPORRESU PPTESTCD PPSTRESU conversion_factor</span></span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; 23             hr     tmax      day      4.166667e-02</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; 22             hr     tmax      day      4.166667e-02</span></span>
 <span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; 52          ng/mL     cmax    ng/mL      1.000000e+00</span></span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; 82       hr*ng/mL  auclast hr*ng/mL      1.000000e+00</span></span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; 118 mg/(hr*ng/mL)   cl.obs     L/hr      1.000000e+03</span></span></code></pre></div>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; 65          ng/mg       fe fraction      1.000000e-06</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; 83       hr*ng/mL  auclast hr*ng/mL      1.000000e+00</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; 119 mg/(hr*ng/mL)   cl.obs     L/hr      1.000000e+03</span></span></code></pre></div>
 <p>Now, the units are much cleaner to look at.</p>
 <p>To do a conversion that is not possible directly with the
 <code>units</code> library, you can add the conversion factor manually
@@ -523,10 +526,10 @@ not specify that conversion; all conversions must be specified.</p>
 <span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co"># Show a selection of the units generated</span></span>
 <span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>d_units_clean_manual[d_units_clean_manual<span class="sc">$</span>PPTESTCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;cmax&quot;</span>, <span class="st">&quot;tmax&quot;</span>, <span class="st">&quot;auclast&quot;</span>, <span class="st">&quot;cl.obs&quot;</span>, <span class="st">&quot;vd.obs&quot;</span>), ]</span>
 <span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;          PPORRESU PPTESTCD PPSTRESU conversion_factor</span></span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; 23             hr     tmax      day      4.166667e-02</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; 22             hr     tmax      day      4.166667e-02</span></span>
 <span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; 52          ng/mL     cmax   nmol/L      8.130081e+00</span></span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; 82       hr*ng/mL  auclast hr*ng/mL      1.000000e+00</span></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; 118 mg/(hr*ng/mL)   cl.obs     L/hr      1.000000e+03</span></span></code></pre></div>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; 83       hr*ng/mL  auclast hr*ng/mL      1.000000e+00</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; 119 mg/(hr*ng/mL)   cl.obs     L/hr      1.000000e+03</span></span></code></pre></div>
 </div>
 <div id="how-do-i-add-different-unit-conversions-for-different-analytes" class="section level1">
 <h1>How do I add different unit conversions for different analytes?</h1>

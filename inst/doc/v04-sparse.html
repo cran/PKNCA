@@ -12,7 +12,7 @@
 
 <meta name="author" content="Bill Denney" />
 
-<meta name="date" content="2025-05-08" />
+<meta name="date" content="2025-08-18" />
 
 <title>Sparse NCA Calculations</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Sparse NCA Calculations</h1>
 <h4 class="author">Bill Denney</h4>
-<h4 class="date">2025-05-08</h4>
+<h4 class="date">2025-08-18</h4>
 
 
 
@@ -429,7 +429,7 @@ identifier:</p>
 <p>or individual results are available through the
 <code>as.data.frame()</code> function:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">as.data.frame</span>(o_nca)</span></code></pre></div>
-<pre><code>## # A tibble: 16 × 5
+<pre><code>## # A tibble: 17 × 5
 ##    start   end PPTESTCD            PPORRES exclude                              
 ##    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt; &lt;chr&gt;                                
 ##  1     0    24 cmax                  3.05  &lt;NA&gt;                                 
@@ -440,14 +440,15 @@ identifier:</p>
 ##  6     0    24 r.squared            NA     Too few points for half-life calcula…
 ##  7     0    24 adj.r.squared        NA     Too few points for half-life calcula…
 ##  8     0    24 lambda.z.time.first  NA     Too few points for half-life calcula…
-##  9     0    24 lambda.z.n.points    NA     Too few points for half-life calcula…
-## 10     0    24 clast.pred           NA     Too few points for half-life calcula…
-## 11     0    24 half.life            NA     Too few points for half-life calcula…
-## 12     0    24 span.ratio           NA     Too few points for half-life calcula…
-## 13     0    24 aucinf.obs           NA     Too few points for half-life calcula…
-## 14     0    24 sparse_auclast       39.5   &lt;NA&gt;                                 
-## 15     0    24 sparse_auc_se         7.31  &lt;NA&gt;                                 
-## 16     0    24 sparse_auc_df        NA     &lt;NA&gt;</code></pre>
+##  9     0    24 lambda.z.time.last   NA     Too few points for half-life calcula…
+## 10     0    24 lambda.z.n.points    NA     Too few points for half-life calcula…
+## 11     0    24 clast.pred           NA     Too few points for half-life calcula…
+## 12     0    24 half.life            NA     Too few points for half-life calcula…
+## 13     0    24 span.ratio           NA     Too few points for half-life calcula…
+## 14     0    24 aucinf.obs           NA     Too few points for half-life calcula…
+## 15     0    24 sparse_auclast       39.5   &lt;NA&gt;                                 
+## 16     0    24 sparse_auc_se         7.31  &lt;NA&gt;                                 
+## 17     0    24 sparse_auc_df        NA     &lt;NA&gt;</code></pre>
 </div>
 
 

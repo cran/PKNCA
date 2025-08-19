@@ -71,15 +71,15 @@ d_units_auto[d_units_auto$PPTESTCD %in% c("cmax", "tmax", "auclast", "cl.obs", "
 ## ----create-units-semi-manual-------------------------------------------------
 d_units_clean <-
   pknca_units_table(
-    concu="ng/mL", doseu="mg", amountu="mg", timeu="hr",
+    concu="ng/mL", doseu="mg", amountu="ng", timeu="hr",
     conversions=
       data.frame(
-        PPORRESU=c("mg/(hr*ng/mL)", "mg/(ng/mL)", "hr"),
-        PPSTRESU=c("L/hr", "L", "day")
+        PPORRESU=c("mg/(hr*ng/mL)", "mg/(ng/mL)", "hr", "ng/mg"),
+        PPSTRESU=c("L/hr", "L", "day", "fraction")
       )
   )
 # Show a selection of the units generated
-d_units_clean[d_units_clean$PPTESTCD %in% c("cmax", "tmax", "auclast", "cl.obs", "vd.obs"), ]
+d_units_clean[d_units_clean$PPTESTCD %in% c("cmax", "tmax", "auclast", "cl.obs", "vd.obs", "fe"), ]
 
 ## ----create-units-manual------------------------------------------------------
 d_units_clean_manual <-

@@ -250,6 +250,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="#auc.method" id="toc-auc.method">auc.method</a></li>
 <li><a href="#conc.na" id="toc-conc.na">conc.na</a></li>
 <li><a href="#conc.blq" id="toc-conc.blq">conc.blq</a></li>
+<li><a href="#debug" id="toc-debug">debug</a></li>
 <li><a href="#first.tmax" id="toc-first.tmax">first.tmax</a></li>
 <li><a href="#allow.tmax.in.half.life" id="toc-allow.tmax.in.half.life">allow.tmax.in.half.life</a></li>
 <li><a href="#keep_interval_cols" id="toc-keep_interval_cols">keep_interval_cols</a></li>
@@ -271,7 +272,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 effects throughout the package. The options are controlled using either
 the <code>PKNCA.options</code> function or by passing the
 <code>options</code> argument to any of the functions with that as an
-argument. All options supported by the current version of PKNCA (0.12.0)
+argument. All options supported by the current version of PKNCA (0.12.1)
 are listed below with their descriptions.</p>
 </div>
 <div id="options" class="section level1">
@@ -309,6 +310,11 @@ option.</p>
 <p>$first [1] “keep”</p>
 <p>$middle [1] “drop”</p>
 <p>$last [1] “keep”</p>
+</div>
+<div id="debug" class="section level2">
+<h2>debug</h2>
+<p>Enable PKNCA debugging mode (not for production use)</p>
+<p>NULL</p>
 </div>
 <div id="first.tmax" class="section level2">
 <h2>first.tmax</h2>
@@ -418,52 +424,6 @@ interval.</p>
 <col width="0%" />
 <col width="0%" />
 <col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="1%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="1%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="1%" />
-<col width="1%" />
-<col width="1%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
-<col width="0%" />
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
@@ -472,9 +432,18 @@ interval.</p>
 <col width="0%" />
 <col width="0%" />
 <col width="1%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
 <col width="1%" />
 <col width="1%" />
 <col width="1%" />
+<col width="0%" />
+<col width="0%" />
 <col width="1%" />
 <col width="1%" />
 <col width="0%" />
@@ -485,6 +454,8 @@ interval.</p>
 <col width="0%" />
 <col width="1%" />
 <col width="1%" />
+<col width="1%" />
+<col width="1%" />
 <col width="0%" />
 <col width="0%" />
 <col width="1%" />
@@ -492,7 +463,43 @@ interval.</p>
 <col width="0%" />
 <col width="0%" />
 <col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
 <col width="1%" />
+<col width="1%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
+<col width="1%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="1%" />
+<col width="0%" />
+<col width="0%" />
+<col width="1%" />
+<col width="1%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
+<col width="0%" />
 <col width="0%" />
 <col width="0%" />
 </colgroup>
@@ -559,6 +566,7 @@ interval.</p>
 <th align="left">adj.r.squared</th>
 <th align="left">lambda.z</th>
 <th align="left">lambda.z.time.first</th>
+<th align="left">lambda.z.time.last</th>
 <th align="left">lambda.z.n.points</th>
 <th align="left">clast.pred</th>
 <th align="left">span.ratio</th>
@@ -746,6 +754,7 @@ interval.</p>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="right">0</td>
@@ -805,6 +814,7 @@ interval.</p>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
